@@ -454,7 +454,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </a>
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="后台-工作台总览.html">工作台总览</a>
+      <a href="index.html">工作台总览</a>
       <a href="后台-课题管理.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a href="后台-模型管理.html">运营管理</a>
@@ -487,9 +487,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="container">
   <div class="admin-app">
 
-    <aside class="admin-side"><a class="snav" href="后台-工作台总览.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
+    <aside class="admin-side"><a class="snav" href="index.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
 
-    <main class="admin-main"><div class="px-pagehead"><h1>账号安全</h1><a class="px-btn" href="后台-工作台总览.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>登录与安全</h2><span class="px-chip">账号已启用</span></div><table class="px-table"><tbody><tr><td>登录密码</td><td>建议定期更新密码</td><td><button class="px-btn" onclick="password()">修改密码</button></td></tr><tr><td>邮箱绑定</td><td id="emailStatus">未绑定</td><td><button class="px-btn" onclick="bindEmail()">设置邮箱</button></td></tr><tr><td>当前会话</td><td>当前浏览器 · 张明</td><td><button class="px-btn" onclick="location.href='后台-登录.html'">退出登录</button></td></tr></tbody></table></section><section class="px-card"><div class="px-card-head"><h2>最近安全操作</h2></div><div id="securityLog" style="padding:22px"></div></section></main>
+    <main class="admin-main"><div class="px-pagehead"><h1>账号安全</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>登录与安全</h2><span class="px-chip">账号已启用</span></div><table class="px-table"><tbody><tr><td>登录密码</td><td>建议定期更新密码</td><td><button class="px-btn" onclick="password()">修改密码</button></td></tr><tr><td>邮箱绑定</td><td id="emailStatus">未绑定</td><td><button class="px-btn" onclick="bindEmail()">设置邮箱</button></td></tr><tr><td>当前会话</td><td>当前浏览器 · 张明</td><td><button class="px-btn" onclick="location.href='后台-登录.html'">退出登录</button></td></tr></tbody></table></section><section class="px-card"><div class="px-card-head"><h2>最近安全操作</h2></div><div id="securityLog" style="padding:22px"></div></section></main>
 
   </div>
 </div>
@@ -576,7 +576,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document
 // Preserve editable content across refreshes without changing original inline handlers.
 const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
 </script><script>function logs(){document.getElementById('securityLog').innerHTML=PX.get('agri-security',[]).map(x=>'<p>'+PX.e(x)+'</p>').join('')||'<p class="px-help">暂无安全操作记录</p>';document.getElementById('emailStatus').textContent=PX.get('agri-profile',{}).email||'未绑定'}function log(t){let a=PX.get('agri-security',[]);a.unshift(new Date().toLocaleString('zh-CN')+'　'+t);PX.put('agri-security',a);logs()}function password(){PX.modal('修改密码','<p class="px-help">原型中仅验证填写规则，请使用演示密码。</p><div class="px-grid">'+PX.field('原密码','old','','password')+PX.field('新密码','new','','password')+PX.field('确认新密码','confirm','','password')+'</div>',(fd,form)=>{let n=fd.get('new');if(!fd.get('old')||n.length<8||n!==fd.get('confirm')){form.querySelector('.px-error').textContent='请输入原密码；新密码至少8位，两次输入必须一致。';return false}log('修改密码表单校验通过');toast('演示校验通过，未修改真实账号密码')},'确认修改')}function bindEmail(){PX.modal('设置邮箱','<div class="px-grid">'+PX.field('电子邮箱','email','','email')+'</div>',fd=>{if(!fd.get('email'))return false;let a=PX.get('agri-profile',{});a.email=fd.get('email');PX.put('agri-profile',a);log('更新联系邮箱')})}logs();</script></body>
 </html>

@@ -454,7 +454,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </a>
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="后台-工作台总览.html">工作台总览</a>
+      <a href="index.html">工作台总览</a>
       <a href="后台-课题管理.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a href="后台-模型管理.html">运营管理</a>
@@ -487,9 +487,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="container">
   <div class="admin-app">
 
-    <aside class="admin-side"><a class="snav" href="后台-工作台总览.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
+    <aside class="admin-side"><a class="snav" href="index.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
 
-    <main class="admin-main"><div class="px-pagehead"><h1>个人资料</h1><a class="px-btn" href="后台-工作台总览.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>基本信息</h2><span class="px-chip">平台管理员</span></div><form id="profile" style="padding:26px;max-width:850px"><div class="px-grid"><label class="px-field">姓名<input name="name" required value="张明"></label><label class="px-field">账号<input value="zhangming" readonly></label><label class="px-field">所属机构<input name="org" value="智慧农场技术与系统全国重点实验室"></label><label class="px-field">联系电话<input name="phone" type="tel" placeholder="填写联系电话"></label><label class="px-field">电子邮箱<input name="email" type="email" placeholder="填写电子邮箱"></label><label class="px-field">岗位<input name="job" value="平台运营管理"></label></div><p class="px-help">账号角色与权限由平台统一配置。</p><button class="px-btn primary" type="submit">保存资料</button></form></section></main>
+    <main class="admin-main"><div class="px-pagehead"><h1>个人资料</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>基本信息</h2><span class="px-chip">平台管理员</span></div><form id="profile" style="padding:26px;max-width:850px"><div class="px-grid"><label class="px-field">姓名<input name="name" required value="张明"></label><label class="px-field">账号<input value="zhangming" readonly></label><label class="px-field">所属机构<input name="org" value="智慧农场技术与系统全国重点实验室"></label><label class="px-field">联系电话<input name="phone" type="tel" placeholder="填写联系电话"></label><label class="px-field">电子邮箱<input name="email" type="email" placeholder="填写电子邮箱"></label><label class="px-field">岗位<input name="job" value="平台运营管理"></label></div><p class="px-help">账号角色与权限由平台统一配置。</p><button class="px-btn primary" type="submit">保存资料</button></form></section></main>
 
   </div>
 </div>
@@ -576,7 +576,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document
 // Preserve editable content across refreshes without changing original inline handlers.
 const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
 </script><script>let frm=document.getElementById('profile'),data=PX.get('agri-profile',{});Object.entries(data).forEach(([k,v])=>{if(frm.elements[k])frm.elements[k].value=v});frm.onsubmit=ev=>{ev.preventDefault();PX.put('agri-profile',Object.fromEntries(new FormData(frm)));PX.audit('修改个人资料','张明');toast('资料已保存')};</script></body>
 </html>

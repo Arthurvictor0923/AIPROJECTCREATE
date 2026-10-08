@@ -537,7 +537,7 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
     </a>
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="后台-工作台总览.html">工作台总览</a>
+      <a href="index.html">工作台总览</a>
       <a href="后台-课题管理.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a class="active" href="javascript:void(0)" aria-current="page">运营管理</a>
@@ -1022,7 +1022,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document
 // Preserve editable content across refreshes without changing original inline handlers.
 const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
 
 </script>
@@ -1108,8 +1108,8 @@ const f=PX.file;
 PX.filter=()=>{let body=document.querySelector('#tbody,#todoBody');if(!body)return;let main=document.querySelector('main'),table=body.closest('table');let ctrls=Array.from(main.querySelectorAll('input,select')).filter(x=>!(x.compareDocumentPosition(table)&Node.DOCUMENT_POSITION_PRECEDING)&&x.type!=='checkbox'&&x.type!=='date'&&!x.classList.contains('pgsel'));let words=ctrls.map(x=>x.tagName==='SELECT'?x.selectedOptions[0]?.textContent:x.value).filter(x=>x&&!/全部|请选择|选择|不限/.test(x));Array.from(body.rows).forEach(r=>r.dataset.pxMatch=words.every(w=>r.innerText.includes(w))?'1':'0');PX.paginate(1)};
 let page=PX.paginate;PX.paginate=(n=1,size)=>{page(n,size);let total=document.querySelector('#pgTotal')||document.querySelector('.pager>span:first-child,.pagination .total');let rows=Array.from(document.querySelectorAll('#tbody tr,#todoBody tr')).filter(r=>r.dataset.pxMatch!=='0');if(total&&/^共/.test(total.textContent.trim()))total.textContent='共 '+rows.length+' 条';let input=document.querySelector('.pgjump input,.pg-jump input');if(input){input.removeAttribute('onkeydown');input.onkeydown=ev=>{if(ev.key==='Enter')PX.paginate(+input.value||1)}}};
 // Set functional selectors immediately, including those previously drawn as spans.
-document.querySelectorAll('.pgsel').forEach(el=>{if(el.tagName==='SELECT')return;let n=parseInt(el.textContent)||10;if(n<1)n=10;let sel=document.createElement('select');sel.className='px-size';sel.setAttribute('aria-label','每页条数');[...new Set([n,5,10,20,50])].sort((a,b)=>a-b).forEach(n=>sel.add(new Option(n+'条/页',n)));sel.value=n;PX.ps=n;sel.onchange=()=>{if(f==='后台-审批中心.html'){PAGESIZE=+sel.value;CUR_PAGE=1;renderTable()}else if(f==='后台-工作台总览.html'){PAGE_SIZE=+sel.value;CUR_PAGE=1;renderTable()}else PX.paginate(1,+sel.value)};el.replaceWith(sel)});
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(f))PX.paginate();
+document.querySelectorAll('.pgsel').forEach(el=>{if(el.tagName==='SELECT')return;let n=parseInt(el.textContent)||10;if(n<1)n=10;let sel=document.createElement('select');sel.className='px-size';sel.setAttribute('aria-label','每页条数');[...new Set([n,5,10,20,50])].sort((a,b)=>a-b).forEach(n=>sel.add(new Option(n+'条/页',n)));sel.value=n;PX.ps=n;sel.onchange=()=>{if(f==='后台-审批中心.html'){PAGESIZE=+sel.value;CUR_PAGE=1;renderTable()}else if(f==='index.html'){PAGE_SIZE=+sel.value;CUR_PAGE=1;renderTable()}else PX.paginate(1,+sel.value)};el.replaceWith(sel)});
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(f))PX.paginate();
 window.addEventListener('click',ev=>{let btn=ev.target.closest('button');if(!btn||btn.textContent.trim()!=='重置'||btn.closest('#pxMask'))return;if(!document.querySelector('#tbody'))return;ev.preventDefault();ev.stopImmediatePropagation();let body=document.querySelector('#tbody'),table=body.closest('table');document.querySelectorAll('main input,main select').forEach(x=>{if(!(x.compareDocumentPosition(table)&Node.DOCUMENT_POSITION_PRECEDING)&&!x.classList.contains('px-size')){if(x.tagName==='SELECT')x.selectedIndex=0;else x.value=''}});PX.filter()},true);
 // Persist direct row mutations; no deleted-resource module is used.
 const kind=f==='后台-案例管理.html'?'案例':f==='后台-需求管理.html'?'需求':f==='后台-门户管理-通知公告.html'?'公告':null;
@@ -1145,7 +1145,7 @@ if(f.startsWith('后台-模型详情编辑')){
 (()=>{
 const saved=PX.get(PX.key+':fields',[]);const inputs=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{const el=x.id?document.getElementById(x.id):inputs[x.i];if(el&&x.html)el.innerHTML=x.val});
 // Link the working overview cards to their existing modules.
-if(PX.file==='后台-工作台总览.html'){
+if(PX.file==='index.html'){
  document.querySelectorAll('.kpi').forEach(el=>{el.style.cursor='pointer';el.tabIndex=0;const jump=()=>{let s=el.textContent;if(s.includes('模型'))PX.go('后台-模型管理');else if(s.includes('数据'))PX.go('后台-数据集管理');else if(s.includes('空间'))PX.go('后台-科研空间管理');else PX.go('后台-科研人员推荐')};el.onclick=jump;el.onkeydown=e=>{if(e.key==='Enter')jump()}});
 }
 // Prototype select controls keep menu selections without unnecessary notifications.

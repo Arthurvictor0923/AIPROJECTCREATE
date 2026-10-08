@@ -454,7 +454,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </a>
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="后台-工作台总览.html">工作台总览</a>
+      <a href="index.html">工作台总览</a>
       <a href="后台-课题管理.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a href="后台-模型管理.html">运营管理</a>
@@ -487,9 +487,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="container">
   <div class="admin-app">
 
-    <aside class="admin-side"><a class="snav" href="后台-工作台总览.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
+    <aside class="admin-side"><a class="snav" href="index.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
 
-    <main class="admin-main"><div class="px-pagehead"><h1>合作申请受理</h1><a class="px-btn" href="后台-工作台总览.html">返回工作台</a></div><section class="px-card"><div class="px-filter"><input id="coQuery" class="px-input" placeholder="搜索单位名称或联系人" oninput="draw()"><select class="px-input" id="coStatus" onchange="draw()"><option>全部状态</option><option>待联系</option><option>联系中</option><option>已受理</option><option>不予受理</option></select></div><table class="px-table"><thead><tr><th>申请单位</th><th>联系人</th><th>合作意向</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="coRows"></tbody></table></section></main>
+    <main class="admin-main"><div class="px-pagehead"><h1>合作申请受理</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-filter"><input id="coQuery" class="px-input" placeholder="搜索单位名称或联系人" oninput="draw()"><select class="px-input" id="coStatus" onchange="draw()"><option>全部状态</option><option>待联系</option><option>联系中</option><option>已受理</option><option>不予受理</option></select></div><table class="px-table"><thead><tr><th>申请单位</th><th>联系人</th><th>合作意向</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="coRows"></tbody></table></section></main>
 
   </div>
 </div>
@@ -576,7 +576,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document
 // Preserve editable content across refreshes without changing original inline handlers.
 const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
 </script><script>let rows=PX.get('agri-cooperation',[{name:'智慧农业技术服务公司',who:'王经理',type:'企业入驻',time:'2026-09-23 16:20',status:'待联系',note:''},{name:'东北农业科研团队',who:'李老师',type:'科研合作',time:'2026-09-22 10:10',status:'联系中',note:'已确认合作方向，等待线下材料核验。'}]);function draw(){let q=document.getElementById('coQuery').value,st=document.getElementById('coStatus').value;document.getElementById('coRows').innerHTML=rows.map((r,i)=>({...r,i})).filter(r=>(r.name+r.who).includes(q)&&(st==='全部状态'||st===r.status)).map(r=>'<tr><td>'+PX.e(r.name)+'</td><td>'+PX.e(r.who)+'</td><td>'+r.type+'</td><td>'+r.time+'</td><td><span class="px-chip">'+r.status+'</span></td><td><button class="px-btn" onclick="handle('+r.i+')">查看材料 / 受理</button></td></tr>').join('')||'<tr><td colspan="6" class="px-empty">暂无符合条件的申请</td></tr>';}function handle(i){let r=rows[i];PX.modal('合作申请 · '+r.name,'<dl class="px-kv"><dt>申请单位</dt><dd>'+PX.e(r.name)+'</dd><dt>联系人</dt><dd>'+r.who+'</dd><dt>合作意向</dt><dd>'+r.type+'</dd><dt>提交材料</dt><dd>机构介绍、合作意向说明</dd><dt>合作说明</dt><dd>希望使用平台模型和数据开展农业生产服务，并对接研究团队。</dd></dl><hr style="border:0;border-top:1px solid #e2ebe5;margin:22px 0"><div class="px-grid">'+PX.field('受理状态','status',r.status,'text',['待联系','联系中','已受理','不予受理'])+PX.field('受理记录','note',r.note,'textarea')+'</div>',fd=>{if(['已受理','不予受理'].includes(fd.get('status'))&&!fd.get('note').trim())return false;r.status=fd.get('status');r.note=fd.get('note');PX.put('agri-cooperation',rows);PX.audit('合作申请受理',r.name);draw()},'保存受理记录')}draw();</script></body>
 </html>

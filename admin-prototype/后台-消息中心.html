@@ -454,7 +454,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </a>
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="后台-工作台总览.html">工作台总览</a>
+      <a href="index.html">工作台总览</a>
       <a href="后台-课题管理.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a href="后台-模型管理.html">运营管理</a>
@@ -487,9 +487,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="container">
   <div class="admin-app">
 
-    <aside class="admin-side"><a class="snav" href="后台-工作台总览.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
+    <aside class="admin-side"><a class="snav" href="index.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
 
-    <main class="admin-main"><div class="px-pagehead"><h1>消息中心</h1><a class="px-btn" href="后台-工作台总览.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><div class="px-tabs" style="margin:0"><button class="px-btn on" onclick="tab('all',this)">全部消息</button><button class="px-btn" onclick="tab('unread',this)">未读消息</button><button class="px-btn" onclick="tab('read',this)">已读消息</button></div><button class="px-btn" onclick="readAll()">全部标为已读</button></div><div class="px-filter"><input class="px-input" id="kw" placeholder="搜索消息标题" oninput="draw()"></div><table class="px-table"><thead><tr><th>消息标题</th><th>分类</th><th>接收时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="msgRows"></tbody></table><div class="px-pager" id="count"></div></section></main>
+    <main class="admin-main"><div class="px-pagehead"><h1>消息中心</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><div class="px-tabs" style="margin:0"><button class="px-btn on" onclick="tab('all',this)">全部消息</button><button class="px-btn" onclick="tab('unread',this)">未读消息</button><button class="px-btn" onclick="tab('read',this)">已读消息</button></div><button class="px-btn" onclick="readAll()">全部标为已读</button></div><div class="px-filter"><input class="px-input" id="kw" placeholder="搜索消息标题" oninput="draw()"></div><table class="px-table"><thead><tr><th>消息标题</th><th>分类</th><th>接收时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="msgRows"></tbody></table><div class="px-pager" id="count"></div></section></main>
 
   </div>
 </div>
@@ -576,7 +576,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document
 // Preserve editable content across refreshes without changing original inline handlers.
 const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
 </script><script>let data=PX.get('agri-messages',[{title:'水稻估产研究空间申请待处理',type:'审批提醒',time:'2026-09-24 09:30',read:false,body:'李伟提交了科研开发空间申请，请查看申请资源和用途后处理。',link:'后台-审批中心.html'},{title:'水稻估产模型构建完成',type:'任务通知',time:'2026-09-24 09:15',read:false,body:'模型 v2.3 构建完成，可查看构建记录并配置部署。',link:'后台-模型管理.html'},{title:'智慧农业技术服务公司提交合作申请',type:'合作消息',time:'2026-09-23 16:20',read:false,body:'合作单位已提交入驻资料，等待管理员联系并受理。',link:'后台-合作申请受理.html'},{title:'数据集资料已更新',type:'运营通知',time:'2026-09-23 14:08',read:true,body:'寒地水稻全生育期观测数据集资料已更新，请核对门户展示内容。',link:'后台-数据集管理.html'}]);let mode='all';function tab(m,b){mode=m;document.querySelectorAll('.px-tabs button').forEach(x=>x.classList.toggle('on',x===b));draw()}function draw(){let q=document.getElementById('kw').value;let rows=data.map((r,i)=>({...r,i})).filter(r=>(mode==='all'||r.read===(mode==='read'))&&r.title.includes(q));document.getElementById('msgRows').innerHTML=rows.map(r=>'<tr><td>'+PX.e(r.title)+'</td><td>'+r.type+'</td><td>'+r.time+'</td><td><span class="px-chip">'+(r.read?'已读':'未读')+'</span></td><td><button class="px-btn" onclick="show('+r.i+')">查看</button></td></tr>').join('')||'<tr><td colspan="5" class="px-empty">暂无符合条件的消息</td></tr>';document.getElementById('count').textContent='共 '+rows.length+' 条';PX.put('agri-messages',data)}function show(i){data[i].read=true;draw();let r=data[i];PX.modal(r.title,'<p>'+PX.e(r.body)+'</p><p class="px-help">'+r.time+'</p><a class="px-btn primary" href="'+r.link+'">前往处理</a>')}function readAll(){data.forEach(x=>x.read=true);draw()}draw();</script></body>
 </html>

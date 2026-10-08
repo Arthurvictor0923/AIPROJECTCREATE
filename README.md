@@ -6,9 +6,19 @@
 
 | 路径 | 说明 |
 | --- | --- |
-| `index.html` | 站点入口，自动跳转到后台登录页 |
+| `index.html` | 站点入口，自动跳转到 `admin-prototype/` |
+| `admin-prototype/index.html` | **原型入口页 = 工作台总览**（目录根即可打开） |
 | `admin-prototype/` | 管理后台原型（38 个页面 + 更新说明） |
-| `admin-prototype/index.html` | 该原型集的入口页，自动跳转到登录页 |
+| `admin-prototype/更新说明.md` | 本批原型的更新说明 |
+
+## 入口说明
+
+访问站点根路径会自动进入 `admin-prototype/`，该目录的 `index.html` 就是**工作台总览**页面，
+因此在地址栏看到的是纯 ASCII 路径，复制、粘贴、转发都不会出现中文转义问题：
+
+```
+https://arthurvictor0923.github.io/AIPROJECTCREATE/admin-prototype/
+```
 
 ## 原型内容
 
@@ -26,7 +36,7 @@
 - **公共能力**：时空数据管理、地图引擎、能力共享、管理设置
 - **账号与消息**：登录、个人资料、账号安全、消息中心、数据查询、合作申请受理
 
-入口页面：`admin-prototype/后台-登录.html`
+入口页面：`admin-prototype/index.html`（即工作台总览）；登录页为 `admin-prototype/后台-登录.html`。
 
 ## 技术说明
 
@@ -36,4 +46,4 @@
 
 ## 本地查看
 
-直接用浏览器打开 `admin-prototype/后台-登录.html` 即可，无需启动任何服务器。
+直接用浏览器打开 `admin-prototype/index.html` 即可，无需启动任何服务器。

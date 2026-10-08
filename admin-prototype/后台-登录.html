@@ -454,7 +454,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </a>
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="后台-工作台总览.html">工作台总览</a>
+      <a href="index.html">工作台总览</a>
       <a href="后台-课题管理.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a href="后台-模型管理.html">运营管理</a>
@@ -487,9 +487,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="container">
   <div class="admin-app">
 
-    <aside class="admin-side"><a class="snav" href="后台-工作台总览.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
+    <aside class="admin-side"><a class="snav" href="index.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
 
-    <main class="admin-main"><div class="px-pagehead"><h1>登录</h1><a class="px-btn" href="后台-工作台总览.html">返回工作台</a></div><div style="max-width:500px;margin:60px auto"><section class="px-card"><div class="px-card-head"><h2>北大荒智慧农业协同创新平台</h2></div><form id="login" style="padding:28px"><h2 style="font-size:20px;margin:0 0 24px">管理员登录</h2><div class="px-grid" style="grid-template-columns:1fr"><label class="px-field">账号<input name="account" required value="zhangming" autocomplete="off"></label><label class="px-field">演示密码<input name="password" required type="password" autocomplete="off" placeholder="输入任意演示密码"></label></div><p class="px-help">用于原型页面演示，无需输入真实账号密码。</p><button class="px-btn primary" type="submit" style="width:100%">进入工作台</button></form></section></div></main>
+    <main class="admin-main"><div class="px-pagehead"><h1>登录</h1><a class="px-btn" href="index.html">返回工作台</a></div><div style="max-width:500px;margin:60px auto"><section class="px-card"><div class="px-card-head"><h2>北大荒智慧农业协同创新平台</h2></div><form id="login" style="padding:28px"><h2 style="font-size:20px;margin:0 0 24px">管理员登录</h2><div class="px-grid" style="grid-template-columns:1fr"><label class="px-field">账号<input name="account" required value="zhangming" autocomplete="off"></label><label class="px-field">演示密码<input name="password" required type="password" autocomplete="off" placeholder="输入任意演示密码"></label></div><p class="px-help">用于原型页面演示，无需输入真实账号密码。</p><button class="px-btn primary" type="submit" style="width:100%">进入工作台</button></form></section></div></main>
 
   </div>
 </div>
@@ -576,7 +576,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document
 // Preserve editable content across refreshes without changing original inline handlers.
 const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
-</script><script>document.getElementById('login').onsubmit=e=>{e.preventDefault();location.href='后台-工作台总览.html'};</script></body>
+</script><script>document.getElementById('login').onsubmit=e=>{e.preventDefault();location.href='index.html'};</script></body>
 </html>

@@ -454,7 +454,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </a>
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="后台-工作台总览.html">工作台总览</a>
+      <a href="index.html">工作台总览</a>
       <a href="后台-课题管理.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a href="后台-模型管理.html">运营管理</a>
@@ -487,9 +487,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="container">
   <div class="admin-app">
 
-    <aside class="admin-side"><a class="snav" href="后台-工作台总览.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
+    <aside class="admin-side"><a class="snav" href="index.html">工作台总览</a><a class="snav" href="后台-消息中心.html">消息中心</a><a class="snav" href="后台-个人资料.html">个人资料</a><a class="snav" href="后台-账号安全.html">账号安全</a></aside>
 
-    <main class="admin-main"><div class="px-pagehead"><h1>数据查询</h1><a class="px-btn" href="后台-工作台总览.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>寒地水稻观测数据</h2><span class="px-chip">数据预览</span></div><div class="px-filter"><label>数据形态 <select class="px-input" id="mode" onchange="draw()"><option>结构化表格</option><option>遥感影像</option></select></label><label>所属农场 <select class="px-input" id="farm" onchange="draw()"><option>全部农场</option><option>七星农场</option><option>建三江农场</option></select></label><label>采集日期 <input class="px-input" type="date" id="day" onchange="draw()"></label><button class="px-btn" onclick="reset()">重置</button></div><div id="preview"></div></section></main>
+    <main class="admin-main"><div class="px-pagehead"><h1>数据查询</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>寒地水稻观测数据</h2><span class="px-chip">数据预览</span></div><div class="px-filter"><label>数据形态 <select class="px-input" id="mode" onchange="draw()"><option>结构化表格</option><option>遥感影像</option></select></label><label>所属农场 <select class="px-input" id="farm" onchange="draw()"><option>全部农场</option><option>七星农场</option><option>建三江农场</option></select></label><label>采集日期 <input class="px-input" type="date" id="day" onchange="draw()"></label><button class="px-btn" onclick="reset()">重置</button></div><div id="preview"></div></section></main>
 
   </div>
 </div>
@@ -576,7 +576,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document
 // Preserve editable content across refreshes without changing original inline handlers.
 const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
-if(!['后台-模型管理.html','后台-审批中心.html','后台-工作台总览.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
+if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
 </script><script>const samples=Array.from({length:24},(_,i)=>({code:'PLOT-'+String(i+1).padStart(3,'0'),farm:i%2?'七星农场':'建三江农场',date:'2026-06-'+(10+Math.floor(i/4)),crop:'水稻',ndvi:(.63+(i%7)*.025).toFixed(3),height:52+i%15}));let page=1,size=10;function reset(){document.getElementById('farm').selectedIndex=0;document.getElementById('day').value='';draw()}function draw(){let farm=document.getElementById('farm').value,day=document.getElementById('day').value,rows=samples.filter(x=>(farm==='全部农场'||x.farm===farm)&&(!day||x.date===day));let html='';if(document.getElementById('mode').value==='结构化表格'){html='<table class="px-table"><thead><tr><th>样地编号</th><th>农场</th><th>采集日期</th><th>作物</th><th>NDVI</th><th>株高（cm）</th><th>操作</th></tr></thead><tbody>'+rows.slice((page-1)*size,page*size).map(x=>'<tr><td>'+x.code+'</td><td>'+x.farm+'</td><td>'+x.date+'</td><td>'+x.crop+'</td><td>'+x.ndvi+'</td><td>'+x.height+'</td><td><button class="px-btn" onclick="inspect(\''+x.code+'\')">详情</button></td></tr>').join('')+'</tbody></table><div class="px-pager">共 '+rows.length+' 条 <select class="px-size" onchange="size=+this.value;page=1;draw()">'+[5,10,20].map(n=>'<option '+(n===size?'selected':'')+'>'+n+'</option>').join('')+'</select><button class="px-btn" '+(page<=1?'disabled':'')+' onclick="page--;draw()">上一页</button>'+page+'<button class="px-btn" '+(page*size>=rows.length?'disabled':'')+' onclick="page++;draw()">下一页</button></div>'}else{html='<div style="padding:22px"><div class="px-layout"><aside class="px-filetree"><b>影像记录</b>'+rows.slice(0,6).map(x=>'<button class="px-btn" onclick="inspect(\''+x.code+'\')">'+x.code+'<br>'+x.date+'</button>').join('')+'</aside><div><div style="height:340px;border-radius:8px;background:repeating-linear-gradient(14deg,transparent 0 60px,#f0e5b5 62px 67px),repeating-linear-gradient(100deg,#729d49 0 88px,#88ae60 90px 180px,#bad492 182px 264px);position:relative"><span class="px-chip" style="position:absolute;top:14px;left:14px">样例影像示意</span></div><p class="px-help">显示示例地块纹理。像元值与地理位置在接入真实影像服务后提供。</p><div class="px-checks"><label><input type="checkbox" checked onchange="document.getElementById(\'legend\').hidden=!this.checked">显示图例</label></div><p id="legend">NDVI　<span style="background:#729d49;color:white;padding:4px 10px">高</span>　<span style="background:#bad492;padding:4px 10px">低</span></p></div></div></div>'}document.getElementById('preview').innerHTML=rows.length?html:'<div class="px-empty">没有符合筛选条件的数据</div>'}function inspect(code){let x=samples.find(r=>r.code===code);PX.detail('样地观测记录',{'样地编号':x.code,'所属农场':x.farm,'日期':x.date,'作物':x.crop,'NDVI':x.ndvi,'株高':x.height+' cm','来源':'地面观测','质量标记':'已校验'})}draw();</script></body>
 </html>
