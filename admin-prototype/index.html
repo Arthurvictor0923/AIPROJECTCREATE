@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>管理后台原型 · 入口</title>
+<meta http-equiv="refresh" content="0;url=后台-登录.html">
+<style>
+  :root { --brand:#005653; --page:#f4f8f5; --text:#10213a; --secondary:#526078; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; }
+  body {
+    display:flex; align-items:center; justify-content:center;
+    background:var(--page); color:var(--text);
+    font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+  }
+  .boot { text-align:center; padding:24px; }
+  .boot .mark {
+    width:44px; height:44px; margin:0 auto 18px; border-radius:8px;
+    background:var(--brand); color:#fff; font-size:20px; line-height:44px; font-weight:600;
+  }
+  .boot h1 { margin:0 0 8px; font-size:17px; font-weight:600; letter-spacing:.5px; }
+  .boot p { margin:0; font-size:13px; color:var(--secondary); }
+  .boot a { color:var(--brand); text-decoration:none; border-bottom:1px solid currentColor; }
+</style>
+</head>
+<body>
+  <div class="boot">
+    <div class="mark">农</div>
+    <h1>管理后台原型演示</h1>
+    <p>正在进入…</p>
+    <p style="margin-top:14px">
+      若未自动跳转，请点击
+      <a href="后台-登录.html">进入后台管理端原型</a>
+    </p>
+  </div>
+  <script>
+    location.replace('后台-登录.html');
+  </script>
+</body>
+</html>
