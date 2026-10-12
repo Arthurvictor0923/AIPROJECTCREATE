@@ -537,7 +537,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <span class="brand-tag">管理后台</span>
     <nav class="main-nav" aria-label="管理后台一级导航">
       <a href="index.html">工作台总览</a>
-      <a href="后台-课题管理.html">课题管理</a>
+      <a href="后台-课题工作台.html">课题管理</a>
       <a href="后台-审批中心.html">审批中心</a>
       <a href="后台-模型管理.html">运营管理</a>
       <a href="后台-时空数据管理.html">时空数据管理</a>
@@ -735,7 +735,7 @@ function savePublication(e){e.preventDefault();const key=$s('publishAPI').value,
 window.addEventListener('storage',e=>{if(e.key==='bdh-model-catalog-v1')render();});
 
 try{localStorage.setItem(SHARE_KEY,JSON.stringify(data));}catch{}
-function registrationBinding(r){const locked=!!data.publications[r.key],m=portalModels().find(x=>x.key===r.modelKey);const options=portalModels().filter(x=>x.access==='api'&&(x.done||x.key===r.modelKey));return '<div class="fld"><label for="apiModel">关联模型 / 版本<span class="req">*</span></label><select class="inp" id="apiModel" required '+(locked?'disabled':'')+'>'+opt('',m?'请选择模型及版本':r.modelKey?'原关联模型已不存在，请重新选择':'请选择接口接入模型及版本','')+options.map(x=>opt(x.key,x.name+' · '+x.no+' · '+x.ver,r.modelKey)).join('')+'</select></div>'+(!locked?'<a class="lnk" target="_blank" rel="noopener" href="后台-模型管理.html?new=api">新建接口接入模型 ›</a>':'');}
+function registrationBinding(r){const locked=!!data.publications[r.key],m=portalModels().find(x=>x.key===r.modelKey);const options=portalModels().filter(x=>x.access==='api'&&(x.done||x.key===r.modelKey));return '<div class="fld"><label for="apiModel">关联模型 / 版本<span class="req">*</span></label><select class="inp" id="apiModel" required '+(locked?'disabled':'')+'>'+opt('',m?'请选择模型及版本':r.modelKey?'原关联模型已不存在，请重新选择':'请选择接口接入模型及版本','')+options.map(x=>opt(x.key,x.name+' · '+x.no+' · '+x.ver,r.modelKey)).join('')+'</select></div>';}
 // User-uploaded documents are independent of structured interface parameter definitions.
 let documentDB,documentRows=[],documentEdit=null,documentURL=null,documentRenderToken=0;
 function openDocumentDB(){if(!documentDB)documentDB=new Promise((resolve,reject)=>{const req=indexedDB.open('bdh-interface-documents-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('documents',{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});return documentDB;}
@@ -791,5 +791,10 @@ initSw();
 
 </script>
 
+<!-- meeting-1010:start --><link rel="stylesheet" href="assets/meeting/meeting.css"><script src="assets/meeting/meeting-seed.js"></script><script src="assets/meeting/meeting-core.js"></script>
+<script src="assets/meeting/approval-seeds.js"></script>
+<script src="assets/meeting/project-space-seeds.js"></script>
+<script src="assets/meeting/backend-seeds.js"></script>
+<script src="assets/meeting/backend-state.js"></script><script src="assets/meeting/meeting-features.js"></script><script src="assets/meeting/meeting-filters.js"></script><script src="assets/meeting/meeting-space.js"></script><!-- meeting-1010:end --><script src="assets/meeting/backend-integration.js"></script>
 </body>
 </html>

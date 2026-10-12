@@ -8,7 +8,8 @@
 | --- | --- |
 | `index.html` | 站点入口，自动跳转到 `admin-prototype/` |
 | `admin-prototype/index.html` | **原型入口页 = 工作台总览**（目录根即可打开） |
-| `admin-prototype/` | 管理后台原型（38 个页面 + 更新说明） |
+| `admin-prototype/` | 管理后台原型（40 个页面 ＋ `开始浏览.html` 页面目录 ＋ `assets/` 共享交互脚本 ＋ 更新说明） |
+| `admin-prototype/开始浏览.html` | 原型包自带的页面目录（分组列出全部页面） |
 | `admin-prototype/更新说明.md` | 本批原型的更新说明 |
 
 ## 入口说明
@@ -20,13 +21,18 @@
 https://arthurvictor0923.github.io/AIPROJECTCREATE/admin-prototype/
 ```
 
+> ⚠️ **源目录里这一页仍叫 `后台-工作台总览.html`**（源包不改名）。
+> `index.html` 是同步进仓库时由脚本改的，并已把全量引用 `后台-工作台总览.html` 一起改掉，
+> 同时补齐了「按文件名识别后台」的两处共享脚本判断（`admin=file.startsWith('后台-')` 需接受 `index.html`、
+> 门户首页专属分支需加 `!M.admin` 门卫）。**整目录重拷会回退这些改造，必须重跑同步脚本。**
+
 ## 原型内容
 
-管理后台共 38 个页面，按模块划分：
+管理后台共 40 个页面（`index.html` 即工作台总览），按模块划分：
 
-- **工作台**：工作台总览
+- **工作台**：工作台总览（`index.html`）、课题工作台
 - **课题管理**：课题管理、课题指南管理、科研人员推荐
-- **审批中心**：审批中心
+- **审批中心**：审批中心、资源申请审批
 - **模型管理**：模型管理、模型详情编辑（待完善 / 已完善 / 后台新建）
 - **科研空间**：科研空间管理、科研空间详情
 - **数据集管理**：数据集管理、数据集详情编辑（待完善 / 已完善 / 数据预览）
@@ -36,14 +42,23 @@ https://arthurvictor0923.github.io/AIPROJECTCREATE/admin-prototype/
 - **公共能力**：时空数据管理、地图引擎、能力共享、管理设置
 - **账号与消息**：登录、个人资料、账号安全、消息中心、数据查询、合作申请受理
 
-入口页面：`admin-prototype/index.html`（即工作台总览）；登录页为 `admin-prototype/后台-登录.html`。
+登录页为 `admin-prototype/后台-登录.html`。
 
 ## 技术说明
 
-- 纯静态自包含 HTML，内联 CSS/JS，无构建步骤、无外部依赖（不含 CDN 引用与图片资源）。
+- 纯静态 HTML，页面自身内联样式；公共交互脚本与样式集中在 `admin-prototype/assets/meeting/`
+  （`meeting-core.js` / `meeting-features.js` / `backend-integration.js` 等），**页面与 `assets/` 必须一起保留**。
 - 页面之间通过同目录相对路径互相跳转，可直接以 `file://` 协议在本地打开。
+- 页面通过浏览器本地存储交换记录；跨页联动建议把完整目录放在同一静态服务地址下访问。
 - 站点由 GitHub Pages 托管，仓库根目录下的 `.nojekyll` 用于跳过 Jekyll 处理。
 
 ## 本地查看
 
 直接用浏览器打开 `admin-prototype/index.html` 即可，无需启动任何服务器。
+
+## 更新流程
+
+1. 在 `平台调整后原型/后台管理端原型-补全版/后台管理端原型 (2)/后台管理端原型/` 修改原型页面；
+2. 跑 `平台调整后原型/_ghpages_sync_20261012.py`，整目录同步覆盖到本仓库 `admin-prototype/`，
+   并自动完成「工作台总览 → `index.html`」改名、引用改写与两处共享脚本补丁；
+3. 提交并推送到 `main`，GitHub Pages 自动重新部署。
