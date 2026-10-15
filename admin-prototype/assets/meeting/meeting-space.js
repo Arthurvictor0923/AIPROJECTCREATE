@@ -1,5 +1,20 @@
-(()=>{const M=Meeting,F=M.file,key='agri-space-applications-v8';if(!['后台-科研空间管理.html','后台-审批中心.html'].includes(F))return;const host=document.createElement('section');host.className='mt-panel';host.id='mt-space-requests';(document.querySelector('main')||document.querySelector('.container>.wrap')).append(host);const requests=()=>M.read(key,[]);
-M.refreshSpaces=()=>{const rows=requests();host.innerHTML='<h2>科研空间申请与开发环境</h2><div class="mt-table-wrap"><table class="mt-table"><thead><tr><th>科研空间 / 团队</th><th>关联模型</th><th>开发环境</th><th>计算配置</th><th>状态</th><th>操作</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+M.e(r.name)+'<small>'+M.e(r.team)+'</small></td><td>'+M.e(r.model||'未关联模型')+'</td><td>'+M.e(r.compute.runtime)+'<small>'+M.e(r.image)+' · '+M.e(r.ide)+'</small></td><td>'+r.cpu+' 核 / '+r.ram+' GB / '+r.gpu+' GPU<small>研究存储 '+r.storage+' GB</small></td><td>'+M.badge(r.state)+'</td><td>'+M.link('查看',`Meeting.viewSpace('${r.id}')`)+(F==='后台-审批中心.html'&&r.state==='申请中'?M.link('审批',`Meeting.reviewSpace('${r.id}')`):'')+'</td></tr>').join('')+' '+(!rows.length?'<tr><td colspan="6" class="mt-empty">暂无门户提交的科研空间申请</td></tr>':'')+'</tbody></table></div>'};
-M.viewSpace=id=>{const r=requests().find(r=>String(r.id)===id);if(!r)return;M.dialog('科研空间申请详情','<div class="mt-grid">'+[['空间名称',r.name],['所属团队',r.team],['研究用途',r.desc],['关联模型',r.model||'未关联模型'],['开发镜像',r.image],['运行环境',r.compute.runtime],['系统环境',r.compute.detail],['开发工具',r.ide],['CPU / 内存',r.cpu+' 核 / '+r.ram+' GB'],['GPU',r.gpu+' 张 · 单卡显存 '+r.gpuMemory+' GB'],['研究存储 / 系统盘',r.storage+' GB / '+r.systemDisk+' GB'],['审批意见',r.reviewNote||'尚未审批']].map(([t,v])=>'<div><small class="mt-note">'+t+'</small><p>'+M.e(v)+'</p></div>').join('')+'</div>',M.btn('关闭','Meeting.close()')+(F==='后台-审批中心.html'&&r.state==='申请中'?M.btn('审批',`Meeting.reviewSpace('${id}')`,true):''))};
-M.reviewSpace=id=>{const r=requests().find(x=>String(x.id)===id);if(!r||r.state!=='申请中')return;M.dialog('科研空间申请审批','<p>'+M.e(r.name)+' · '+M.e(r.compute.runtime)+'</p><form id="mt-space-review">'+M.field('space-decision','审批结果','','select',['通过','驳回','拒绝'])+M.field('space-opinion','审批意见','','textarea')+'</form>',M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="mt-space-review">确认</button>');document.getElementById('mt-space-review').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),rows=requests(),s=rows.find(x=>String(x.id)===id);if(!s||s.state!=='申请中')return;const d=f.get('space-decision');s.state=d==='通过'?'可用':d==='驳回'?'已驳回':'已拒绝';s.reviewNote=f.get('space-opinion').trim();if(!s.reviewNote)return;s.instance=d==='通过'?'已停止':'未开通';s.progress='审批'+d+'：'+s.reviewNote;M.write(key,rows);M.close();M.refreshSpaces();M.toast('审批结果已保存')}};M.refreshSpaces();window.addEventListener('storage',e=>{if(e.key===key)M.refreshSpaces()});
-})();
+/* meeting-space.js —— 已停用（20261014）
+
+   原实现：往「后台-科研空间管理.html」底部注入「科研空间申请与开发环境」面板
+   （科研空间/团队 · 关联模型 · 开发环境 · 计算配置 · 状态 · 查看/审批）。
+   该面板属需求发散产物，与本页定位（实例运营台账）不符，已按用户要求移除。
+
+   为什么保留文件（而不是删掉）：
+     本包 36 个页面都写了 <script src="assets/meeting/meeting-space.js">，
+     删文件会导致全部页面 404。改为整段短路 = 面板不再出现、页面不再报错。
+
+   为什么可以直接停用：
+     · 审批中心有自有实现 approval-center.js，已提供 viewSpace / reviewSpace /
+       refreshSpaces，并接管审批中心页面，与本文件无关；
+     · 科研空间详情 / 课题工作台的跳转走 project-workbench-links.js + project-workbench.js，
+       自带 viewSpace，不依赖本文件；
+     · 本文件在其它 34 个页面本就因 F 不匹配而首行 return，从无副作用。
+
+   如后续确定「科研空间申请」要在后台落地，正确做法是新建独立模块页，
+   不要把申请流塞进实例运营台账页。届时本文件可连同 36 处 script 引用一并清理。
+*/
