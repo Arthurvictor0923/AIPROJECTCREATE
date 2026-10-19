@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script>
+// Listing state is shared with model management; published records expose metadata edits only.
+window.ModelEditPolicy=(()=>{
+ const qs=new URLSearchParams(location.search),key=qs.get('record');let original=null;
+ try{original=JSON.parse(qs.get('data')||'null');}catch{}
+ const metadata=new Set(['name','alias','owner','modelType','origin','business','crop','summary','intro','cases','cover','d','t','detailPage']);
+ const baselines=new Map(),message='模型已上架，仅可编辑元数据；请先下架后再修改其他信息。';
+ const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}};
+ function current(){const s=read('bdh-model-service-v3',{}),r=(s.newRows||[]).find(r=>r.key===key)||Object.values(s.edits||{}).find(r=>r.key===key),c=read('bdh-model-catalog-v1',[]).find(r=>r.key===key);return {...(original||{}),...(r||{}),...(c?{up:c.up}:{})};}
+ function locked(){return !!key&&current().up==='on';}
+ function protect(n){if(!baselines.has(n))baselines.set(n,{disabled:n.disabled,readOnly:n.readOnly,editable:n.getAttribute('contenteditable'),value:'value'in n?n.value:null,html:n.hasAttribute('contenteditable')?n.innerHTML:null});n.dataset.modelProtected='true';}
+ function collect(){
+  document.querySelectorAll('main .card').forEach(card=>{const title=card.querySelector(':scope > .sec-hd h3')?.textContent||'';if(title.includes('推荐配置')){card.querySelectorAll('input,select,textarea,button').forEach(protect);}});
+  document.querySelectorAll('.readme-row').forEach(row=>row.querySelectorAll('button,a,input').forEach(protect));
+  document.querySelectorAll('.blk').forEach(block=>{if(/^(输入输出规范|输出示例|使用方式)$/.test(block.querySelector(':scope > h4')?.textContent.trim()||''))block.querySelectorAll('input,select,textarea,button,[contenteditable]').forEach(protect);});
+  document.querySelectorAll('.fld > label,.info-form > .lb').forEach(label=>{if(/^(模型编号|版本号)$/.test(label.textContent.replace(/\*/g,'').trim())){const parent=label.classList.contains('lb')?label.nextElementSibling:label.parentElement;parent?.querySelectorAll('input,select').forEach(protect);}});
+  document.querySelectorAll('main input[type=file]').forEach(n=>{if(!n.closest('.cover-box,.cover-up'))protect(n);});
+ }
+ function resetProtected(){for(const [n,b] of baselines){if(!n.isConnected)continue;if(b.value!==null&&n.type!=='file')n.value=b.value;if(b.html!==null)n.innerHTML=b.html;}}
+ function applyUsage(){const dialog=document.getElementById('modelUsageDialog');if(!dialog)return;const on=locked();dialog.querySelectorAll('input,select,textarea,.mu-delete,[data-mu-add]').forEach(n=>n.disabled=on);const save=dialog.querySelector('[type=submit]');if(save){save.hidden=on;save.disabled=on;}const opener=document.getElementById('modelUsageOpen');if(opener)opener.title=on?'模型已上架，使用说明仅可查看':'';}
+ function apply(){collect();const on=locked();for(const [n,b] of baselines){if(!n.isConnected)continue;if('disabled'in n)n.disabled=on||!!b.disabled;if('readOnly'in n)n.readOnly=on||!!b.readOnly;if(b.editable!==null)n.setAttribute('contenteditable',on?'false':b.editable);n.classList.toggle('model-locked-control',on);n.setAttribute('aria-disabled',String(on));if(on)n.title=message;else n.removeAttribute('title');}applyUsage();const save=[...document.querySelectorAll('.ph-act button')].find(b=>b.textContent.includes('保存'));if(save&&key)save.textContent='保存并返回';}
+ function beforeSave(row){if(!locked())return true;resetProtected();if(row){const authoritative=current();Object.keys(row).forEach(k=>{if(!metadata.has(k)){if(Object.hasOwn(authoritative,k))row[k]=authoritative[k];else delete row[k];}});row.key=key;row.up='on';}return true;}
+ window.addEventListener('click',e=>{if(locked()&&e.target.closest?.('[data-model-protected]')){e.preventDefault();e.stopImmediatePropagation();window.toast?.(message);}},true);
+ window.addEventListener('storage',e=>{if(['bdh-model-service-v3','bdh-model-catalog-v1'].includes(e.key)){if(locked())resetProtected();apply();}});
+ return {locked,current,apply,applyUsage,beforeSave,message};
+})();
+
+</script>
+<style>.model-locked-control{opacity:.6;cursor:not-allowed!important;}[contenteditable=false].model-locked-control{background:#f4f7f6;}input:disabled,select:disabled,textarea:disabled{background:#f4f7f6;color:#6b778c;}</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>模型详情编辑-已完善 — 北大荒智慧农业协同创新平台 · 管理后台</title>
@@ -497,14 +526,14 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
               <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">支持 .md、.txt</div>
             </div>
 
-            <div class="blk"><h4>模型概述</h4>
-              <div class="rte"><div class="rte-tb" id="tb1"></div>
-                <div class="rte-bd">融合多时相卫星影像与农田气象观测，估测水稻地块单产及区域总产，支持生育期内滚动更新。</div></div></div>
-
-            <div class="blk"><h4>输入输出规范</h4>
-              <div class="rte"><div class="rte-tb" id="tb2"></div>
-                <div class="rte-bd">
-                  <table>
+            <div class="blk model-intro">
+              <div class="model-intro-heading"><h4 id="modelIntroLabel">模型介绍</h4></div>
+              <div class="rte" id="modelIntroEditor">
+                <div class="rte-tb" id="tb1"></div>
+                <div class="rte-bd" id="modelIntroContent" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="modelIntroLabel" data-placeholder="请输入模型介绍"><h3>模型概述</h3>
+<p>融合多时相卫星影像与农田气象观测，估测水稻地块单产及区域总产，支持生育期内滚动更新。</p>
+<h3>输入输出规范</h3>
+<table>
                     <colgroup><col style="width:64px"><col><col style="width:33%"></colgroup>
                     <thead><tr><th>类型</th><th>内容</th><th>格式与单位</th></tr></thead>
                     <tbody>
@@ -512,28 +541,21 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
                       <tr><td>输出</td><td>地块单产、区域总产、估测区间</td><td>kg/亩、吨</td></tr>
                     </tbody>
                   </table>
-                </div></div></div>
-
-            <div class="blk"><h4>业务能力</h4>
-              <div class="rte"><div class="rte-tb" id="tb3"></div>
-                <div class="rte-bd">
-                  <ul>
+<h3>业务能力</h3>
+<ul>
                     <li>地块单产估测</li>
                     <li>区域产量汇总</li>
                     <li>多时相估产对比</li>
                   </ul>
-                </div></div></div>
-
-            <div class="blk"><h4>输出示例</h4>
-              <div class="rte"><div class="rte-tb" id="tb4"></div>
-                <div class="rte-bd">
-                  <table>
+<h3>输出示例</h3>
+<table>
                     <colgroup><col style="width:88px"><col><col></colgroup>
                     <thead><tr><th>地块编号</th><th>预测单产（kg/亩）</th><th>估测区间（kg/亩）</th></tr></thead>
                     <tbody><tr><td>A001</td><td>620</td><td>580 - 660</td></tr></tbody>
                   </table>
-                  <p class="note">示例数据。</p>
-                </div></div></div>
+                  <p class="note">示例数据。</p></div>
+              </div>
+            </div>
           </section>
         </div>
 
@@ -651,7 +673,7 @@ function rmChip(e,el){
   chip.parentNode.removeChild(chip);
   toast('已移除「'+name+'」（原型演示）');
 }
-/* 富文本工具栏（4 处共用同一套按钮） */
+/* 模型介绍富文本工具栏 */
 function tbHTML(){
   var B=function(tip,svg){return '<button type="button" class="tbtn" title="'+tip+'" onclick="toast(\''+tip+'（原型演示）\')">'+svg+'</button>';};
   var sep='<span class="sep"></span>';
@@ -672,7 +694,7 @@ function tbHTML(){
     +B('撤销','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8H15a4.5 4.5 0 0 1 0 9H9"/><path d="M12 5L9 8l3 3"/></svg>')
     +B('重做','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8H9a4.5 4.5 0 0 0 0 9h6"/><path d="M12 5l3 3-3 3"/></svg>');
 }
-['tb1','tb2','tb3','tb4'].forEach(function(id){document.getElementById(id).innerHTML=tbHTML();});
+document.getElementById('tb1').innerHTML='<div class="rte-tools">'+tbHTML()+'</div>';
 cnt();
 </script>
 
@@ -683,21 +705,21 @@ cnt();
  try{row=JSON.parse(qs.get('data')||'null');}catch(e){}
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const list='后台-模型管理.html';
- document.querySelectorAll('.svc-note .tx span').forEach(n=>n.textContent='在模型管理列表中完成构建与部署，服务状态与门户上架状态分别管理。');
+ document.querySelectorAll('.svc-note .tx span').forEach(n=>n.textContent='模型上架后仅可编辑元数据，构建、部署及其他信息需下架后调整。');
  document.querySelectorAll('.svc-note .act a').forEach(n=>{n.textContent='查看构建与部署 ›';n.href=list+(key?'?record='+encodeURIComponent(key)+'&action=deploy':'');});
- if(!row)return;
+ if(!row)return;row={...row,...ModelEditPolicy.current()};
  document.querySelectorAll('.svc-note .tx b').forEach(n=>n.textContent='构建与部署');
- const badge=document.querySelector('.page-head h1 .tag');if(badge){badge.textContent=row.done?'已完善':'待完善';badge.className='tag '+(row.done?'ok':'warn');}
+ const badge=document.querySelector('.page-head h1 .tag');if(badge){badge.textContent=row.src==='new'?'本地新建':'成果提交';badge.className='tag';}
  const mapping={'模型编号':'no','模型名称':'name','版本号':'ver'};
  const fields={};
  document.querySelectorAll('.fld > label,.info-form > .lb').forEach(label=>{const name=label.textContent.replace(/\*/g,'').trim(),k=mapping[name];if(!k)return;const wrap=label.classList.contains('lb')?label.nextElementSibling:label.parentElement;let input=wrap.querySelector('input');if(!input){const val=wrap.querySelector('.ro-val');if(val){input=document.createElement('input');input.className='inp';val.replaceWith(input);}}if(input){input.value=['待填写','—'].includes(row[k])?'':row[k];fields[k]=input;}});
- const note=document.createElement('section');note.className='card card-tight';note.style.padding='16px 24px';note.innerHTML='<div style="font-size:14px;font-weight:600;color:var(--brand);margin-bottom:8px">已关联构建材料 · '+(row.materialType==='image'?'镜像包':'模型文件')+'</div><div style="font-size:13px;color:var(--text-secondary)">'+(row.files||[]).map(esc).join('　 /　 ')+'</div><p style="font-size:12px;color:var(--text-muted);margin-top:8px">'+(row.src==='new'?'材料在新建模型时上传。':'材料来自科研成果提交。')+'保存完善资料后，可返回列表构建。</p>';
+ const note=document.createElement('section');note.className='card card-tight';note.style.padding='16px 24px';note.innerHTML='<div style="font-size:14px;font-weight:600;color:var(--brand);margin-bottom:8px">已关联构建材料 · '+(row.materialType==='image'?'镜像包':'模型文件')+'</div><div style="font-size:13px;color:var(--text-secondary)">'+(row.files||[]).map(esc).join('　 /　 ')+'</div><p style="font-size:12px;color:var(--text-muted);margin-top:8px">'+(row.src==='new'?'材料在新建模型时上传。':'材料来自科研成果提交。')+'保存后，可返回列表查看。</p>';
  document.querySelector('.svc-note').after(note);
  const origin=document.querySelector('.src-hint');if(origin)origin.textContent='本模型由后台新建，已关联新建时上传的构建材料。来源、权属与授权范围在本页维护。';
  const save=Array.from(document.querySelectorAll('.ph-act button')).find(b=>b.textContent.includes('保存'));
  if(save){save.removeAttribute('onclick');save.onclick=()=>{for(const [k,input]of Object.entries(fields)){if(!input.value.trim()){toast('请填写'+Object.keys(mapping).find(n=>mapping[n]===k));input.focus();return;}row[k]=input.value.trim();}if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(row.no)||!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(row.ver)){toast('请检查模型编号和版本号格式');return;}
  // Existing detail editing is demonstrative; the completion action returns its selected row to the list.
- if(!window.saveSelectedModelDetail(row))return;row.done=true;row.key=key;row.detailPage=decodeURIComponent(location.pathname.split('/').pop());location.href=list+'?saved='+encodeURIComponent(JSON.stringify(row));};save.textContent='保存完善资料并返回';}
+ if(!window.saveSelectedModelDetail(row))return;delete row.done;row.key=key;row.detailPage=decodeURIComponent(location.pathname.split('/').pop());location.href=list+'?saved='+encodeURIComponent(JSON.stringify(row));};save.textContent='保存并返回';}
 })();
 
 </script>
@@ -708,6 +730,25 @@ const PX=window.PX={}; const file=decodeURIComponent(location.pathname.split('/'
 PX.file=file; PX.key=new URLSearchParams(location.search).get('record')?'agri-model-detail:'+new URLSearchParams(location.search).get('record'):'agri-proto-v2:'+file; PX.last=null;
 PX.e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 PX.get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+
+// Preserve saved text when the four legacy editors become one editor.
+(() => {
+  const saved = PX.get(PX.key + ':fields', []);
+  if (saved.some(x => x.id === 'modelIntroContent')) return;
+  const legacy = saved.filter(x => x.html && !x.id);
+  if (legacy.length !== 4) return;
+  const headings = ['模型概述','输入输出规范','业务能力','输出示例'];
+  const content = legacy.map((x, i) => {
+    const text = (x.val || '').trim();
+    if (!text || /^请输入(模型概述|输入输出规范|业务能力|输出示例)$/.test(text)) return '';
+    return '<h3>' + headings[i] + '</h3>' + text;
+  }).join('\n');
+  const fields = saved.filter(x => !legacy.includes(x)).map(x => ({...x,i:x.i > legacy[3].i ? x.i - 3 : x.i}));
+  fields.push({id:'modelIntroContent',i:legacy[0].i,val:content,html:true});
+  fields.sort((a,b) => a.i - b.i);
+  try { localStorage.setItem(PX.key + ':fields', JSON.stringify(fields)); } catch {}
+})();
+
 PX.put=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch{toast('浏览器未能保存，请保留当前页面');return false}};
 PX.go=(name,hash='')=>location.href=name+'.html'+(hash?'#'+encodeURIComponent(hash):'');
 PX.close=()=>{document.getElementById('pxMask')?.remove();PX.last?.focus?.()};
@@ -922,6 +963,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
  const nodes=[...document.querySelectorAll('main *')];nodes.forEach((n,i)=>n.dataset.modelSlot=i);
  const saved=PX.get(PX.key+':uploads',[]);for(const x of saved){const parent=nodes[x.slot];if(parent){parent.querySelectorAll(':scope>.px-upload').forEach(n=>n.remove());parent.insertAdjacentHTML('beforeend',x.html);parent.querySelectorAll(':scope>.px-upload>button').forEach(b=>b.onclick=()=>b.parentElement.remove());}}
  window.saveSelectedModelDetail=row=>{
+  ModelEditPolicy.beforeSave(row);
   const deleted=PX.get('agri-proto-v2:后台-模型管理.html:deleted',[]);if(deleted.includes(key)){toast('该模型已删除，请返回列表');return false;}
   const state=PX.get('bdh-model-service-v3',{}),peers=[...(state.newRows||[]),...Object.values(state.edits||{})],catalog=PX.get('bdh-model-catalog-v1',[]);
   if([...peers,...catalog].some(x=>x.key!==key&&x.no===row.no&&x.ver===row.ver)){toast('相同模型编号和版本已存在');return false;}
@@ -936,5 +978,202 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
 <script src="assets/meeting/backend-seeds.js"></script>
 <script src="assets/meeting/backend-state.js"></script><script src="assets/meeting/meeting-features.js"></script><script src="assets/meeting/meeting-filters.js"></script><script src="assets/meeting/meeting-space.js"></script><!-- meeting-1010:end --><script src="assets/meeting/backend-integration.js"></script>
 <!-- devdoc-1012:start --><script src="assets/meeting/meeting-devdoc.js"></script><!-- devdoc-1012:end -->
+<!-- model-usage-dialog:start -->
+<style id="modelUsageStyles">
+#modelIntroEditor .rte-tb{display:flex;align-items:flex-start;flex-wrap:nowrap;gap:12px;}
+#modelIntroEditor .rte-tools{display:flex;align-items:center;gap:2px;flex-wrap:wrap;flex:1;min-width:0;}
+#modelIntroContent{min-height:400px;padding:16px;outline:none;}
+#modelIntroContent:empty::before{content:attr(data-placeholder);color:var(--text-muted);pointer-events:none;}
+#modelIntroContent h3{font-size:14px;font-weight:600;margin:22px 0 8px;}
+#modelIntroContent h3:first-child{margin-top:0;}
+.model-intro-heading{display:flex;align-items:center;gap:12px;margin-bottom:9px;}
+.model-intro-heading h4{font-size:13.5px;font-weight:600;color:var(--text);margin:0;}
+.model-usage-open{margin:0 0 0 auto;color:var(--brand);border-color:#b6cfca;flex-shrink:0;}
+.model-usage-open[hidden]{display:none;}
+#modelUsageDialog{width:min(1000px,calc(100vw - 40px));max-width:none;max-height:calc(100dvh - 48px);margin:auto;padding:0;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);box-shadow:0 20px 64px rgba(16,33,58,.22);font-family:var(--font-ui);overflow:hidden;}
+#modelUsageDialog::backdrop{background:rgba(16,33,58,.42);}
+#modelUsageDialog[open]{display:flex;flex-direction:column;}
+#modelUsageDialog .mu-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#modelUsageDialog .mu-head h2{font-size:18px;font-weight:600;}
+#modelUsageDialog .mu-close{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:4px;color:var(--text-secondary);}
+#modelUsageDialog .mu-close:hover{background:var(--brand-soft);color:var(--brand);}
+#modelUsageDialog .mu-form{display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+#modelUsageDialog .mu-body{padding:20px 24px 24px;overflow:auto;min-height:0;overscroll-behavior:contain;}
+#modelUsageDialog .mu-field{display:flex;flex-direction:column;gap:7px;margin-bottom:20px;}
+#modelUsageDialog .mu-field:last-child{margin-bottom:0;}
+#modelUsageDialog label{font-size:13.5px;font-weight:500;}
+#modelUsageDialog .mu-required{color:var(--error);margin-left:4px;}
+#modelUsageDialog .mu-control{width:100%;min-width:0;height:36px;padding:7px 10px;border:1px solid var(--border);border-radius:4px;background:#fff;font:13px var(--font-ui);color:var(--text);}
+#modelUsageDialog .mu-control:focus{outline:2px solid #d3e6df;outline-offset:1px;border-color:var(--brand);}
+#modelUsageDialog .mu-control[aria-invalid=true]{border-color:var(--error);}
+#modelUsageDialog textarea.mu-control{height:76px;min-height:68px;resize:vertical;line-height:1.65;}
+#modelUsageDialog #modelUsageContent{max-width:280px;}
+#modelUsageDialog #modelUsageExample{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;}
+#modelUsageDialog .mu-section{margin-bottom:22px;}
+#modelUsageDialog .mu-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+#modelUsageDialog .mu-section-head h3{font-size:14px;font-weight:600;}
+#modelUsageDialog .mu-add{display:inline-flex;align-items:center;gap:4px;color:var(--brand);font-size:13px;padding:3px 0;}
+#modelUsageDialog .mu-table-wrap{border:1px solid var(--border);border-radius:5px;overflow:auto;}
+#modelUsageDialog .mu-table{width:100%;min-width:660px;table-layout:fixed;border-collapse:collapse;font-size:13px;}
+#modelUsageDialog .mu-table th{height:38px;padding:8px 10px;background:#f5f8f7;color:var(--text-secondary);text-align:left;font-weight:500;white-space:nowrap;}
+#modelUsageDialog .mu-table td{padding:9px 10px;border-top:1px solid var(--border);vertical-align:middle;}
+#modelUsageDialog .mu-table .mu-check-cell{text-align:center;}
+#modelUsageDialog .mu-table input[type=checkbox]{width:16px;height:16px;accent-color:var(--brand);vertical-align:middle;}
+#modelUsageDialog .mu-table .mu-delete{font-size:13px;color:var(--error);white-space:nowrap;}
+#modelUsageDialog .mu-table .mu-empty{padding:18px;text-align:center;color:var(--text-muted);}
+#modelUsageDialog .mu-foot{display:flex;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid var(--border);background:#fff;flex-shrink:0;}
+#modelUsageDialog .mu-error{margin-right:auto;color:var(--error);font-size:13px;line-height:1.5;}
+#modelUsageDialog .mu-actions{display:flex;gap:10px;margin-left:auto;}
+@media(max-width:680px){#modelUsageDialog{width:calc(100vw - 20px);max-height:calc(100dvh - 24px);}#modelUsageDialog .mu-head{padding:14px 16px;}#modelUsageDialog .mu-body{padding:16px;}#modelUsageDialog .mu-foot{padding:12px 16px;flex-wrap:wrap;}#modelUsageDialog .mu-error:not(:empty){width:100%;}.model-usage-open{padding:0 10px;}}
+</style>
+<dialog id="modelUsageDialog" aria-labelledby="modelUsageTitle">
+  <div class="mu-head">
+    <h2 id="modelUsageTitle">使用说明</h2>
+    <button type="button" class="mu-close" data-mu-close data-px-own="true" aria-label="关闭使用说明"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  </div>
+  <form class="mu-form" novalidate>
+    <div class="mu-body">
+      <div class="mu-field"><label for="modelUsageText">使用说明<span class="mu-required">*</span></label><textarea class="mu-control" id="modelUsageText" required></textarea></div>
+      <div class="mu-field"><label for="modelUsageContent">内容类型</label><select class="mu-control" id="modelUsageContent"><option value="JSON">JSON</option><option value="form-data">form-data</option></select></div>
+      <section class="mu-section" aria-labelledby="modelUsageInputsTitle">
+        <div class="mu-section-head"><h3 id="modelUsageInputsTitle">入参</h3><button type="button" class="mu-add" data-mu-add="inputs" data-px-own="true">＋ 添加入参</button></div>
+        <div class="mu-table-wrap"><table class="mu-table"><colgroup><col style="width:23%"><col style="width:18%"><col style="width:64px"><col><col style="width:64px"></colgroup><thead><tr><th scope="col">参数名称</th><th scope="col">类型</th><th scope="col" class="mu-check-cell">必填</th><th scope="col">参数说明</th><th scope="col">操作</th></tr></thead><tbody id="modelUsageInputs"></tbody></table></div>
+      </section>
+      <section class="mu-section" aria-labelledby="modelUsageOutputsTitle">
+        <div class="mu-section-head"><h3 id="modelUsageOutputsTitle">出参</h3><button type="button" class="mu-add" data-mu-add="outputs" data-px-own="true">＋ 添加出参</button></div>
+        <div class="mu-table-wrap"><table class="mu-table"><colgroup><col style="width:23%"><col style="width:18%"><col><col style="width:64px"></colgroup><thead><tr><th scope="col">参数名称</th><th scope="col">类型</th><th scope="col">参数说明</th><th scope="col">操作</th></tr></thead><tbody id="modelUsageOutputs"></tbody></table></div>
+      </section>
+      <div class="mu-field"><label for="modelUsageExample">返回示例</label><textarea class="mu-control" id="modelUsageExample" spellcheck="false"></textarea></div>
+    </div>
+    <div class="mu-foot"><p class="mu-error" id="modelUsageError" role="alert" aria-live="polite"></p><div class="mu-actions"><button type="button" class="btn" data-mu-close data-px-own="true">取消</button><button type="submit" class="btn primary" data-px-own="true">保存</button></div></div>
+  </form>
+</dialog>
+<script>
+// Add a separate structured editor without replacing any rich-text content.
+(() => {
+  const tabs = document.querySelector('.col-l .tabs');
+  const dialog = document.getElementById('modelUsageDialog');
+  if (!tabs || !dialog) return;
+  const record = new URLSearchParams(location.search).get('record');
+  const storageKey = (window.PX?.key || 'agri-proto-v2:' + decodeURIComponent(location.pathname.split('/').pop())) + ':interfaceDoc';
+  const serviceKey = 'bdh-model-service-v3';
+  const inputBody = document.getElementById('modelUsageInputs');
+  const outputBody = document.getElementById('modelUsageOutputs');
+  const usage = document.getElementById('modelUsageText');
+  const content = document.getElementById('modelUsageContent');
+  const example = document.getElementById('modelUsageExample');
+  const error = document.getElementById('modelUsageError');
+  const opener = document.createElement('button');
+  opener.type = 'button';
+  opener.id = 'modelUsageOpen';
+  opener.className = 'btn sm model-usage-open';
+  opener.dataset.pxOwn = 'true';
+  opener.setAttribute('aria-haspopup', 'dialog');
+  opener.setAttribute('aria-controls', dialog.id);
+  opener.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M3 4h5a4 4 0 0 1 4 2 4 4 0 0 1 4-2h5v15h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3z"/></svg>使用说明';
+  document.getElementById('modelIntroLabel').after(opener);
+  const syncButton = () => { opener.hidden = !tabs.querySelector('.tab.active')?.textContent.includes('模型介绍'); };
+  new MutationObserver(syncButton).observe(tabs, {subtree:true,attributes:true,attributeFilter:['class']});
+  syncButton();
+
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const readStore = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
+  const getDocument = () => {
+    const saved = readStore(storageKey, null);
+    const service = record ? readStore(serviceKey, {}).services?.[record] : null;
+    return saved || service?.active?.interfaceDoc || service?.deploys?.find(d => d.interfaceDoc)?.interfaceDoc || {usage:'',content:'JSON',inputs:[],outputs:[],example:''};
+  };
+  let loaded = null;
+  let previousOverflow = '';
+  function emptyState(body, input) {
+    body.querySelector('[data-mu-empty]')?.remove();
+    if (!body.querySelector('[data-mu-row]')) body.innerHTML = '<tr data-mu-empty><td class="mu-empty" colspan="' + (input ? 5 : 4) + '">暂无' + (input ? '入参' : '出参') + '</td></tr>';
+  }
+  function addParameter(body, input, parameter = {}, focus = false) {
+    body.querySelector('[data-mu-empty]')?.remove();
+    const tr = document.createElement('tr');
+    tr.dataset.muRow = 'true';
+    tr._originalParameter = parameter;
+    const types = ['string','number','integer','boolean','object','array',...(input ? ['file'] : [])];
+    tr.innerHTML = '<td><input class="mu-control" data-mu="name" aria-label="参数名称" value="' + escape(parameter.name) + '" required></td><td><select class="mu-control" data-mu="type" aria-label="参数类型">' + types.map(type => '<option value="' + type + '"' + (type === (parameter.type || 'string') ? ' selected' : '') + '>' + type + '</option>').join('') + '</select></td>' + (input ? '<td class="mu-check-cell"><input type="checkbox" data-mu="required" aria-label="必填"' + (parameter.required ? ' checked' : '') + '></td>' : '') + '<td><input class="mu-control" data-mu="description" aria-label="参数说明" value="' + escape(parameter.description) + '"></td><td><button type="button" class="mu-delete" data-px-own="true" aria-label="删除' + (input ? '入参' : '出参') + '">删除</button></td>';
+    tr.querySelector('.mu-delete').addEventListener('click', () => { tr.remove(); emptyState(body, input); error.textContent = ''; });
+    body.append(tr);
+    if (focus) tr.querySelector('input').focus();
+  }
+  function openDialog() {
+    if (dialog.open) return;
+    loaded = getDocument();
+    usage.value = loaded.usage || '';
+    content.value = loaded.content === 'form-data' ? 'form-data' : 'JSON';
+    example.value = loaded.example || '';
+    inputBody.innerHTML = '';
+    outputBody.innerHTML = '';
+    (loaded.inputs || []).forEach(p => addParameter(inputBody, true, p));
+    (loaded.outputs || []).forEach(p => addParameter(outputBody, false, p));
+    emptyState(inputBody, true);
+    emptyState(outputBody, false);
+    error.textContent = '';
+    dialog.querySelectorAll('[aria-invalid]').forEach(n => n.removeAttribute('aria-invalid'));
+    previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    ModelEditPolicy.applyUsage();
+    dialog.showModal();
+    dialog.querySelector('.mu-body').scrollTop = 0;
+    dialog.querySelector('.mu-close').focus({preventScroll:true});
+  }
+  function showError(message, field) {
+    error.textContent = message;
+    if (field) { field.setAttribute('aria-invalid','true'); field.focus(); }
+  }
+  function collect(body, input) {
+    return [...body.querySelectorAll('[data-mu-row]')].map(tr => ({
+      ...tr._originalParameter,
+      ...Object.fromEntries([...tr.querySelectorAll('[data-mu]')].map(n => [n.dataset.mu, n.type === 'checkbox' ? n.checked : n.value.trim()])),
+      ...(input ? {position:'Body'} : {})
+    }));
+  }
+  opener.addEventListener('click', openDialog);
+  dialog.querySelectorAll('[data-mu-close]').forEach(b => b.addEventListener('click', () => dialog.close()));
+  dialog.addEventListener('close', () => { document.body.style.overflow = previousOverflow; opener.focus({preventScroll:true}); });
+  dialog.addEventListener('cancel', e => { e.preventDefault(); dialog.close(); });
+  dialog.addEventListener('click', e => {
+    if (e.target !== dialog) return;
+    const bounds = dialog.getBoundingClientRect();
+    if (e.clientX < bounds.left || e.clientX > bounds.right || e.clientY < bounds.top || e.clientY > bounds.bottom) dialog.close();
+  });
+  dialog.querySelectorAll('[data-mu-add]').forEach(b => b.addEventListener('click', () => {
+    const input = b.dataset.muAdd === 'inputs';
+    addParameter(input ? inputBody : outputBody, input, {}, true);
+    error.textContent = '';
+  }));
+  dialog.addEventListener('input', e => { e.target.removeAttribute('aria-invalid'); error.textContent = ''; });
+  dialog.querySelector('form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (ModelEditPolicy.locked()) return showError(ModelEditPolicy.message);
+    dialog.querySelectorAll('[aria-invalid]').forEach(n => n.removeAttribute('aria-invalid'));
+    const doc = {...loaded, usage:usage.value.trim(),content:content.value,inputs:collect(inputBody,true),outputs:collect(outputBody,false),example:example.value.trim()};
+    if (!doc.usage) return showError('请填写使用说明', usage);
+    for (const [body, parameters] of [[inputBody,doc.inputs],[outputBody,doc.outputs]]) {
+      const names = new Set();
+      for (let i = 0; i < parameters.length; i++) {
+        const field = body.querySelectorAll('[data-mu="name"]')[i];
+        if (!parameters[i].name) return showError('请填写参数名称', field);
+        if (names.has(parameters[i].name)) return showError('参数名称不可重复', field);
+        names.add(parameters[i].name);
+      }
+    }
+    if (doc.content !== 'form-data' && doc.inputs.some(p => p.type === 'file')) return showError('文件入参需要选择 form-data', content);
+    try { localStorage.setItem(storageKey, JSON.stringify(doc)); }
+    catch { return showError('使用说明未能保存，请重试'); }
+    dialog.close();
+    window.toast?.('使用说明已保存');
+  });
+})();
+</script>
+<!-- model-usage-dialog:end -->
+
+<script>
+(()=>{const upload=PX.upload;PX.upload=(el,mode)=>{if(ModelEditPolicy.locked()&&mode!=='image')return toast(ModelEditPolicy.message);return upload(el,mode);};const save=PX.save;PX.save=(...args)=>{ModelEditPolicy.beforeSave();return save(...args);};ModelEditPolicy.apply();document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(()=>ModelEditPolicy.apply()));})();
+</script>
 </body>
 </html>

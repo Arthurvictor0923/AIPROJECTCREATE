@@ -102,6 +102,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px;}
 table.tbl th{text-align:left;font-weight:600;color:var(--text-secondary);background:var(--brand-soft);padding:11px var(--s4);white-space:nowrap;font-size:13px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
 table.tbl td{padding:11px var(--s4);border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
 table.tbl tbody tr:last-child td{border-bottom:0;}
+.ops button:disabled{opacity:.4;cursor:not-allowed;}.inp[readonly]{background:#f4f7f6;color:var(--text-secondary);}
 table.tbl tbody tr:hover{background:#fafcfb;}
 table.tbl th:first-child,table.tbl td:first-child{padding-left:var(--s5);}
 table.tbl th:last-child,table.tbl td:last-child{padding-right:var(--s5);}
@@ -259,7 +260,19 @@ textarea.svc-code{height:115px;padding-bottom:10px;resize:vertical;}
 .svc-confirm{padding:12px 14px;border:1px solid var(--warn-bd);background:var(--warn-bg);border-radius:4px;font-size:13px;margin-top:16px;}
 @media(max-width:680px){#serviceMask{padding:12px;}#serviceMask .modal{width:100%;max-height:calc(100dvh - 24px);}#serviceMask .modal-ft{flex-wrap:wrap;}.svc-choices{flex-direction:column;}.svc-history-head{align-items:flex-start;flex-wrap:wrap;}}
 
-.md-table{min-width:600px}.md-table .inp{padding:0 8px;font-size:12px}.md-table td,.md-table th{padding:9px 8px!important}.md-table th:first-child{width:24%}.md-table th:nth-child(2){width:22%}.md-doc{border-top:1px solid var(--border);margin-top:20px}
+.md-entry{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--border);padding-top:18px;margin-top:20px;}
+.md-entry h3{font-size:14.5px;font-weight:600;}.md-entry .svc-help{margin-top:3px;}
+dialog.md-dialog{margin:auto;border:0;border-radius:var(--radius-md);width:min(1000px,calc(100vw - 48px));max-width:none;max-height:calc(100dvh - 64px);padding:0;color:var(--text);background:var(--surface);box-shadow:0 24px 64px rgba(16,33,58,.24);}
+dialog.md-dialog::backdrop{background:rgba(16,33,58,.40);}
+.md-dialog form{display:flex;flex-direction:column;max-height:calc(100dvh - 64px);min-height:0;}
+.md-dialog .modal-bd{min-height:0;overflow-y:auto;overscroll-behavior:contain;}
+.md-dialog .modal-hd,.md-dialog .modal-ft{flex-shrink:0;}.md-dialog .modal-ft{justify-content:flex-end;}
+.md-dialog textarea.inp{height:88px;padding:10px;resize:vertical;}.md-dialog #mdContent{max-width:260px;}
+.md-dialog #mdError{margin:16px 0 0;}
+.md-param-scroll{max-height:280px;overflow:auto;overscroll-behavior:contain;border:1px solid var(--border);border-radius:var(--radius-sm);}
+.md-table{min-width:720px;table-layout:fixed;}.md-table .inp{padding:0 8px;font-size:13px;}
+.md-table td,.md-table th{padding:9px 8px!important;}.md-table th{position:sticky;top:0;z-index:1;border-top:0!important;}
+@media(max-width:680px){dialog.md-dialog{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);}.md-dialog form{max-height:calc(100dvh - 24px);}.md-dialog .modal-hd,.md-dialog .modal-bd,.md-dialog .modal-ft{padding-left:16px;padding-right:16px;}}
 dialog.ma-dialog{margin:auto;border:0;border-radius:8px;width:min(920px,94vw);max-height:90vh;padding:0;color:var(--text)}dialog.ma-dialog::backdrop{background:#10213a66}.ma-dialog .modal-bd{max-height:calc(90vh - 140px)}.ma-dialog .modal-ft{justify-content:flex-end}.ma-dialog textarea{height:100px;padding:10px;resize:vertical}.ma-dialog .share-error{color:var(--error);margin-top:14px}
 #tbody td:nth-child(3),#tbody td:nth-child(10){white-space:nowrap}#tbody td:nth-child(10){min-width:110px}
 .btn.danger{background:#a93d35;border-color:#a93d35;color:white}#maBody .tbl{margin-top:18px}#maBody .tbl th:first-child{width:135px}</style>
@@ -355,8 +368,8 @@ dialog.ma-dialog{margin:auto;border:0;border-radius:8px;width:min(920px,94vw);ma
               <input id="kw" type="text" placeholder="请输入模型编号、名称、文件名或记录 ID" onkeydown="if(event.key==='Enter'){toast('已按关键词查询（原型演示）');}">
             </span>
           </span>
-          <span class="f-field"><label for="fAccess">接入方式</label><select id="fAccess"><option value="">全部</option><option value="platform">平台部署</option><option value="api">接口接入</option></select></span><span class="f-field"><label for="f1">资料状态</label>
-            <select id="f1"><option>全部</option><option>待完善</option><option>已完善</option></select></span>
+          <span class="f-field"><label for="fAccess">接入方式</label><select id="fAccess"><option value="">全部</option><option value="platform">平台部署</option><option value="api">接口接入</option></select></span><span class="f-field"><label for="f1">记录来源</label>
+            <select id="f1"><option value="">全部</option><option value="result">成果提交</option><option value="new">本地新建</option></select></span>
           <span class="f-field"><label for="f2">上架状态</label>
             <select id="f2"><option>全部</option><option>已上架</option><option>未上架</option><option>已下架</option></select></span>
           <button type="button" class="btn primary" onclick="toast('已按条件查询（原型演示）')">查询</button>
@@ -371,7 +384,7 @@ dialog.ma-dialog{margin:auto;border:0;border-radius:8px;width:min(920px,94vw);ma
             <thead>
               <tr>
                 <th>模型编号</th><th>模型名称</th><th>接入方式</th><th>提交文件</th><th>提交人</th><th>提交时间</th>
-                <th>版本号</th><th>资料状态</th><th>上架状态</th><th>构建 / 部署</th><th>操作</th>
+                <th>版本号</th><th>记录来源</th><th>上架状态</th><th>构建 / 部署</th><th>操作</th>
               </tr>
             </thead>
             <tbody id="tbody"></tbody>
@@ -455,7 +468,7 @@ dialog.ma-dialog{margin:auto;border:0;border-radius:8px;width:min(920px,94vw);ma
       <div class="sec-hd mt"><h3>构建材料<span class="req">*</span></h3></div>
       <div class="svc-choices"><label><input type="radio" name="newMaterialType" value="image" checked onchange="newMaterialMode()">上传镜像包</label></div>
       <div class="svc-upload"><strong style="font-size:13px">选择构建材料</strong><p class="svc-help" id="newMaterialHelp">上传模型文件、推理代码和依赖清单，可选择多个文件或一个源码压缩包。</p><input id="newFiles" type="file" multiple accept=".pkl,.joblib,.onnx,.pt,.pth,.py,.json,.yaml,.yml,.txt,.csv,.pdf,.zip,.tar.gz,.tgz" onchange="newFilesChanged()"><p class="svc-help" id="newFileSummary">尚未选择文件</p></div>
-      <p class="svc-help">材料随模型保存，完善资料后可在列表中构建。交互原型仅记录文件信息，不实际上传文件。</p>
+      <p class="svc-help">材料随模型保存，保存后可在列表中构建。交互原型仅记录文件信息，不实际上传文件。</p>
       <div class="sec-hd mt"><h3>推荐配置（性能要求）</h3><span class="sec-tip">服务部署时用于推理算力区资源选型参考</span></div>
       <div class="grid-3">
         <div class="fld"><label>推荐算力卡型<span class="req">*</span></label>
@@ -505,7 +518,7 @@ dialog.ma-dialog{margin:auto;border:0;border-radius:8px;width:min(920px,94vw);ma
     <div class="modal-ft">
       <button type="button" class="btn" onclick="closeModal()">取消</button>
       <span class="right">
-        <button type="button" class="btn" onclick="saveNewModel(false)">保存草稿</button>
+        <button type="button" class="btn" onclick="saveNewModel(false)">保存</button>
         <button type="button" class="btn primary" onclick="saveNewModel(true)">保存并继续
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
       </span>
@@ -543,24 +556,39 @@ document.getElementById('modalMask').addEventListener('click',function(e){if(e.t
 
 /* ===== 模型列表（照示意稿 10 行 / 共 23 条） ===== */
 var ROWS=[
- {no:'待填写',name:'待填写',files:['rice_yield_raw.pkl','feature_spec.json','train_log.csv'],who:'李伟',d:'2026-09-23',t:'14:30',ver:'—',done:false,up:'none'},
- {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_v2.3.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'李伟',d:'2026-09-18',t:'10:20',ver:'v2.3',done:true,up:'on'},
- {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_v2.2.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'李伟',d:'2026-04-02',t:'09:10',ver:'v2.2',done:true,up:'off'},
- {no:'MDL-2026-002',name:'作物病害识别模型',files:['crop_disease_v1.1.pkl','label_map.json'],who:'王芳',d:'2026-09-15',t:'16:40',ver:'v1.1',done:true,up:'none'},
- {no:'待填写',name:'待填写',files:['soil_moisture_raw.csv','sensor_layout.json'],who:'陈晨',d:'2026-09-22',t:'11:05',ver:'—',done:false,up:'none'},
- {no:'MDL-2026-003',name:'遥感作物分类模型',files:['crop_class_v1.0.pkl','class_map.json','train_config.yaml'],who:'刘洋',d:'2026-09-10',t:'15:20',ver:'v1.0',done:true,up:'none'},
- {no:'MDL-2026-004',name:'玉米估产模型',files:['maize_yield_v1.2.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'张强',d:'2026-08-28',t:'13:40',ver:'v1.2',done:true,up:'on'},
- {no:'待填写',name:'待填写',files:['wheat_growth.pkl','feature_list.json'],who:'赵敏',d:'2026-09-14',t:'17:25',ver:'—',done:false,up:'none'},
- {no:'MDL-2026-005',name:'农田长势模型',files:['crop_growth_v1.0.pkl','feature_spec.json','train_config.yaml'],who:'周杰',d:'2026-09-01',t:'10:15',ver:'v1.0',done:true,up:'off'},
- {no:'MDL-2026-007',name:'农田气象灾情预警模型',files:[],who:'张明',d:'2026-09-21',t:'11:20',ver:'v1.0',done:true,up:'none',src:'new'}
+ {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_raw.pkl','feature_spec.json','train_log.csv'],who:'李伟',d:'2026-09-23',t:'14:30',ver:'v2.4',src:'result',up:'none'},
+ {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_v2.3.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'李伟',d:'2026-09-18',t:'10:20',ver:'v2.3',up:'on'},
+ {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_v2.2.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'李伟',d:'2026-04-02',t:'09:10',ver:'v2.2',up:'off'},
+ {no:'MDL-2026-002',name:'作物病害识别模型',files:['crop_disease_v1.1.pkl','label_map.json'],who:'王芳',d:'2026-09-15',t:'16:40',ver:'v1.1',up:'none'},
+ {no:'MDL-2026-006',name:'土壤墒情预测模型',files:['soil_moisture_raw.csv','sensor_layout.json'],who:'陈晨',d:'2026-09-22',t:'11:05',ver:'v1.0',src:'result',up:'none'},
+ {no:'MDL-2026-003',name:'遥感作物分类模型',files:['crop_class_v1.0.pkl','class_map.json','train_config.yaml'],who:'刘洋',d:'2026-09-10',t:'15:20',ver:'v1.0',up:'none'},
+ {no:'MDL-2026-004',name:'玉米估产模型',files:['maize_yield_v1.2.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'张强',d:'2026-08-28',t:'13:40',ver:'v1.2',up:'on'},
+ {no:'MDL-2026-008',name:'小麦长势监测模型',files:['wheat_growth.pkl','feature_list.json'],who:'赵敏',d:'2026-09-14',t:'17:25',ver:'v1.0',src:'result',up:'none'},
+ {no:'MDL-2026-005',name:'农田长势模型',files:['crop_growth_v1.0.pkl','feature_spec.json','train_config.yaml'],who:'周杰',d:'2026-09-01',t:'10:15',ver:'v1.0',up:'off'},
+ {no:'MDL-2026-007',name:'农田气象灾情预警模型',files:[],who:'张明',d:'2026-09-21',t:'11:20',ver:'v1.0',up:'none',src:'new'}
 ];
 var TOTAL=23, PS=10;
-var EDIT_DONE='后台-模型详情编辑-已完善.html', EDIT_WAIT='后台-模型详情编辑-待完善.html', EDIT_NEW='后台-模型详情编辑-后台新建.html';
-function editUrl(r){ return [EDIT_DONE,EDIT_WAIT,EDIT_NEW].includes(r.detailPage)?r.detailPage:(r.src==='new' ? EDIT_NEW : (r.done ? EDIT_DONE : EDIT_WAIT)); }
+// Keep existing detail filenames so the page can be returned to its original prototype package.
+var EDIT_MODEL='后台-模型详情编辑-已完善.html', EDIT_NEW='后台-模型详情编辑-后台新建.html';
+const MODEL_SEEDS=ROWS.map(r=>({...r}));
+const MODEL_METADATA_FIELDS=['name','alias','owner','modelType','origin','business','crop','summary','intro','cases','cover','d','t','detailPage'];
+function modelLocked(r){return r?.up==='on';}
+function modelLockMessage(){return '模型已上架，仅可编辑元数据；请先下架后再操作。';}
+function applyModelEdit(target,patch){if(modelLocked(target)){MODEL_METADATA_FIELDS.forEach(k=>{if(Object.hasOwn(patch,k))target[k]=patch[k];});}else Object.assign(target,patch);return target;}
+function modelMutationAllowed(r){if(!modelLocked(r))return true;toast(modelLockMessage());return false;}
+function recordSource(r){return r.src==='new'?'本地新建':'成果提交';}
+function normalizeModelRecord(r){
+  const seed=MODEL_SEEDS[Number((r.key||'').replace('row-',''))];
+  if(seed){['no','name','ver'].forEach(k=>{if(!r[k]||['待填写','—'].includes(r[k]))r[k]=seed[k];});}
+  r.src=r.src==='new'||(r.key||'').startsWith('new-')?'new':'result';
+  delete r.done;
+  return r;
+}
+function editUrl(r){return [EDIT_MODEL,EDIT_NEW].includes(r.detailPage)?r.detailPage:(r.src==='new'?EDIT_NEW:EDIT_MODEL);}
 /* 提交文件列：科研团队提交的是「多个文件的合集」→ 只出文件数（文件名清单走 title） */
 function fileCell(r){
   var n=(r.files||[]).length;
-  if(!n){ return '<span class="f-none" title="该模型由后台新建创建，无原始提交文件">—</span>'; }
+  if(!n){ return '<span class="f-none" title="暂无提交文件">—</span>'; }
   return '<span class="nowrap" title="'+esc(r.files.join('、'))+'">'+(r.materialType==='image'?'1 个镜像包':n+' 个文件')+'</span>';
 }
 function dlFiles(n){
@@ -572,6 +600,7 @@ function upDot(u){
 }
 function upAct(u){return u==='on'?'下架':'上架';}
 function renderTable(){
+  ROWS.forEach(normalizeModelRecord);
   document.getElementById('tbody').innerHTML=ROWS.map(function(r,idx){
     var edit=editUrl(r);
     return '<tr>'+
@@ -581,14 +610,14 @@ function renderTable(){
       '<td class="nowrap">'+esc(r.who)+'</td>'+
       '<td class="nowrap"><span class="t-two">'+r.d+'<br>'+r.t+'</span></td>'+
       '<td class="nowrap">'+esc(r.ver)+'</td>'+
-      '<td>'+dot(r.done?'ok':'warn',r.done?'已完善':'待完善')+'</td>'+
+      '<td class="nowrap">'+recordSource(r)+'</td>'+
       '<td>'+upDot(r.up)+'</td>'+
       '<td>'+serviceCell(idx)+'</td>'+
       '<td><span class="ops">'+
         '<a class="lnk" href="'+edit+'">查看</a>'+
-        '<a class="lnk" href="'+edit+'">编辑</a>'+
-        '<button type="button" class="lnk" onclick="openService('+idx+',\'build\')">构建</button>'+
-        '<button type="button" class="lnk" onclick="openService('+idx+',\'deploy\')">部署</button>'+
+        '<a class="lnk" href="'+edit+'">'+'编辑'+'</a>'+
+        '<button type="button" class="lnk" '+(modelLocked(r)?'disabled title="模型已上架，请先下架"':'')+' onclick="openService('+idx+',\'build\')">构建</button>'+
+        '<button type="button" class="lnk" '+(modelLocked(r)?'disabled title="模型已上架，请先下架"':'')+' onclick="openService('+idx+',\'deploy\')">部署</button>'+
         (((r.files||[]).length)?'<a class="lnk" href="javascript:void(0)" onclick="dlFiles('+(r.files.length)+')">下载</a>':'')+
         '<a class="lnk" href="javascript:void(0)" onclick="ph(\''+upAct(r.up)+'模型\')">'+upAct(r.up)+'</a>'+
         '<a class="lnk" href="javascript:void(0)" onclick="ph(\'删除模型\')">删除</a>'+
@@ -613,13 +642,15 @@ const $=id=>document.getElementById(id);
 let activeRow=0,svcMode='build',svcTab='config',returnFocus=null;
 let serviceData={},newRows=[];
 try{const s=JSON.parse(localStorage.getItem(STORE)||'{}');serviceData=s.services||{};newRows=s.newRows||[];Object.entries(s.edits||{}).forEach(([i,v])=>{if(ROWS[i])Object.assign(ROWS[i],v);});}catch(e){}
+try{const catalog=JSON.parse(localStorage.getItem('bdh-model-catalog-v1')||'[]');ROWS.forEach((r,i)=>{const saved=catalog.find(x=>x.key===(r.key||'row-'+i));if(saved)r.up=saved.up;});}catch(e){}
 let savedRow=null;try{savedRow=JSON.parse(new URLSearchParams(location.search).get('saved')||'null');}catch(e){}
-if(savedRow&&savedRow.key){if(savedRow.key.startsWith('new-')){const n=newRows.findIndex(x=>x.key===savedRow.key);if(n>=0)newRows[n]=savedRow;else newRows.push(savedRow);}else{const i=Number(savedRow.key.replace('row-',''));if(ROWS[i]){Object.assign(ROWS[i],savedRow);try{let store=JSON.parse(localStorage.getItem(STORE)||'{}');store.edits=store.edits||{};store.edits[i]=savedRow;localStorage.setItem(STORE,JSON.stringify(store));}catch(e){}}}history.replaceState(null,'',location.pathname);}
+if(savedRow&&savedRow.key){if(savedRow.key.startsWith('new-')){const n=newRows.findIndex(x=>x.key===savedRow.key);if(n>=0)applyModelEdit(newRows[n],savedRow);else newRows.push(savedRow);}else{const i=Number(savedRow.key.replace('row-',''));if(ROWS[i]){applyModelEdit(ROWS[i],savedRow);try{let store=JSON.parse(localStorage.getItem(STORE)||'{}');store.edits=store.edits||{};store.edits[i]={...ROWS[i]};localStorage.setItem(STORE,JSON.stringify(store));}catch(e){}}}history.replaceState(null,'',location.pathname);}
 ROWS.forEach((r,i)=>{r.key=r.key||'row-'+i;r.materialType=r.materialType||'files';});
 // The newly-created sample retains the uploaded image as its build input.
 ROWS[9].files=['weather_alert_v1.0.tar'];ROWS[9].materialType='image';
 newRows.forEach(r=>{if(!ROWS.some(x=>x.key===r.key))ROWS.push(r);});
-function persist(){try{let s=JSON.parse(localStorage.getItem(STORE)||'{}');s.services=serviceData;s.newRows=ROWS.filter(r=>r.key.startsWith('new-'));localStorage.setItem(STORE,JSON.stringify(s));}catch(e){toast('当前浏览器无法保存演示记录，刷新后将恢复初始状态');}}
+ROWS.forEach(normalizeModelRecord);
+function persist(){try{let s=JSON.parse(localStorage.getItem(STORE)||'{}');s.services=serviceData;s.newRows=ROWS.filter(r=>r.key.startsWith('new-'));s.edits=Object.fromEntries(ROWS.filter(r=>r.key.startsWith('row-')).map(r=>[r.key.slice(4),{...r}]));localStorage.setItem(STORE,JSON.stringify(s));}catch(e){toast('当前浏览器无法保存演示记录，刷新后将恢复初始状态');}}
 function imageURI(r,tag){return 'registry.platform.local/models/'+r.no.toLowerCase()+':'+tag;}
 function initial(i){const r=ROWS[i];let bs=[],ds=[];
  if([1,2,5,6].includes(i)){const tag=r.ver.replace(/^v/,'')+'-b001';bs=[{id:'B-20260918-'+String(i).padStart(3,'0'),tag,image:imageURI(r,tag),status:'success',date:'2026-09-18 10:30',kind:'模板构建',runtime:'cpu',command:'python /opt/service/server.py',port:8000,logs:['[示例] 构建材料已校验','[示例] 推理模板与模型文件已打包','[示例] 镜像已推送至平台镜像仓库']}];}
@@ -631,7 +662,7 @@ function state(i){const k=ROWS[i].key;if(!serviceData[k])serviceData[k]=initial(
 ROWS.forEach((r,i)=>{const s=state(i);[...s.builds,...s.deploys].forEach(j=>{if(j.status==='running'){j.status='failed';j.logs.push('[演示] 页面刷新中断了本地模拟任务，请重新提交。');}});});
 function statusDot(status,kind){return status==='success'?dot('ok',kind==='build'?'构建成功':'运行中'):status==='running'?dot('warn',kind==='build'?'构建中':'部署中'):status==='failed'?dot('no',kind==='build'?'构建失败':'部署失败'):dot('gray',kind==='build'?'未构建':'未部署');}
 function serviceCell(i){const s=state(i),b=s.builds[0],d=s.deploys[0];let deployLabel=s.active?dot('ok','运行中'):d?.status==='stopped'?dot('gray','已停止'):statusDot(d?.status,'deploy');if(d?.status==='running'||d?.status==='failed')deployLabel=statusDot(d.status,'deploy');return '<div class="svc-state"><button onclick="openService('+i+',\'build\',\'records\')">'+statusDot(b?.status,'build')+'</button><button onclick="openService('+i+',\'deploy\',\'records\')">'+deployLabel+'</button></div>';}
-function context(){const r=ROWS[activeRow];return '<div class="svc-context"><strong>'+esc(r.name)+'</strong><span>'+esc(r.no)+'</span><span>模型版本：'+esc(r.ver)+'</span><span>'+esc(r.src==='new'?'后台新建':'科研成果提交')+'</span></div>';}
+function context(){const r=ROWS[activeRow];return '<div class="svc-context"><strong>'+esc(r.name)+'</strong><span>'+esc(r.no)+'</span><span>模型版本：'+esc(r.ver)+'</span><span>'+esc(recordSource(r))+'</span></div>';}
 function field(label,id,value,extra='',help=''){return '<div class="fld"><label for="'+id+'">'+label+'</label><input class="inp" id="'+id+'" value="'+esc(value)+'" '+extra+'>'+(help?'<p class="svc-help">'+help+'</p>':'')+'</div>';}
 function select(label,id,opts,extra=''){return '<div class="fld"><label for="'+id+'">'+label+'</label><select class="sel" id="'+id+'" '+extra+'>'+opts+'</select></div>';}
 function opt(v,t,sel){return '<option value="'+esc(v)+'"'+(sel?' selected':'')+'>'+esc(t||v)+'</option>';}
@@ -639,13 +670,24 @@ function unit(label,id,value,u,min=1,max=256){return '<div class="fld"><label fo
 function openService(i,mode,tab='config'){activeRow=i;svcMode=mode;svcTab=tab;returnFocus=document.activeElement;$('serviceMask').classList.add('open');document.body.style.overflow='hidden';drawService();$('serviceMask').querySelector('.x').focus();}
 function closeService(){$('serviceMask').classList.remove('open');document.body.style.overflow='';returnFocus?.focus();}
 function serviceTab(tab){svcTab=tab;drawService();}
+function applyServiceLock(){
+ const locked=modelLocked(ROWS[activeRow]);
+ if(!locked)return;
+ ['buildForm','deployForm'].forEach(id=>$(id)?.querySelectorAll('input,select,textarea,button:not(#mdOpenButton)').forEach(n=>n.disabled=true));
+ $('svcFooter').querySelectorAll('[type=submit]').forEach(n=>{n.disabled=true;n.title=modelLockMessage();});
+ $('svcBody').querySelectorAll('button[onclick]').forEach(n=>{if(/askStop|stopService|deployBuild|serviceTab\('config|openService.*'build'/.test(n.getAttribute('onclick'))){n.disabled=true;n.title=modelLockMessage();}});
+ if($('mdOpenButton'))$('mdOpenButton').textContent='查看使用说明';
+}
+
 function drawService(){const kind=svcMode==='build'?'构建':'部署';$('serviceTitle').textContent=kind+'模型';$('svcConfigTab').textContent=kind+'配置';$('svcRecordTab').textContent=kind+'记录';['Config','Record'].forEach((k,i)=>{const on=svcTab===(i?'records':'config');$('svc'+k+'Tab').classList.toggle('active',on);$('svc'+k+'Tab').setAttribute('aria-selected',on);});$('svcBody').innerHTML=context()+'<div id="svcError" class="svc-error" role="alert" hidden></div>'+(svcTab==='records'?recordsUI():svcMode==='build'?buildUI():deployUI());$('svcFooter').innerHTML='<button type="button" class="btn" onclick="closeService()">关闭</button>';
- if(svcTab==='config'){const r=ROWS[activeRow],s=state(activeRow);const busy=(svcMode==='build'?s.builds:s.deploys).some(x=>x.status==='running');const ready=r.done&&r.no!=='待填写'&&r.ver!=='—'&&(r.files||[]).length;
+ if(svcTab==='config'){const r=ROWS[activeRow],s=state(activeRow);const busy=(svcMode==='build'?s.builds:s.deploys).some(x=>x.status==='running');const ready=(r.files||[]).length;
  if(svcMode==='build')$('svcFooter').innerHTML+='<button type="submit" form="buildForm" class="btn primary" '+(!ready||busy?'disabled':'')+'>'+(busy?'构建中…':r.materialType==='image'?'导入并校验镜像':'开始构建')+'</button>';
- else $('svcFooter').innerHTML+='<button type="submit" form="deployForm" class="btn primary" '+(!r.done||!s.builds.some(b=>b.status==='success')||busy?'disabled':'')+'>'+(busy?'部署中…':s.active?'更新部署':'开始部署')+'</button>';
+ else $('svcFooter').innerHTML+='<button type="submit" form="deployForm" class="btn primary" '+(!s.builds.some(b=>b.status==='success')||busy?'disabled':'')+'>'+(busy?'部署中…':s.active?'更新部署':'开始部署')+'</button>';
  if(svcMode==='build'&&ready&&r.materialType!=='image')buildMethod();if(svcMode==='deploy'&&s.builds.some(b=>b.status==='success')){syncImage();syncGPU();}
- } }
-function buildUI(){const r=ROWS[activeRow],s=state(activeRow),img=r.materialType==='image';let block='';if(!r.done||r.no==='待填写'||r.ver==='—')block='<div class="svc-note">请先完善模型资料并保存，再进行构建。<a href="'+editUrl(r)+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r))+'">去完善资料 ›</a></div>';else if(!r.files.length)block='<div class="svc-note">尚未上传构建材料，请先在模型资料中补充文件或镜像。</div>';
+ }
+ applyServiceLock();
+ }
+function buildUI(){const r=ROWS[activeRow],s=state(activeRow),img=r.materialType==='image';let block='';if(!r.files.length)block='<div class="svc-note">尚未上传构建材料，请先在模型资料中补充文件或镜像。</div>';
  const tag=r.ver.replace(/^v/,'')+'-b'+String(s.builds.length+1).padStart(3,'0');
  return block+'<form id="buildForm" onsubmit="submitBuild(event)"><div class="sec-hd"><h3>构建材料</h3><span class="svc-muted">已关联 · '+(img?'镜像包':'模型文件')+'</span></div><div class="svc-files">'+(r.files.length?r.files.map(f=>'<span>▤ '+esc(f)+'</span>').join(''):'<span class="svc-muted">暂无材料</span>')+'</div><p class="svc-help">'+(r.src==='new'?'使用新建模型时上传的材料。':'使用该条成果记录已上传的材料。')+'</p><div class="sec-hd mt"><h3>'+(img?'镜像导入配置':'构建配置')+'</h3></div>'+
  (img?'<div class="svc-note ok">已有镜像将解包、校验并登记到平台镜像仓库，无需重复编译。</div><div class="grid-2">'+field('镜像包','bArchive',r.files[0]||'','readonly')+select('运行硬件<span class="req">*</span>','bHardware',opt('cpu','CPU')+opt('gpu','NVIDIA GPU'))+'</div>':
@@ -656,34 +698,34 @@ function buildMethod(){const docker=document.querySelector('[name=bMethod]:check
 function syncModelFiles(){const r=ROWS[activeRow],ext=$('bBase').value==='onnx'?/\.onnx$/i:/\.(pkl|joblib)$/i;const fs=r.files.filter(f=>ext.test(f));$('bModel').innerHTML=fs.length?fs.map(f=>opt(f)).join(''):opt('','无匹配文件，请使用 Dockerfile 构建');}
 function buildError(msg){$('svcError').hidden=false;$('svcError').textContent=msg;$('svcError').scrollIntoView({block:'nearest'});}
 function stamp(){return new Date().toLocaleString('sv-SE');}
-function submitBuild(e){e.preventDefault();const i=activeRow,r=ROWS[i],s=state(i);if(!r.done||!r.files.length)return buildError('请先完善资料并上传材料。');if(s.builds.some(x=>x.status==='running'))return;const tag=$('bTag').value.trim();if(s.builds.some(x=>x.status==='success'&&x.tag===tag))return buildError('该镜像版本已存在，请使用新的标签。');let kind=r.materialType==='image'?'镜像导入':document.querySelector('[name=bMethod]:checked').value==='template'?'模板构建':'Dockerfile 构建';if(kind==='模板构建'&&!$('bModel').value)return buildError('材料中未找到匹配的模型文件，请切换框架或使用 Dockerfile 构建。');
+function submitBuild(e){e.preventDefault();if(!modelMutationAllowed(ROWS[activeRow]))return;const i=activeRow,r=ROWS[i],s=state(i);if(!r.files.length)return buildError('请先上传构建材料。');if(s.builds.some(x=>x.status==='running'))return;const tag=$('bTag').value.trim();if(s.builds.some(x=>x.status==='success'&&x.tag===tag))return buildError('该镜像版本已存在，请使用新的标签。');let kind=r.materialType==='image'?'镜像导入':document.querySelector('[name=bMethod]:checked').value==='template'?'模板构建':'Dockerfile 构建';if(kind==='模板构建'&&!$('bModel').value)return buildError('材料中未找到匹配的模型文件，请切换框架或使用 Dockerfile 构建。');
  const job={id:'B-'+Date.now(),date:stamp(),tag,image:imageURI(r,tag),kind,status:'running',runtime:kind==='模板构建'?'cpu':$('bHardware').value,command:kind==='模板构建'?'python /opt/service/server.py':'',port:8000,files:[...r.files],config:Object.fromEntries(Array.from($('buildForm').querySelectorAll('input,select,textarea')).filter(n=>n.id&&!n.disabled).map(n=>[n.id,n.type==='checkbox'?n.checked:n.value])),logs:['[演示] 任务已提交，读取关联材料']};s.builds.unshift(job);persist();renderTable();serviceTab('records');simulate(i,'build',job);}
 function simulate(i,kind,job){const steps=kind==='build'?['校验关联文件与镜像格式','准备运行环境并生成镜像','镜像校验完成，已登记至平台仓库']:['分配推理资源并拉取镜像','启动服务实例','健康检查通过，服务已就绪'];let n=0;const timer=setInterval(()=>{if(job.status!=='running'){clearInterval(timer);return;}job.logs.push('[演示] '+steps[n++]);if(n===steps.length){job.status='success';if(kind==='deploy'){const s=state(i);if(s.active)s.active.status='replaced';s.active=job;}clearInterval(timer);}persist();renderTable();if($('serviceMask').classList.contains('open')&&activeRow===i&&svcMode===kind&&svcTab==='records')drawService();},850);}
-function deployUI(){const r=ROWS[activeRow],s=state(activeRow),built=s.builds.filter(b=>b.status==='success');if(!r.done)return '<div class="svc-note">请先完善模型资料，再构建并部署。</div>';if(!built.length)return '<div class="svc-empty">暂无可部署的镜像，请先完成构建。<br><button type="button" class="btn primary mt14" onclick="openService('+activeRow+',\'build\')">前往构建</button></div>';
+function deployUI(){const r=ROWS[activeRow],s=state(activeRow),built=s.builds.filter(b=>b.status==='success');if(!built.length)return '<div class="svc-empty">暂无可部署的镜像，请先完成构建。<br><button type="button" class="btn primary mt14" onclick="openService('+activeRow+',\'build\')">前往构建</button></div>';
  const a=s.active,c=a||s.deploys.find(d=>d.service)||{};return (a?runtimeUI(a):'')+'<form id="deployForm" onsubmit="submitDeploy(event)"><div class="sec-hd"><h3>服务配置</h3></div><div class="grid-2">'+field('服务名称<span class="req">*</span>','dName',c.service||r.no.toLowerCase()+'-service','required pattern="[a-z][a-z0-9\\x2D]{2,49}" '+(a?'readonly':''),'3–50 位小写字母、数字或连字符。')+select('部署镜像<span class="req">*</span>','dImage',built.map((b,j)=>opt(b.id,b.tag+' · '+b.kind,j===0)).join(''),'onchange="syncImage()"')+field('镜像地址','dURI','','readonly class="svc-code"')+select('部署资源池','dPool',opt('inference','推理算力池 · x86_64'))+'</div><div class="grid-2 mt14">'+field('启动命令','dCommand',c.command||'','placeholder="留空使用镜像默认 CMD / ENTRYPOINT"','HTTP 服务需监听 0.0.0.0，与服务端口一致。')+unit('服务端口<span class="req">*</span>','dPort',c.port||8000,'端口',1,65535)+'</div><div class="sec-hd mt"><h3>实例资源</h3><span class="svc-muted">以下配置均为单副本规格</span></div><div class="grid-3">'+unit('CPU','dCPU',c.cpu||4,'核',1,128)+unit('内存','dMem',c.mem||8,'GiB',1,1024)+unit('临时存储','dDisk',c.disk||20,'GiB',10,2048)+select('GPU 类型','dGPU',opt('none','不使用 GPU')+opt('t4','NVIDIA T4 · 16 GiB')+opt('a100','NVIDIA A100 · 40 GiB'),'onchange="syncGPU()"')+unit('GPU 数量','dCards',0,'卡',0,8)+unit('副本数量','dReplicas',c.replicas||1,'个',1,10)+'</div><p class="svc-help" id="resourceTotal"></p><details class="svc-advanced"><summary>高级配置 · 健康检查、环境变量与调用设置</summary><div><div class="grid-2">'+select('健康检查','dHealth',opt('http','HTTP GET')+opt('tcp','TCP 端口'),'onchange="syncHealth()"')+field('健康检查路径','dHealthPath','/health','required pattern="/.*"')+unit('启动等待时间','dWait',120,'秒',10,1800)+unit('请求超时','dRequestTimeout',60,'秒',1,600)+'</div><p class="svc-help">通过健康检查后才接入请求；未实现 HTTP 检查接口的镜像可选择 TCP 检查。</p><div class="fld mt14"><label>环境变量</label><div id="envRows"></div><button type="button" class="lnk" onclick="addEnv()">＋ 添加变量</button></div><div class="grid-2 mt14">'+field('访问范围','dAccess','平台内部','readonly')+field('调用鉴权','dAuth','平台统一鉴权','readonly')+'</div></div></details>'+(a?'<div class="svc-confirm"><label><input type="checkbox" id="dConfirm" required>确认更新当前服务。新实例就绪后切换流量，失败时保留原服务。</label></div>':'')+'</form>';
 }
 function syncImage(){const b=state(activeRow).builds.find(x=>x.id===$('dImage')?.value);if(!b)return;$('dURI').value=b.image;$('dCommand').value=b.command||'';$('dPort').value=b.port||8000;$('dGPU').value=b.runtime==='gpu'?'t4':'none';syncGPU();}
 function syncGPU(){const gpu=$('dGPU').value!=='none';$('dCards').disabled=!gpu;$('dCards').min=gpu?1:0;$('dCards').value=gpu?Math.max(1,Number($('dCards').value)):0;resourceTotal();}
 function syncHealth(){$('dHealthPath').disabled=$('dHealth').value==='tcp';$('dHealthPath').required=!$('dHealthPath').disabled;}
 function resourceTotal(){const n=Number($('dReplicas')?.value||1);$('resourceTotal').textContent='合计资源：'+Number($('dCPU').value)*n+' 核 CPU / '+Number($('dMem').value)*n+' GiB 内存 / '+Number($('dCards').value)*n+' 张 GPU';}
-function addEnv(){const row=document.createElement('div');row.className='svc-env';row.innerHTML='<input class="inp" aria-label="变量名" required pattern="[A-Za-z_][A-Za-z0-9_]*" placeholder="变量名"><input class="inp" aria-label="变量值" required placeholder="变量值"><button type="button" class="lnk" onclick="this.parentElement.remove()">删除</button>';$('envRows').append(row);}
-function submitDeploy(e){e.preventDefault();const i=activeRow,r=ROWS[i],s=state(i);if(s.deploys.some(x=>x.status==='running'))return;const b=s.builds.find(x=>x.id===$('dImage').value&&x.status==='success');if(!b)return buildError('请选择当前模型版本构建成功的镜像。');if(b.runtime==='gpu'&&$('dGPU').value==='none')return buildError('当前镜像需要 GPU 运行环境，请配置 GPU。');const env=Array.from(document.querySelectorAll('.svc-env')).map(row=>Array.from(row.querySelectorAll('input')).map(n=>n.value));if(new Set(env.map(x=>x[0])).size!==env.length)return buildError('环境变量名不可重复。');const form=$('deployForm');const config=Object.fromEntries(Array.from(form.querySelectorAll('input,select')).filter(n=>n.id).map(n=>[n.id,n.type==='checkbox'?n.checked:n.value]));const job={id:'D-'+Date.now(),date:stamp(),status:'running',image:b.image,tag:b.tag,service:$('dName').value.trim(),cpu:+$('dCPU').value,mem:+$('dMem').value,gpu:+$('dCards').value,disk:+$('dDisk').value,replicas:+$('dReplicas').value,port:+$('dPort').value,command:$('dCommand').value,config,env,logs:['[演示] 部署任务已提交，关联镜像 '+b.tag]};s.deploys.unshift(job);persist();renderTable();serviceTab('records');simulate(i,'deploy',job);}
+function addEnv(){if(!modelMutationAllowed(ROWS[activeRow]))return;const row=document.createElement('div');row.className='svc-env';row.innerHTML='<input class="inp" aria-label="变量名" required pattern="[A-Za-z_][A-Za-z0-9_]*" placeholder="变量名"><input class="inp" aria-label="变量值" required placeholder="变量值"><button type="button" class="lnk" onclick="this.parentElement.remove()">删除</button>';$('envRows').append(row);}
+function submitDeploy(e){e.preventDefault();if(!modelMutationAllowed(ROWS[activeRow]))return;const i=activeRow,r=ROWS[i],s=state(i);if(s.deploys.some(x=>x.status==='running'))return;const b=s.builds.find(x=>x.id===$('dImage').value&&x.status==='success');if(!b)return buildError('请选择当前模型版本构建成功的镜像。');if(b.runtime==='gpu'&&$('dGPU').value==='none')return buildError('当前镜像需要 GPU 运行环境，请配置 GPU。');const env=Array.from(document.querySelectorAll('.svc-env')).map(row=>Array.from(row.querySelectorAll('input')).map(n=>n.value));if(new Set(env.map(x=>x[0])).size!==env.length)return buildError('环境变量名不可重复。');const form=$('deployForm');const config=Object.fromEntries(Array.from(form.querySelectorAll('input,select')).filter(n=>n.id).map(n=>[n.id,n.type==='checkbox'?n.checked:n.value]));const job={id:'D-'+Date.now(),date:stamp(),status:'running',image:b.image,tag:b.tag,service:$('dName').value.trim(),cpu:+$('dCPU').value,mem:+$('dMem').value,gpu:+$('dCards').value,disk:+$('dDisk').value,replicas:+$('dReplicas').value,port:+$('dPort').value,command:$('dCommand').value,config,env,logs:['[演示] 部署任务已提交，关联镜像 '+b.tag]};s.deploys.unshift(job);persist();renderTable();serviceTab('records');simulate(i,'deploy',job);}
 function runtimeUI(a){return '<div class="svc-runtime"><div class="svc-history-head"><strong>'+esc(a.service)+'</strong>'+dot('ok','运行中')+'</div><p class="svc-help">当前镜像：'+esc(a.tag)+'　｜　副本 '+a.replicas+' / '+a.replicas+'　｜　'+a.cpu+' 核 / '+a.mem+' GiB</p><div class="svc-log">POST /api/model-services/'+esc(a.service)+'/predict<br>Authorization: Bearer &lt;平台授权令牌&gt;</div><div class="actions"><button type="button" class="lnk" onclick="testService()">调用验证</button><button type="button" class="lnk" onclick="askStop()">停止服务</button></div><div id="runtimeFeedback"></div></div>';}
 function testService(){$('runtimeFeedback').innerHTML='<div class="svc-log">[模拟调用] HTTP 200 · 128 ms\n当前服务连接正常。正式接入时需按模型输入规范提交样例数据。</div>';}
-function askStop(){if(state(activeRow).deploys.some(d=>d.status==='running'))return toast('请等待部署任务结束后再停止服务');$('runtimeFeedback').innerHTML='<div class="svc-confirm">停止后将释放运行资源，接口暂不可用。<div class="actions"><button type="button" class="btn sm" onclick="this.closest(\'.svc-confirm\').remove()">取消</button><button type="button" class="btn primary sm" onclick="stopService()">确认停止</button></div></div>';}
+function askStop(){if(!modelMutationAllowed(ROWS[activeRow]))return;if(state(activeRow).deploys.some(d=>d.status==='running'))return toast('请等待部署任务结束后再停止服务');$('runtimeFeedback').innerHTML='<div class="svc-confirm">停止后将释放运行资源，接口暂不可用。<div class="actions"><button type="button" class="btn sm" onclick="this.closest(\'.svc-confirm\').remove()">取消</button><button type="button" class="btn primary sm" onclick="stopService()">确认停止</button></div></div>';}
 function recordsUI(){const s=state(activeRow),build=svcMode==='build',jobs=build?s.builds:s.deploys;return (!build&&s.active?runtimeUI(s.active):'')+(!jobs.length?'<div class="svc-empty">暂无'+(build?'构建':'部署')+'记录</div>':jobs.map((j,k)=>'<div class="svc-history"><div class="svc-history-head"><strong>'+esc(j.id)+'</strong>'+dot(j.status==='success'?'ok':j.status==='running'?'warn':j.status==='failed'?'no':'gray',({success:build?'构建成功':'部署成功',running:build?'构建中':'部署中',failed:build?'构建失败':'部署失败',replaced:'已替换',stopped:'已停止'})[j.status])+'</div><p class="svc-help">'+esc(j.date)+'　·　张明　·　镜像 '+esc(j.tag)+'　'+esc(j.kind||j.service)+'</p>'+(j.image?'<p class="svc-help" style="overflow-wrap:anywhere">'+esc(j.image)+'</p>':'')+'<details '+(k===0?'open':'')+'><summary class="svc-help" style="cursor:pointer">任务日志与配置</summary><pre class="svc-log">'+esc(j.logs.join('\n'))+'</pre>'+(j.config?'<pre class="svc-log">'+esc(Object.entries(j.config).filter(([k])=>!['bDockerText','bDeps'].includes(k)).map(([k,v])=>(configNames[k]||k)+'：'+v).join('\n'))+'</pre>':'')+'</details>'+(build&&j.status==='success'?'<button type="button" class="lnk mt14" onclick="deployBuild(\''+esc(j.id)+'\')">使用此镜像部署 →</button>':'')+(j.status==='failed'?'<button type="button" class="lnk mt14" onclick="serviceTab(\'config\')">调整配置并重试</button>':'')+'</div>').join(''));}
-function deployBuild(id){svcMode='deploy';svcTab='config';drawService();$('dImage').value=id;syncImage();}
+function deployBuild(id){if(!modelMutationAllowed(ROWS[activeRow]))return;svcMode='deploy';svcTab='config';drawService();$('dImage').value=id;syncImage();}
 const configNames={bArchive:'镜像包',bHardware:'运行硬件',bBase:'基础环境',bModel:'模型文件',bContext:'构建上下文',bTag:'镜像版本',bRepo:'镜像仓库',bResource:'构建资源',bTimeout:'超时（分钟）',bCache:'复用缓存',bRemark:'备注',dName:'服务名称',dImage:'构建任务',dURI:'部署镜像',dPool:'资源池',dCommand:'启动命令',dPort:'端口',dCPU:'CPU（核）',dMem:'内存（GiB）',dDisk:'存储（GiB）',dGPU:'GPU 类型',dCards:'GPU 数量',dReplicas:'副本数',dHealth:'健康检查方式',dHealthPath:'检查路径',dWait:'启动等待（秒）',dRequestTimeout:'请求超时（秒）',dAccess:'访问范围',dAuth:'鉴权',dConfirm:'确认更新'};
 $('serviceMask').addEventListener('click',e=>{if(e.target===$('serviceMask'))closeService();});
 document.addEventListener('input',e=>{if(['dCPU','dMem','dCards','dReplicas'].includes(e.target.id))resourceTotal();});
-document.addEventListener('keydown',e=>{if(!$('serviceMask').classList.contains('open'))return;if(e.key==='Escape')closeService();if(e.key==='Tab'){const els=Array.from($('serviceMask').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],summary')).filter(n=>n.getClientRects().length);const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+document.addEventListener('keydown',e=>{if($('mdDialog')?.open||!$('serviceMask').classList.contains('open'))return;if(e.key==='Escape')closeService();if(e.key==='Tab'){const els=Array.from($('serviceMask').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],summary')).filter(n=>n.getClientRects().length);const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
 function newMaterialMode(){const img=document.querySelector('[name=newMaterialType]:checked').value==='image';$('newFiles').accept=img?'.tar,.tar.gz,.tgz':'.pkl,.joblib,.onnx,.pt,.pth,.py,.json,.yaml,.yml,.txt,.csv,.pdf,.zip,.tar.gz,.tgz';$('newFiles').multiple=!img;$('newFiles').value='';$('newFileSummary').textContent='尚未选择文件';$('newMaterialHelp').textContent=img?'上传 Docker / OCI 镜像包（.tar / .tar.gz / .tgz）。保存后通过构建操作导入并校验。':'上传模型文件、推理代码和依赖清单，可选择多个文件或一个源码压缩包。';}
 function newFilesChanged(){const fs=Array.from($('newFiles').files);const img=document.querySelector('[name=newMaterialType]:checked').value==='image';if(img&&fs.some(f=>!/(\.tar|\.tar\.gz|\.tgz)$/i.test(f.name))){$('newFiles').value='';$('newFileSummary').textContent='镜像仅支持 .tar / .tar.gz / .tgz';return;}$('newFileSummary').textContent=fs.map(f=>f.name+' ('+(f.size/1024/1024).toFixed(2)+' MB)').join('、')||'尚未选择文件';}
-function saveNewModel(go){if([...$('newFiles').files].some(f=>!f.size||!/(\.tar|\.tar\.gz|\.tgz)$/i.test(f.name))){toast('请选择有效的非空镜像包');return;}const no=$('newNo').value.trim(),name=$('newName').value.trim(),ver=$('newVer').value.trim(),files=Array.from($('newFiles').files);if(!no||!name||!ver)return toast('请填写模型名称和版本号');if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(no))return toast('模型编号请使用字母、数字、连字符或下划线');if(!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(ver))return toast('版本号请使用字母、数字、点或连字符');if(!files.length)return toast('请上传镜像包');if(ROWS.some(r=>r.no===no&&r.ver===ver))return toast('相同模型编号和版本已存在');const r={key:'new-'+Date.now(),no,name,ver,files:files.map(f=>f.name),materialType:document.querySelector('[name=newMaterialType]:checked').value,who:'张明',d:stamp().slice(0,10),t:stamp().slice(11,16),done:false,up:'none',src:'new'};ROWS.push(r);persist();TOTAL=ROWS.length;currentPage=Math.ceil(ROWS.length/PS);renderTable();closeModal();if(go)location.href=EDIT_NEW+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r));else toast('模型及材料已保存，请完善详情资料后构建（原型演示）');}
-// Disable build for incomplete records while retaining its visible row action.
+function saveNewModel(go){if([...$('newFiles').files].some(f=>!f.size||!/(\.tar|\.tar\.gz|\.tgz)$/i.test(f.name))){toast('请选择有效的非空镜像包');return;}const no=$('newNo').value.trim(),name=$('newName').value.trim(),ver=$('newVer').value.trim(),files=Array.from($('newFiles').files);if(!no||!name||!ver)return toast('请填写模型名称和版本号');if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(no))return toast('模型编号请使用字母、数字、连字符或下划线');if(!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(ver))return toast('版本号请使用字母、数字、点或连字符');if(!files.length)return toast('请上传镜像包');if(ROWS.some(r=>r.no===no&&r.ver===ver))return toast('相同模型编号和版本已存在');const r={key:'new-'+Date.now(),no,name,ver,files:files.map(f=>f.name),materialType:document.querySelector('[name=newMaterialType]:checked').value,who:'张明',d:stamp().slice(0,10),t:stamp().slice(11,16),up:'none',src:'new'};ROWS.push(r);persist();TOTAL=ROWS.length;currentPage=Math.ceil(ROWS.length/PS);renderTable();closeModal();if(go)location.href=EDIT_NEW+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r));else toast('模型及材料已保存（原型演示）');}
+// Keep record links and pagination independent of display-material completeness.
 let currentPage=1;
 const baseRenderTable=renderTable;
-renderTable=function(){baseRenderTable();Array.from($('tbody').rows).forEach((tr,i)=>{const r=ROWS[i];const b=tr.querySelector('.ops button');if(b&&(!r.done||r.no==='待填写'||r.ver==='—')){b.disabled=true;b.style.opacity='.4';b.style.cursor='not-allowed';b.title='请先完善模型资料';}tr.querySelectorAll('.ops a[href$=".html"]').forEach(a=>{a.href=a.getAttribute('href')+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r));});});
+renderTable=function(){baseRenderTable();Array.from($('tbody').rows).forEach((tr,i)=>{const r=ROWS[i];tr.querySelectorAll('.ops a[href$=".html"]').forEach(a=>{a.href=a.getAttribute('href')+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r));});});
  const total=ROWS.length,pages=Math.max(1,Math.ceil(total/PS));currentPage=Math.min(currentPage,pages);
  Array.from($('tbody').rows).forEach((tr,i)=>tr.hidden=i<(currentPage-1)*PS||i>=currentPage*PS);
  $('pgTotal').textContent='共 '+total+' 条';
@@ -821,7 +863,7 @@ if(f==='后台-审批中心.html'){
 }
 if(f==='后台-模型管理.html'){
  // The existing build and deploy flow remains authoritative.
- let oldph=window.ph;window.ph=(name,el=PX.last)=>{if(/上架|下架|删除/.test(name)){let tr=el.closest('tr'),txt=tr?.innerText||'',r=ROWS[tr.rowIndex-1];if(!r)return;PX.confirm(name,r.name,()=>{if(name.includes('删除')){let removed=PX.get(PX.key+':deleted',[]);removed.push(r.key);PX.put(PX.key+':deleted',removed);ROWS.splice(ROWS.indexOf(r),1)}else{if(name.includes('上架')&&!r.done){toast('请先完善模型资料');return}r.up=name.includes('下架')?'off':'on'}PX.put(PX.key+':rows',ROWS);renderTable();persist();PX.audit(name,r.name)});return}oldph(name,el)};
+ let oldph=window.ph;window.ph=(name,el=PX.last)=>{if(/上架|下架|删除/.test(name)){let tr=el.closest('tr'),txt=tr?.innerText||'',r=ROWS[tr.rowIndex-1];if(!r)return;PX.confirm(name,r.name,()=>{if(name.includes('删除')){let removed=PX.get(PX.key+':deleted',[]);removed.push(r.key);PX.put(PX.key+':deleted',removed);ROWS.splice(ROWS.indexOf(r),1)}else{r.up=name.includes('下架')?'off':'on'}PX.put(PX.key+':rows',ROWS);renderTable();persist();PX.audit(name,r.name)});return}oldph(name,el)};
  let stored=PX.get(PX.key+':rows',null);if(stored)stored.forEach(s=>{let r=ROWS.find(x=>x.key===s.key);if(r)r.up=s.up});let removed=PX.get(PX.key+':deleted',[]);ROWS=ROWS.filter(r=>!removed.includes(r.key));renderTable();
  const ps=document.querySelector('.pgsel');if(ps&&ps.tagName!=='SELECT'){ps.removeAttribute('onclick');ps.innerHTML='<select class="px-size"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option></select>';ps.querySelector('select').onchange=e=>{PX.paginate(1,+e.target.value)}}
 }
@@ -932,19 +974,43 @@ persist=function(){persistModelBeforeSharing();syncSharedInterfaces();};
 syncSharedInterfaces();
 
 </script>
+<dialog class="md-dialog" id="mdDialog" aria-labelledby="mdTitle">
+  <form id="mdForm" onsubmit="mdSave(event)" novalidate>
+    <div class="modal-hd"><div><h2 id="mdTitle">接口使用说明</h2><p class="svc-help" id="mdContext"></p></div><button type="button" class="x" onclick="mdClose()" aria-label="关闭接口使用说明">✕</button></div>
+    <div class="modal-bd" id="mdBody"></div>
+    <div class="modal-ft"><button type="button" class="btn" onclick="mdClose()">取消</button><button type="submit" class="btn primary">保存并返回</button></div>
+  </form>
+</dialog>
 <script>
 // Usage documentation belongs to the model deployment; capability sharing consumes it read-only.
-function mdDoc(){const s=state(activeRow);return s.active?.interfaceDoc||s.deploys.find(d=>d.interfaceDoc)?.interfaceDoc||{usage:'',content:'JSON',inputs:[],outputs:[],example:''};}
+const mdDrafts=new Map();
+let mdEditingKey=null,mdReturnFocus=null;
+function mdDoc(){const r=ROWS[activeRow],s=state(activeRow);return (!modelLocked(r)&&mdDrafts.get(r.key))||s.active?.interfaceDoc||s.deploys.find(d=>d.interfaceDoc)?.interfaceDoc||{usage:'',content:'JSON',inputs:[],outputs:[],example:''};}
 function mdParam(p={},input=true){return '<tr><td><input class="inp" data-md="name" aria-label="参数名称" value="'+esc(p.name||'')+'" required></td><td><select class="inp" data-md="type" aria-label="参数类型">'+['string','number','integer','boolean','object','array',...(input?['file']:[])].map(t=>opt(t,t,t===(p.type||'string'))).join('')+'</select></td>'+(input?'<td><input type="checkbox" data-md="required" aria-label="必填" '+(p.required?'checked':'')+'></td>':'')+'<td><input class="inp" data-md="description" aria-label="参数说明" value="'+esc(p.description||'')+'"></td><td><button type="button" class="lnk" onclick="this.closest(\'tr\').remove()">删除</button></td></tr>';}
-function mdTable(id,rows,input){return '<div style="overflow-x:auto"><table class="tbl md-table"><thead><tr><th>参数名称</th><th>类型</th>'+(input?'<th>必填</th>':'')+'<th>参数说明</th><th>操作</th></tr></thead><tbody id="'+id+'">'+rows.map(p=>mdParam(p,input)).join('')+'</tbody></table></div><button type="button" class="lnk mt14" onclick="mdAdd(\''+id+'\','+input+')">＋ 添加'+(input?'入参':'出参')+'</button>';}
-function mdAdd(id,input){$(id).insertAdjacentHTML('beforeend',mdParam({},input));}
-function mdUI(){const d=mdDoc();return '<section class="md-doc"><div class="sec-hd mt"><h3>接口使用说明</h3></div><div class="fld"><label for="mdUsage">使用说明</label><textarea class="inp" id="mdUsage" style="height:88px;padding:10px">'+esc(d.usage)+'</textarea></div><div class="fld mt14"><label for="mdContent">内容类型</label><select id="mdContent" class="inp">'+opt('JSON','JSON',d.content==='JSON')+opt('form-data','form-data',d.content==='form-data')+'</select></div><div class="sec-hd mt"><h3>入参</h3></div>'+mdTable('mdInputs',d.inputs||[],true)+'<div class="sec-hd mt"><h3>出参</h3></div>'+mdTable('mdOutputs',d.outputs||[],false)+'<div class="fld mt14"><label for="mdExample">返回示例</label><textarea id="mdExample" class="inp" style="height:88px;padding:10px">'+esc(d.example||'')+'</textarea></div>'+(state(activeRow).active?'<button type="button" class="btn mt14" onclick="mdSave()">保存使用说明</button>':'')+'<p id="mdError" class="svc-error" hidden></p></section>';}
-function mdRead(){const rows=id=>[...$(id).querySelectorAll('tr')].map(tr=>Object.fromEntries([...tr.querySelectorAll('[data-md]')].map(n=>[n.dataset.md,n.type==='checkbox'?n.checked:n.value.trim()])));const doc={usage:$('mdUsage').value.trim(),content:$('mdContent').value,inputs:rows('mdInputs').map(p=>({...p,position:'Body'})),outputs:rows('mdOutputs'),example:$('mdExample').value.trim()};let error='';if(!doc.usage)error='请填写使用说明';for(const group of [doc.inputs,doc.outputs]){if(group.some(p=>!p.name))error='请填写参数名称';if(new Set(group.map(p=>p.name)).size!==group.length)error='参数名称不可重复';}if(doc.content!=='form-data'&&doc.inputs.some(p=>p.type==='file'))error='文件入参需要选择 form-data';if(error){$('mdError').hidden=false;$('mdError').textContent=error;$('mdError').scrollIntoView({block:'nearest'});return null;}return doc;}
-function mdSave(){const doc=mdRead(),s=state(activeRow);if(!doc||!s.active)return;s.active.interfaceDoc=doc;const same=s.deploys.find(d=>d.id===s.active.id);if(same)same.interfaceDoc=doc;persist();toast('接口使用说明已保存');}
+function mdTable(id,rows,input){return '<div class="md-param-scroll"><table class="tbl md-table"><colgroup><col style="width:24%"><col style="width:18%">'+(input?'<col style="width:64px">':'')+'<col><col style="width:64px"></colgroup><thead><tr><th>参数名称</th><th>类型</th>'+(input?'<th>必填</th>':'')+'<th>参数说明</th><th>操作</th></tr></thead><tbody id="'+id+'">'+rows.map(p=>mdParam(p,input)).join('')+'</tbody></table></div><button type="button" class="lnk mt14" onclick="mdAdd(\''+id+'\','+input+')">＋ 添加'+(input?'入参':'出参')+'</button>';}
+function mdAdd(id,input){if(!modelMutationAllowed(ROWS[activeRow]))return;const body=$(id);body.insertAdjacentHTML('beforeend',mdParam({},input));body.lastElementChild.querySelector('input').focus();}
+function mdEntry(){const d=mdDoc(),summary=d.usage?d.content+' · 入参 '+(d.inputs||[]).length+' 项 · 出参 '+(d.outputs||[]).length+' 项':'';return '<section class="md-entry" id="mdEntry"><div><h3>接口使用说明</h3>'+(summary?'<p class="svc-help">'+esc(summary)+'</p>':'')+'</div><button type="button" class="btn sm" id="mdOpenButton" aria-haspopup="dialog" aria-controls="mdDialog" onclick="mdOpen()">'+(modelLocked(ROWS[activeRow])?'查看使用说明':'编辑使用说明')+'</button></section>';}
+function mdUI(){const d=mdDoc();return '<div class="fld"><label for="mdUsage">使用说明<span class="req">*</span></label><textarea class="inp" id="mdUsage">'+esc(d.usage)+'</textarea></div><div class="fld mt14"><label for="mdContent">内容类型</label><select id="mdContent" class="inp">'+opt('JSON','JSON',d.content==='JSON')+opt('form-data','form-data',d.content==='form-data')+'</select></div><div class="sec-hd mt"><h3>入参</h3></div>'+mdTable('mdInputs',d.inputs||[],true)+'<div class="sec-hd mt"><h3>出参</h3></div>'+mdTable('mdOutputs',d.outputs||[],false)+'<div class="fld mt14"><label for="mdExample">返回示例</label><textarea id="mdExample" class="inp svc-code">'+esc(d.example||'')+'</textarea></div><p id="mdError" class="svc-error" role="alert" hidden></p>';}
+function mdOpen(){if($('mdDialog').open)return;mdEditingKey=ROWS[activeRow].key;mdReturnFocus=document.activeElement;$('mdContext').textContent=ROWS[activeRow].name+' · '+ROWS[activeRow].ver;$('mdBody').innerHTML=mdUI();applyMdLock();$('mdDialog').showModal();(modelLocked(ROWS[activeRow])?$('mdDialog').querySelector('.x'):$('mdUsage')).focus();}
+
+function applyMdLock(){
+ const locked=modelLocked(ROWS[activeRow]);
+ $('mdBody').querySelectorAll('input,select,textarea,button').forEach(n=>n.disabled=locked);
+ $('mdDialog').querySelector('[type=submit]').hidden=locked;
+ const cancel=$('mdDialog').querySelector('.modal-ft button[type=button]');cancel.textContent=locked?'关闭':'取消';
+}
+
+function mdClose(){if(!$('mdDialog').open)return;$('mdDialog').close();$('mdBody').replaceChildren();mdEditingKey=null;const focus=$('mdOpenButton')||mdReturnFocus;if(focus?.isConnected)focus.focus();}
+function mdRead(){const rows=id=>[...$(id).querySelectorAll('tr')].map(tr=>Object.fromEntries([...tr.querySelectorAll('[data-md]')].map(n=>[n.dataset.md,n.type==='checkbox'?n.checked:n.value.trim()])));return {usage:$('mdUsage').value.trim(),content:$('mdContent').value,inputs:rows('mdInputs').map(p=>({...p,position:'Body'})),outputs:rows('mdOutputs'),example:$('mdExample').value.trim()};}
+function mdValidate(doc){let error='';if(!doc.usage)error='请填写使用说明';for(const group of [doc.inputs||[],doc.outputs||[]]){if(group.some(p=>!p.name))error='请填写参数名称';if(new Set(group.map(p=>p.name)).size!==group.length)error='参数名称不可重复';}if(doc.content!=='form-data'&&(doc.inputs||[]).some(p=>p.type==='file'))error='文件入参需要选择 form-data';return error;}
+function mdShowError(error){$('mdError').hidden=false;$('mdError').textContent=error;$('mdError').scrollIntoView({block:'nearest'});}
+function mdRefreshEntry(){const entry=$('mdEntry');if(entry)entry.outerHTML=mdEntry();}
+function mdSave(e){e?.preventDefault();if(!modelMutationAllowed(ROWS[activeRow]))return;if(mdEditingKey!==ROWS[activeRow].key)return;const doc=mdRead(),error=mdValidate(doc);if(error)return mdShowError(error);const s=state(activeRow);mdDrafts.set(mdEditingKey,doc);if(s.active){s.active.interfaceDoc=doc;const same=s.deploys.find(d=>d.id===s.active.id);if(same)same.interfaceDoc=doc;persist();}mdRefreshEntry();mdClose();toast('接口使用说明已更新');}
+$('mdDialog').addEventListener('cancel',e=>{e.preventDefault();mdClose();});
 const mdOriginalDeployUI=deployUI;
-deployUI=function(){const content=mdOriginalDeployUI();return content.includes('id="deployForm"')?content.replace('</form>',mdUI()+'</form>'):content;};
+deployUI=function(){const content=mdOriginalDeployUI();return content.includes('id="deployForm"')?content.replace('</form>',mdEntry()+'</form>'):content;};
 const mdOriginalSubmitDeploy=submitDeploy;
-submitDeploy=function(e){e.preventDefault();const doc=mdRead();if(!doc)return;const s=state(activeRow),previous=s.deploys[0]?.id;mdOriginalSubmitDeploy(e);if(s.deploys[0]?.id!==previous){s.deploys[0].interfaceDoc=doc;persist();}};
+submitDeploy=function(e){e.preventDefault();if(!modelMutationAllowed(ROWS[activeRow]))return;const doc=mdDoc(),error=mdValidate(doc);if(error){mdOpen();mdShowError(error);return;}const s=state(activeRow),previous=s.deploys[0]?.id;mdOriginalSubmitDeploy(e);if(s.deploys[0]?.id!==previous){s.deploys[0].interfaceDoc=doc;persist();}};
 // Query links may have opened the deployment dialog before this extension loaded.
 if($('serviceMask').classList.contains('open')&&svcMode==='deploy'&&svcTab==='config')drawService();
 
@@ -952,37 +1018,45 @@ if($('serviceMask').classList.contains('open')&&svcMode==='deploy'&&svcTab==='co
 <dialog class="ma-dialog" id="maDialog" aria-labelledby="maTitle"><div class="modal-hd"><h2 id="maTitle"></h2><button class="x" aria-label="关闭" onclick="maClose()">×</button></div><div class="modal-bd" id="maBody"></div><div class="modal-ft" id="maFoot"></div></dialog><script>
 // Model records own portal presentation; services bind to a record by key (model ID + version).
 const MODEL_CATALOG='bdh-model-catalog-v1';
-const apiDemo={key:'new-api-disease-demo',no:'MDL-EXT-001',name:'作物病害识别模型（接口接入示例）',ver:'v1.0',access:'api',files:[],who:'张明',d:'2026-10-08',t:'10:00',done:true,up:'none',src:'new',owner:'合作机构（示例）',modelType:'农业专业模型',business:'病虫害识别',crop:'水稻',summary:'通过已登记的外部模型接口识别作物病害。',intro:'上传作物图像后获得识别结果，用于辅助病害识别。',inputSummary:'作物图像',outputSummary:'病害名称、置信度',cases:'',origin:'合作',cover:''};
+const apiDemo={key:'new-api-disease-demo',no:'MDL-EXT-001',name:'作物病害识别模型（接口接入示例）',ver:'v1.0',access:'api',files:[],who:'张明',d:'2026-10-08',t:'10:00',up:'none',src:'new',owner:'合作机构（示例）',modelType:'农业专业模型',business:'病虫害识别',crop:'水稻',summary:'通过已登记的外部模型接口识别作物病害。',intro:'上传作物图像后获得识别结果，用于辅助病害识别。',inputSummary:'作物图像',outputSummary:'病害名称、置信度',cases:'',origin:'合作',cover:''};
 const deletedModels=PX.get(PX.key+':deleted',[]);
 if(!ROWS.some(r=>r.key===apiDemo.key)&&!deletedModels.includes(apiDemo.key))ROWS.push({...apiDemo});
 ROWS.forEach(r=>{r.access=r.access||'platform';});
-function syncModelCatalog(){try{localStorage.setItem(MODEL_CATALOG,JSON.stringify(ROWS.map(r=>({key:r.key,no:r.no,name:r.name,ver:r.ver,access:r.access||'platform',done:r.done,up:r.up,summary:r.summary||'',owner:r.owner||''}))));}catch(e){}}
+function syncModelCatalog(){try{localStorage.setItem(MODEL_CATALOG,JSON.stringify(ROWS.map(r=>({key:r.key,no:r.no,name:r.name,ver:r.ver,access:r.access||'platform',src:r.src,up:r.up,summary:r.summary||'',owner:r.owner||''}))));}catch(e){}}
 const persistBeforeAccess=persist;
 persist=function(){ROWS.forEach(r=>r.access=r.access||'platform');const keys=new Set(ROWS.map(r=>r.key));Object.keys(serviceData).forEach(k=>{if(!keys.has(k))delete serviceData[k];});persistBeforeAccess();syncModelCatalog();};
 let maEditing=null,maCover='',maDirty=false;
 function maField(label,id,value='',required=false){return '<div class="fld"><label for="'+id+'">'+label+(required?'<span class="req">*</span>':'')+'</label><input class="inp" id="'+id+'" value="'+esc(value)+'" '+(required?'required':'')+'></div>';}
 function maText(label,id,value='',required=false){return '<div class="fld mt14"><label for="'+id+'">'+label+(required?'<span class="req">*</span>':'')+'</label><textarea class="inp" id="'+id+'" '+(required?'required':'')+'>'+esc(value)+'</textarea></div>';}
 function maSelect(label,id,values,value){return '<div class="fld"><label for="'+id+'">'+label+'</label><select class="inp" id="'+id+'">'+values.map(x=>opt(x,x,x===value)).join('')+'</select></div>';}
-function maOpen(key='',view=false){const r=ROWS.find(r=>r.key===key)||{no:'',name:'',ver:'v1.0',access:'api'};maEditing=key||null;maCover=r.cover||'';maDirty=false;$('maTitle').textContent=view?'模型展示资料':key?'编辑接口接入模型':'新建模型';$('maBody').innerHTML='<form id="maForm" onsubmit="maSave(event,true)">'+(key?'<p class="svc-help">接入方式：接口接入</p>':'<div class="fld"><label for="maAccess">接入方式</label><select class="inp" id="maAccess" onchange="maSwitch(this.value)"><option value="api">接口接入</option><option value="platform">平台部署</option></select></div>')+'<div class="sec-hd mt"><h3>基本信息</h3></div><div class="grid-3">'+maField('模型编号','maNo',r.no,true)+maField('模型名称','maName',r.name,true)+maField('版本号','maVer',r.ver,true)+maField('提供方','maOwner',r.owner,true)+maSelect('模型类型','maType',['基础与农业增强模型','农业专业模型','农业机理模型'],r.modelType||'农业专业模型')+maSelect('来源','maOrigin',['实验室','合作','自建','第三方'],r.origin||'合作')+maField('业务能力','maBusiness',r.business,true)+maField('适用作物','maCrop',r.crop,true)+'</div>'+maText('模型简介','maSummary',r.summary,true)+'<div class="grid-2 mt14">'+maField('输入内容概述','maInput',r.inputSummary,true)+maField('输出内容概述','maOutput',r.outputSummary,true)+'</div><div class="fld mt14"><label>模型封面</label><input type="file" id="maCoverFile" accept="image/png,image/jpeg" onchange="maReadCover(this)"><div id="maCoverPreview">'+(maCover?'<img src="'+esc(maCover)+'" alt="模型封面" style="max-height:110px;margin-top:8px">':'')+'</div></div><div class="sec-hd mt"><h3>模型详情</h3></div>'+maText('模型介绍','maIntro',r.intro,true)+maText('应用案例','maCases',r.cases)+'<p class="share-error" id="maError" role="alert"></p></form>';
- const locked=!!key&&maBound(key);if(locked){$('maNo').readOnly=true;$('maVer').readOnly=true;}
+function maOpen(key='',view=false){const r=ROWS.find(r=>r.key===key)||{no:'',name:'',ver:'v1.0',access:'api'};maEditing=key||null;maCover=r.cover||'';maDirty=false;$('maTitle').textContent=view?'模型展示资料':key?'编辑接口接入模型':'新建模型';$('maBody').innerHTML='<form id="maForm" onsubmit="maSave(event)">'+(key?'<p class="svc-help">接入方式：接口接入</p>':'<div class="fld"><label for="maAccess">接入方式</label><select class="inp" id="maAccess" onchange="maSwitch(this.value)"><option value="api">接口接入</option><option value="platform">平台部署</option></select></div>')+'<div class="sec-hd mt"><h3>基本信息</h3></div><div class="grid-3">'+maField('模型编号','maNo',r.no,true)+maField('模型名称','maName',r.name,true)+maField('版本号','maVer',r.ver,true)+maField('提供方','maOwner',r.owner,true)+maSelect('模型类型','maType',['基础与农业增强模型','农业专业模型','农业机理模型'],r.modelType||'农业专业模型')+maSelect('来源','maOrigin',['实验室','合作','自建','第三方'],r.origin||'合作')+maField('业务能力','maBusiness',r.business,true)+maField('适用作物','maCrop',r.crop,true)+'</div>'+maText('模型简介','maSummary',r.summary,true)+'<div class="grid-2 mt14">'+maField('输入内容概述','maInput',r.inputSummary,true)+maField('输出内容概述','maOutput',r.outputSummary,true)+'</div><div class="fld mt14"><label>模型封面</label><input type="file" id="maCoverFile" accept="image/png,image/jpeg" onchange="maReadCover(this)"><div id="maCoverPreview">'+(maCover?'<img src="'+esc(maCover)+'" alt="模型封面" style="max-height:110px;margin-top:8px">':'')+'</div></div><div class="sec-hd mt"><h3>模型详情</h3></div>'+maText('模型介绍','maIntro',r.intro,true)+maText('应用案例','maCases',r.cases)+'<p class="share-error" id="maError" role="alert"></p></form>';
+ const locked=!!key&&(maBound(key)||modelLocked(r));if(locked){$('maNo').readOnly=true;$('maVer').readOnly=true;}
+ if(modelLocked(r)){['maInput','maOutput'].forEach(id=>$(id).readOnly=true);if(!view)$('maTitle').textContent='编辑模型元数据';}
  if(view){$('maBody').querySelectorAll('input,select,textarea').forEach(x=>x.disabled=true);$('maFoot').innerHTML='<button class="btn" onclick="maClose()">关闭</button><button class="btn primary" onclick="maOpen('+esc(JSON.stringify(key))+')">编辑资料</button>';}
- else $('maFoot').innerHTML='<button class="btn" onclick="maClose()">取消</button><button class="btn" onclick="maSave(event,false)">保存草稿</button><button type="submit" form="maForm" class="btn primary">保存资料</button>';
+ else $('maFoot').innerHTML='<button class="btn" onclick="maClose()">取消</button><button type="submit" form="maForm" class="btn primary">保存资料</button>';
  $('maDialog').showModal();}
 function maSwitch(v){if(v==='platform'){if(maDirty&&!confirm('是否放弃当前填写内容并切换接入方式？')){$('maAccess').value='api';return;}$('maDialog').close();maDirty=false;maOldOpen();$('newAccess').value='platform';}}
 function maClose(){if(maDirty&&!confirm('资料尚未保存，是否放弃修改？'))return;maDirty=false;$('maDialog').close();}
 async function maReadCover(input){const f=input.files[0];if(!f)return;if(!['image/png','image/jpeg'].includes(f.type)||f.size>5*1024*1024){input.value='';return toast('请选择不超过 5 MB 的 JPG 或 PNG 图片');}maCover=await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.readAsDataURL(f);});$('maCoverPreview').innerHTML='<img src="'+esc(maCover)+'" alt="模型封面" style="max-height:110px;margin-top:8px">';maDirty=true;}
-function maSave(e,complete){e.preventDefault();const f=$('maForm');if(complete&&!f.reportValidity())return;const get=id=>$(id).value.trim();const no=get('maNo'),name=get('maName'),ver=get('maVer');if(!no||!name||!ver)return $('maError').textContent='请填写模型编号、名称和版本号';if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(no)||!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(ver))return $('maError').textContent='模型编号和版本号请使用字母、数字及连字符等有效字符';if(ROWS.some(r=>r.key!==maEditing&&r.no===no&&r.ver===ver))return $('maError').textContent='相同模型编号和版本已存在';let r=ROWS.find(r=>r.key===maEditing);if(r&&maBound(r.key)&&!complete)return $('maError').textContent='模型已有关联接口或服务，请保存完整资料';if(!r){r={key:'new-api-'+Date.now(),files:[],who:'张明',up:'none',src:'new',access:'api'};ROWS.push(r);}Object.assign(r,{no,name,ver,owner:get('maOwner'),modelType:get('maType'),origin:get('maOrigin'),business:get('maBusiness'),crop:get('maCrop'),summary:get('maSummary'),intro:get('maIntro'),inputSummary:get('maInput'),outputSummary:get('maOutput'),cases:get('maCases'),cover:maCover,done:complete,d:stamp().slice(0,10),t:stamp().slice(11,16)});maDirty=false;persist();$('maDialog').close();currentPage=Math.floor(Math.max(0,ROWS.findIndex(x=>x.key===r.key))/PS)+1;renderTable();toast('模型展示资料已保存');}
+function maSave(e){e.preventDefault();const f=$('maForm');if(!f.reportValidity())return;const get=id=>$(id).value.trim();const no=get('maNo'),name=get('maName'),ver=get('maVer');if(!no||!name||!ver)return $('maError').textContent='请填写模型编号、名称和版本号';if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(no)||!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(ver))return $('maError').textContent='模型编号和版本号请使用字母、数字及连字符等有效字符';if(ROWS.some(r=>r.key!==maEditing&&r.no===no&&r.ver===ver))return $('maError').textContent='相同模型编号和版本已存在';let r=ROWS.find(r=>r.key===maEditing);if(!r){r={key:'new-api-'+Date.now(),files:[],who:'张明',up:'none',src:'new',access:'api'};ROWS.push(r);}applyModelEdit(r,{no,name,ver,owner:get('maOwner'),modelType:get('maType'),origin:get('maOrigin'),business:get('maBusiness'),crop:get('maCrop'),summary:get('maSummary'),intro:get('maIntro'),inputSummary:get('maInput'),outputSummary:get('maOutput'),cases:get('maCases'),cover:maCover,d:stamp().slice(0,10),t:stamp().slice(11,16)});maDirty=false;persist();$('maDialog').close();currentPage=Math.floor(Math.max(0,ROWS.findIndex(x=>x.key===r.key))/PS)+1;renderTable();toast('模型展示资料已保存');}
+function nextLocalModelNo(){
+  if(typeof window.Meeting?.nextModelNo==='function')return window.Meeting.nextModelNo();
+  const prefix='MDL-'+new Date().getFullYear()+'-';
+  const largest=ROWS.reduce((max,r)=>{const suffix=r.no.startsWith(prefix)?r.no.slice(prefix.length):'';return /^\d+$/.test(suffix)?Math.max(max,Number(suffix)):max;},0);
+  return prefix+String(largest+1).padStart(3,'0');
+}
 const maOldOpen=openModal;
-openModal=function(){maOldOpen();$('newAccess').value='platform';$('newNo').value=Meeting.nextModelNo();newMaterialMode();};
+openModal=function(){maOldOpen();$('newAccess').value='platform';$('newNo').value=nextLocalModelNo();newMaterialMode();};
 function maAccessChange(v){if(v==='api'){closeModal();maOpen();}}
 const maOriginalOpenService=openService;
 openService=function(i,...args){if(ROWS[i]?.access==='api')return toast('接口接入模型通过已登记接口提供服务，无需构建部署');maOriginalOpenService(i,...args);};
 const maBaseRender=renderTable;
-renderTable=function(){maBaseRender();[...$('tbody').rows].forEach((tr,i)=>{const r=ROWS[i];if(!r)return;tr.dataset.modelKey=r.key;tr.querySelectorAll('.ops a').forEach(a=>{const label=a.textContent.trim();if(['上架','下架','删除'].includes(label)){a.onclick=e=>{e.preventDefault();maAction(r.key,label==='上架'?'up':label==='下架'?'off':'delete');};}});const cell=tr.insertCell(2);cell.textContent=r.access==='api'?'接口接入':'平台部署';if(r.access==='api'){tr.cells[3].textContent='—';tr.cells[9].innerHTML='<span class="f-none">无需构建部署</span>';tr.cells[10].innerHTML='<span class="ops"><button class="lnk" onclick="maOpen('+esc(JSON.stringify(r.key))+',true)">查看</button><button class="lnk" onclick="maOpen('+esc(JSON.stringify(r.key))+')">编辑</button><button class="lnk" onclick="maAction('+esc(JSON.stringify(r.key))+',\''+(r.up==='on'?'off':'up')+'\')">'+(r.up==='on'?'下架':'上架')+'</button><button class="lnk" onclick="maAction('+esc(JSON.stringify(r.key))+',\'delete\')">删除</button></span>';}});maPage();};
-function maMatched(){const kw=$('kw').value.trim().toLowerCase(),access=$('fAccess').value,s1=$('f1').value,s2=$('f2').value;return [...$('tbody').rows].filter(tr=>{const r=ROWS.find(r=>r.key===tr.dataset.modelKey);return (!kw||[r.no,r.name,r.key,...r.files].join(' ').toLowerCase().includes(kw))&&(!access||r.access===access)&&(s1==='全部'||(r.done?'已完善':'待完善')===s1)&&(s2==='全部'||({on:'已上架',off:'已下架',none:'未上架'})[r.up]===s2);});}
+renderTable=function(){maBaseRender();[...$('tbody').rows].forEach((tr,i)=>{const r=ROWS[i];if(!r)return;tr.dataset.modelKey=r.key;tr.querySelectorAll('.ops a').forEach(a=>{const label=a.textContent.trim();if(['上架','下架','删除'].includes(label)){a.onclick=e=>{e.preventDefault();maAction(r.key,label==='上架'?'up':label==='下架'?'off':'delete');};}});const cell=tr.insertCell(2);cell.textContent=r.access==='api'?'接口接入':'平台部署';if(r.access==='api'){tr.cells[3].textContent='—';tr.cells[9].innerHTML='<span class="f-none">无需构建部署</span>';tr.cells[10].innerHTML='<span class="ops"><button class="lnk" onclick="maOpen('+esc(JSON.stringify(r.key))+',true)">查看</button><button class="lnk" onclick="maOpen('+esc(JSON.stringify(r.key))+')">' + '编辑' + '</button><button class="lnk" onclick="maAction('+esc(JSON.stringify(r.key))+',\''+(r.up==='on'?'off':'up')+'\')">'+(r.up==='on'?'下架':'上架')+'</button><button class="lnk" onclick="maAction('+esc(JSON.stringify(r.key))+',\'delete\')">删除</button></span>';}});maPage();};
+function maMatched(){const kw=$('kw').value.trim().toLowerCase(),access=$('fAccess').value,source=$('f1').value,s2=$('f2').value;return [...$('tbody').rows].filter(tr=>{const r=ROWS.find(r=>r.key===tr.dataset.modelKey);return (!kw||[r.no,r.name,r.key,...r.files].join(' ').toLowerCase().includes(kw))&&(!access||r.access===access)&&(!source||r.src===source)&&(s2==='全部'||({on:'已上架',off:'已下架',none:'未上架'})[r.up]===s2);});}
 function maPage(){const matched=maMatched(),max=Math.max(1,Math.ceil(matched.length/PS));currentPage=Math.max(1,Math.min(currentPage,max));[...$('tbody').rows].forEach(tr=>tr.hidden=true);matched.slice((currentPage-1)*PS,currentPage*PS).forEach(tr=>tr.hidden=false);$('pgTotal').textContent='共 '+matched.length+' 条';$('pgBtns').innerHTML='<button class="pgtext" '+(currentPage===1?'disabled':'')+' onclick="setListPage('+(currentPage-1)+')">上一页</button><span>'+currentPage+' / '+max+'</span><button class="pgtext" '+(currentPage===max?'disabled':'')+' onclick="setListPage('+(currentPage+1)+')">下一页</button>';document.querySelector('.pg-inp').value=currentPage;}
 setListPage=function(n){const max=Math.max(1,Math.ceil(maMatched().length/PS));if(!Number.isInteger(n)||n<1||n>max)return toast('请输入有效页码');currentPage=n;maPage();};
 PX.filter=function(){currentPage=1;maPage();};
+if(!['','result','new'].includes($('f1').value)||$('f1').selectedIndex<0)$('f1').selectedIndex=0;
 $('kw').onkeydown=e=>{if(e.key==='Enter')PX.filter();};
 const maButtons=[...document.querySelectorAll('.filter-card button')];maButtons[0].onclick=PX.filter;maButtons[1].onclick=()=>{$('kw').value='';['f1','f2','fAccess'].forEach(id=>$(id).selectedIndex=0);PX.filter();};
 $('maDialog').addEventListener('input',()=>maDirty=true);$('maDialog').addEventListener('cancel',e=>{e.preventDefault();maClose();});
@@ -993,15 +1067,24 @@ function modelReferences(key){const sharing=modelSharing(),external=(sharing.ext
 function maBound(key){const refs=modelReferences(key);return !!(refs.external.length||refs.services.length);}
 function modelDeleteReasons(r){const refs=modelReferences(r.key),s=serviceData[r.key],reasons=[];if(r.up==='on')reasons.push(['上架状态','模型已上架，请先下架']);if(r.access!=='api'&&s?.active)reasons.push(['部署状态','模型仍在运行，请先停止部署']);if(r.access!=='api'&&[...(s?.builds||[]),...(s?.deploys||[])].some(j=>j.status==='running'))reasons.push(['运行任务','构建或部署任务尚未结束']);refs.services.forEach(p=>reasons.push(['服务引用',p.name]));refs.external.forEach(p=>reasons.push(['外部注册接口',p.name]));return reasons;}
 function showModelDeleteBlock(r,reasons){maDirty=false;$('maTitle').textContent='暂不能删除模型';$('maBody').innerHTML='<p>'+esc(r.name)+' · '+esc(r.ver)+'</p><table class="tbl"><thead><tr><th>检查项</th><th>未满足的条件或引用记录</th></tr></thead><tbody>'+reasons.map(([type,value])=>'<tr><td>'+esc(type)+'</td><td>'+esc(value)+'</td></tr>').join('')+'</tbody></table>';$('maFoot').innerHTML='<button class="btn" onclick="maClose()">关闭</button>';if(!$('maDialog').open)$('maDialog').showModal();}
-function maAction(key,kind){const r=ROWS.find(x=>x.key===key);if(!r)return;if(kind==='delete'){const reasons=modelDeleteReasons(r);if(reasons.length)return showModelDeleteBlock(r,reasons);maDirty=false;$('maTitle').textContent='删除模型';$('maBody').innerHTML='<p>确认删除模型“'+esc(r.name)+' · '+esc(r.ver)+'”？</p>'+(r.access!=='api'?'<p>该模型自动生成且未被引用的接口将同时清理。</p>':'');$('maFoot').innerHTML='<button class="btn" onclick="maClose()">取消</button><button class="btn danger" onclick="confirmDeleteModel('+esc(JSON.stringify(key))+')">确认删除</button>';if(!$('maDialog').open)$('maDialog').showModal();return;}if(kind==='up'&&!r.done)return toast('请先完善模型展示资料');if(!confirm((kind==='up'?'上架':'下架')+'模型“'+r.name+'”？'))return;r.up=kind==='up'?'on':'off';PX.put(PX.key+':rows',ROWS);persist();renderTable();toast('模型记录已更新');}
+function maAction(key,kind){const r=ROWS.find(x=>x.key===key);if(!r)return;if(kind==='delete'){const reasons=modelDeleteReasons(r);if(reasons.length)return showModelDeleteBlock(r,reasons);maDirty=false;$('maTitle').textContent='删除模型';$('maBody').innerHTML='<p>确认删除模型“'+esc(r.name)+' · '+esc(r.ver)+'”？</p>'+(r.access!=='api'?'<p>该模型自动生成且未被引用的接口将同时清理。</p>':'');$('maFoot').innerHTML='<button class="btn" onclick="maClose()">取消</button><button class="btn danger" onclick="confirmDeleteModel('+esc(JSON.stringify(key))+')">确认删除</button>';if(!$('maDialog').open)$('maDialog').showModal();return;}if(kind==='up'&&[...(serviceData[key]?.builds||[]),...(serviceData[key]?.deploys||[])].some(j=>j.status==='running'))return toast('构建或部署任务进行中，请结束后再上架');if(!confirm((kind==='up'?'上架':'下架')+'模型“'+r.name+'”？'))return;r.up=kind==='up'?'on':'off';PX.put(PX.key+':rows',ROWS);persist();renderTable();if($('serviceMask').classList.contains('open'))drawService();if($('mdDialog').open)applyMdLock();toast('模型记录已更新');}
 function confirmDeleteModel(key){const r=ROWS.find(x=>x.key===key);if(!r)return maClose();const reasons=modelDeleteReasons(r);if(reasons.length)return showModelDeleteBlock(r,reasons);const removed=[...new Set([...PX.get(PX.key+':deleted',[]),key])],sharing=modelSharing();for(const field of ['interfaceNames','interfaceDescriptions','interfaceUpdated'])if(sharing[field])delete sharing[field][key];
 Object.values(sharing.modelExemptions||{}).forEach(grants=>delete grants[key]);
 // Write the tombstone first so projected interfaces cannot reappear on refresh.
 try{localStorage.setItem(PX.key+':deleted',JSON.stringify(removed));if(localStorage.getItem(MODEL_SHARE_KEY)!==null)localStorage.setItem(MODEL_SHARE_KEY,JSON.stringify(sharing));}catch{return toast('删除未能保存，请重试');}
 for(const name of Object.keys(localStorage)){if(name.startsWith('agri-model-detail:'+key+':'))localStorage.removeItem(name);}ROWS=ROWS.filter(x=>x.key!==key);delete serviceData[key];try{const store=JSON.parse(localStorage.getItem(STORE)||'{}');if(store.edits&&key.startsWith('row-'))delete store.edits[key.slice(4)];localStorage.setItem(STORE,JSON.stringify(store));}catch{}PX.put(PX.key+':rows',ROWS);persist();maDirty=false;$('maDialog').close();renderTable();toast('模型已删除，关联部署接口已清理');}
 // Keep completed deployment history and the active deployment in the same stopped state.
-function stopService(){const s=state(activeRow);if(s.active){const id=s.active.id;s.active.status='stopped';s.active.logs.push('[演示] 张明停止服务，资源已释放');const history=s.deploys.find(d=>d.id===id);if(history&&history!==s.active){history.status='stopped';history.logs.push('[演示] 张明停止服务，资源已释放');}s.active=null;}persist();renderTable();drawService();}
+function stopService(){if(!modelMutationAllowed(ROWS[activeRow]))return;const s=state(activeRow);if(s.active){const id=s.active.id;s.active.status='stopped';s.active.logs.push('[演示] 张明停止服务，资源已释放');const history=s.deploys.find(d=>d.id===id);if(history&&history!==s.active){history.status='stopped';history.logs.push('[演示] 张明停止服务，资源已释放');}s.active=null;}persist();renderTable();drawService();}
 
+window.addEventListener('storage',event=>{
+ if(event.key!==MODEL_CATALOG)return;
+ let catalog;try{catalog=JSON.parse(event.newValue||'[]');}catch{return;}
+ let changed=false;ROWS.forEach(r=>{const latest=catalog.find(x=>x.key===r.key);if(latest&&latest.up!==r.up){r.up=latest.up;changed=true;}});
+ if(!changed)return;renderTable();
+ if($('serviceMask').classList.contains('open'))drawService();
+ if($('mdDialog').open)applyMdLock();
+ if($('maDialog').open&&maEditing){const r=ROWS.find(x=>x.key===maEditing);if(r){const locked=modelLocked(r);['maNo','maVer'].forEach(id=>{if($(id))$(id).readOnly=locked||maBound(r.key);});['maInput','maOutput'].forEach(id=>{if($(id))$(id).readOnly=locked;});}}
+});
 renderTable();persist();
 
 
