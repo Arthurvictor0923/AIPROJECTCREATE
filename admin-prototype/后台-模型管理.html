@@ -462,7 +462,7 @@ dialog.ma-dialog{margin:auto;border:0;border-radius:8px;width:min(920px,94vw);ma
     </div>
 
     <div class="modal-bd" id="newModelForm">
-      <div class="fld" style="margin-bottom:20px"><label for="newAccess">接入方式</label><select class="inp" id="newAccess" onchange="maAccessChange(this.value)"><option value="platform">平台部署</option></select></div><div class="sec-hd"><h3>模型基本信息</h3></div>
+      <div class="sec-hd"><h3>模型基本信息</h3></div>
       <div class="grid-3">
         <div class="fld"><label>模型编号（系统生成）</label><input class="inp" id="newNo" type="text" readonly placeholder="系统自动生成"></div>
         <div class="fld"><label>模型名称<span class="req">*</span></label><input class="inp" id="newName" type="text" title="水稻估产模型（卫星+气象多源）" value="水稻估产模型（卫星+气象多源）"></div>
@@ -507,7 +507,6 @@ dialog.ma-dialog{margin:auto;border:0;border-radius:8px;width:min(920px,94vw);ma
       <div class="svc-choices"><label><input type="radio" name="newMaterialType" value="image" checked onchange="newMaterialMode()">镜像压缩包</label><label><input type="radio" name="newMaterialType" value="dockerfile" onchange="newMaterialMode()">Dockerfile 构建包</label></div>
       <div class="svc-upload"><strong style="font-size:13px">选择构建材料</strong><p class="svc-help" id="newMaterialHelp">上传 Docker / OCI 镜像包（.tar / .tar.gz / .tgz）。</p><div class="upl-file-picker"><input id="newFiles" type="file" accept=".tar,.tar.gz,.tgz" onchange="newFilesChanged()"><button type="button" class="btn sm" id="newDemoFile" onclick="uplUseDemoFile()">使用演示文件</button></div><p class="svc-help" id="newFileSummary">尚未选择文件</p></div>
       <p class="svc-help">提交后请在弹窗内等待上传完成。平台自动导入或构建镜像，完成后可选择部署。</p>
-      <div class="fld mt14"><label for="newImageHardware">运行硬件<span class="req">*</span></label><select class="sel" id="newImageHardware"><option value="cpu">CPU</option><option value="gpu">NVIDIA GPU</option></select></div>
       </section><div class="sec-hd mt"><h3>推荐配置（性能要求）</h3><span class="sec-tip">服务部署时用于推理算力区资源选型参考</span></div>
       <div class="grid-3">
         <div class="fld"><label>推荐算力卡型<span class="req">*</span></label>
@@ -613,7 +612,7 @@ var ROWS=[
  {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_raw.pkl','feature_spec.json','train_log.csv'],who:'李伟',d:'2026-09-23',t:'14:30',ver:'v2.4',src:'result',up:'none'},
  {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_v2.3.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'李伟',d:'2026-09-18',t:'10:20',ver:'v2.3',up:'on'},
  {no:'MDL-2026-001',name:'水稻估产模型',files:['rice_yield_v2.2.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'李伟',d:'2026-04-02',t:'09:10',ver:'v2.2',up:'off'},
- {no:'MDL-2026-002',name:'作物病害识别模型',files:['crop_disease_v1.1.pkl','label_map.json'],who:'王芳',d:'2026-09-15',t:'16:40',ver:'v1.1',up:'none'},
+ {no:'MDL-2026-002',name:'作物病害识别模型',files:['crop_disease_v1.1.pkl','label_map.json'],who:'王芳',d:'2026-09-15',t:'16:40',ver:'v1.1',src:'new',up:'none'},
  {no:'MDL-2026-006',name:'土壤墒情预测模型',files:['soil_moisture_raw.csv','sensor_layout.json'],who:'陈晨',d:'2026-09-22',t:'11:05',ver:'v1.0',src:'result',up:'none'},
  {no:'MDL-2026-003',name:'遥感作物分类模型',files:['crop_class_v1.0.pkl','class_map.json','train_config.yaml'],who:'刘洋',d:'2026-09-10',t:'15:20',ver:'v1.0',up:'none'},
  {no:'MDL-2026-004',name:'玉米估产模型',files:['maize_yield_v1.2.pkl','feature_spec.json','train_config.yaml','evaluation_report.pdf'],who:'张强',d:'2026-08-28',t:'13:40',ver:'v1.2',up:'on'},
@@ -637,7 +636,7 @@ function recordSource(r){return r.src==='new'?'本地新建':'成果提交';}
 function normalizeModelRecord(r){
   const seed=MODEL_SEEDS[Number((r.key||'').replace('row-',''))];
   if(seed){['no','name','ver'].forEach(k=>{if(!r[k]||['待填写','—'].includes(r[k]))r[k]=seed[k];});}
-  r.src=r.src==='new'||(r.key||'').startsWith('new-')?'new':'result';
+  r.src=seed?.src==='new'||r.src==='new'||(r.key||'').startsWith('new-')?'new':'result';
   delete r.done;
   return r;
 }
@@ -707,18 +706,32 @@ ROWS.forEach((r,i)=>{r.key=r.key||'row-'+i;r.materialType=r.materialType||'files
 ROWS.forEach((r,i)=>{if(IMAGE_SAMPLE_PACKAGES[i]&&JSON.stringify(r.files)===JSON.stringify(LEGACY_SAMPLE_FILES[i])){r.files=[IMAGE_SAMPLE_PACKAGES[i].file];r.materialType=IMAGE_SAMPLE_PACKAGES[i].type;}});
 newRows.forEach(r=>{if(!ROWS.some(x=>x.key===r.key))ROWS.push(r);});
 ROWS.forEach(normalizeModelRecord);
-function persist(){try{let s=JSON.parse(localStorage.getItem(STORE)||'{}');s.services=serviceData;s.newRows=ROWS.filter(r=>r.key.startsWith('new-'));s.edits=Object.fromEntries(ROWS.filter(r=>r.key.startsWith('row-')).map(r=>[r.key.slice(4),{...r}]));localStorage.setItem(STORE,JSON.stringify(s));}catch(e){toast('当前浏览器无法保存演示记录，刷新后将恢复初始状态');}}
+function persist(){try{let s=JSON.parse(localStorage.getItem(STORE)||'{}');s.services=serviceData;s.newRows=ROWS.filter(r=>!/^row-\d+$/.test(r.key));s.edits=Object.fromEntries(ROWS.filter(r=>r.key.startsWith('row-')).map(r=>[r.key.slice(4),{...r}]));localStorage.setItem(STORE,JSON.stringify(s));}catch(e){toast('当前浏览器无法保存演示记录，刷新后将恢复初始状态');}}
 function imageURI(r,tag){return 'registry.platform.local/models/'+r.no.toLowerCase()+':'+tag;}
-function initial(i){const r=ROWS[i];let bs=[],ds=[];
- if([1,2,5,6].includes(i)){const tag=r.ver.replace(/^v/,'')+'-b001';bs=[{id:'B-20260918-'+String(i).padStart(3,'0'),tag,image:imageURI(r,tag),status:'success',date:'2026-09-18 10:30',kind:r.materialType==='image'?'镜像导入':'镜像构建',runtime:'cpu',command:'python /opt/service/server.py',port:8000,logs:['[示例] 构建材料已校验','[示例] 镜像处理完成','[示例] 镜像已推送至平台镜像仓库']}];}
- if([1,6].includes(i)){ds=[{id:'D-20260918-'+String(i).padStart(3,'0'),date:'2026-09-18 11:00',status:'success',image:bs[0].image,tag:bs[0].tag,service:r.no.toLowerCase()+'-service',cpu:4,mem:8,gpu:0,replicas:1,port:8000,command:bs[0].command,logs:['[示例] 镜像拉取完成','[示例] 实例 1/1 就绪','[示例] 健康检查通过']}];}
- if(i===3)bs=[{id:'B-20260916-003',date:'2026-09-16 09:00',status:'failed',tag:'1.1-b001',kind:'镜像构建',logs:['[示例] 安装运行依赖','[示例] ERROR: 依赖版本冲突，构建终止。请调整依赖后重新构建。']}];
- return {builds:bs,deploys:ds,active:ds[0]||null};}
-function state(i){const k=ROWS[i].key;if(!serviceData[k])serviceData[k]=initial(i);return serviceData[k];}
-ROWS.forEach((r,i)=>{state(i).builds.forEach(j=>{if(!['镜像导入','镜像构建'].includes(j.kind))j.kind='镜像构建';j.logs=(j.logs||[]).map(line=>line.includes('模板')?'[历史演示记录] 镜像处理完成':line);});});
+function initial(i){
+ const r=ROWS[i];if(r.access==='api')return {builds:[],deploys:[],active:null};
+ const seeded=/^row-\d+$/.test(r.key)&&!!MODEL_SEEDS[Number(r.key.slice(4))],result=r.src!=='new';
+ let bs=[],ds=[];
+ if(seeded||result){
+  const failed=r.key==='row-3'&&!result,tag=r.ver.replace(/^v/,'')+'-b001';
+  const logs=failed?['[示例] 安装运行依赖','[示例] ERROR: 依赖版本冲突，构建终止。请调整依赖后重新构建。']:result?['[示例] 成果提交前已完成镜像构建','[示例] 运行调试已通过，随成果接收已有构建结果']:['[示例] 上传完成后自动处理镜像','[示例] 镜像构建成功，已登记至平台仓库'];
+  bs=[{id:'B-'+r.key,tag,...(!failed?{image:imageURI(r,tag)}:{}),status:failed?'failed':'success',date:r.d+' '+r.t,kind:r.materialType==='image'?'镜像导入':'镜像构建',materialType:r.materialType,files:[...(r.files||[])],command:failed?'':'python /opt/service/server.py',port:8000,logs}];
+ }else{
+  bs=[createImageTask(r,[],'已上传材料自动进入镜像处理')];
+ }
+ if(['row-1','row-6'].includes(r.key)){ds=[{id:'D-'+r.key,date:'2026-09-18 11:00',status:'success',image:bs[0].image,tag:bs[0].tag,service:r.no.toLowerCase()+'-service',cpu:4,mem:8,gpu:0,replicas:1,port:8000,command:bs[0].command,logs:['[示例] 镜像拉取完成','[示例] 实例 1/1 就绪','[示例] 健康检查通过']}];}
+ return {builds:bs,deploys:ds,active:ds[0]||null};
+}
+function state(i){
+ const r=ROWS[i],k=r.key;if(!serviceData[k])serviceData[k]=initial(i);
+ const s=serviceData[k];if(!Array.isArray(s.builds))s.builds=[];if(!Array.isArray(s.deploys))s.deploys=[];
+ if(r.access!=='api'&&!s.builds.length)s.builds=initial(i).builds;
+ return s;
+}
+ROWS.forEach((r,i)=>{delete r.buildRuntime;state(i).builds.forEach(j=>{delete j.runtime;if(j.config)delete j.config.bHardware;if(!['镜像导入','镜像构建'].includes(j.kind))j.kind='镜像构建';j.logs=(j.logs||[]).map(line=>line.includes('模板')?'[历史演示记录] 镜像处理完成':line);});});
 // A browser refresh interrupts local demo timers instead of reporting an unfinished job as successful.
 ROWS.forEach((r,i)=>{const s=state(i);[...s.builds,...s.deploys].forEach(j=>{if(j.status==='running'&&!j.backgroundDemo){j.status='failed';j.logs.push('[演示] 页面刷新中断了本地模拟任务，请重新提交。');}});});
-function statusDot(status,kind){return status==='success'?dot('ok',kind==='build'?'构建成功':'运行中'):status==='running'?dot('warn',kind==='build'?'构建中':'部署中'):status==='failed'?dot('no',kind==='build'?'构建失败':'部署失败'):dot('gray',kind==='build'?'未构建':'未部署');}
+function statusDot(status,kind){return status==='success'?dot('ok',kind==='build'?'构建成功':'运行中'):status==='running'?dot('warn',kind==='build'?'构建中':'部署中'):status==='failed'?dot('no',kind==='build'?'构建失败':'部署失败'):dot('gray',kind==='build'?'—':'未部署');}
 function serviceCell(i){const s=state(i),b=s.builds[0],d=s.deploys[0];let deployLabel=s.active?dot('ok','运行中'):d?.status==='stopped'?dot('gray','已停止'):statusDot(d?.status,'deploy');if(d?.status==='running'||d?.status==='failed')deployLabel=statusDot(d.status,'deploy');return '<div class="svc-state"><button onclick="openService('+i+',\'build\',\'records\')">'+statusDot(b?.status,'build')+'</button><button onclick="openService('+i+',\'deploy\',\'records\')">'+deployLabel+'</button></div>';}
 function context(){const r=ROWS[activeRow];return '<div class="svc-context"><strong>'+esc(r.name)+'</strong><span>'+esc(r.no)+'</span><span>模型版本：'+esc(r.ver)+'</span><span>'+esc(recordSource(r))+'</span></div>';}
 function field(label,id,value,extra='',help=''){return '<div class="fld"><label for="'+id+'">'+label+'</label><input class="inp" id="'+id+'" value="'+esc(value)+'" '+extra+'>'+(help?'<p class="svc-help">'+help+'</p>':'')+'</div>';}
@@ -768,17 +781,19 @@ function newFilesChanged(){
  if(files.length&&uplIsDemoFile(files[0]))$('newFileSummary').textContent+=' · 演示文件，可直接体验上传和续传';
 }
 function imageTaskSteps(type){return type==='dockerfile'?['[演示] 读取已上传构建包','[演示] 校验根目录 Dockerfile 及其引用的材料','[演示] 镜像构建完成，已登记至平台仓库']:['[演示] 读取已上传镜像压缩包','[演示] 校验镜像结构与运行配置','[演示] 镜像已登记至平台仓库'];}
-function enqueueImageTask(i,hardware,reason='上传已完成，自动提交镜像处理任务'){
+function createImageTask(r,builds=[],reason='上传已完成，自动提交镜像处理任务'){
+ let n=builds.length+1,tag;do{tag=r.ver.replace(/^v/,'')+'-b'+String(n++).padStart(3,'0');}while(builds.some(j=>j.tag===tag));
+ return {id:'B-'+Date.now()+'-'+r.key+'-'+(n-1),date:stamp(),tag,image:imageURI(r,tag),kind:r.materialType==='image'?'镜像导入':'镜像构建',materialType:r.materialType,status:'running',command:'',port:8000,files:[...(r.files||[])],backgroundDemo:true,startedAt:Date.now(),duration:6500,config:{bArchive:r.files?.[0]||'',bTag:tag,...(r.materialType==='dockerfile'?{bDockerfile:'包内根目录 / Dockerfile'}:{})},logs:['[演示] '+reason]};
+}
+function enqueueImageTask(i,reason='上传已完成，自动提交镜像处理任务'){
  const r=ROWS[i],s=state(i);if(s.builds.some(j=>j.status==='running'))return null;
  if(!['image','dockerfile'].includes(r.materialType)||!r.files?.length){toast('请重新上传镜像压缩包或 Dockerfile 构建包');return null;}
- let n=s.builds.length+1,tag;do{tag=r.ver.replace(/^v/,'')+'-b'+String(n++).padStart(3,'0');}while(s.builds.some(j=>j.tag===tag));
- const job={id:'B-'+Date.now(),date:stamp(),tag,image:imageURI(r,tag),kind:r.materialType==='image'?'镜像导入':'镜像构建',materialType:r.materialType,status:'running',runtime:hardware||r.buildRuntime||'cpu',command:'',port:8000,files:[...r.files],backgroundDemo:true,startedAt:Date.now(),duration:6500,config:{bArchive:r.files[0],bHardware:hardware||r.buildRuntime||'cpu',bTag:tag,...(r.materialType==='dockerfile'?{bDockerfile:'包内根目录 / Dockerfile'}:{})},logs:['[演示] '+reason]};
- s.builds.unshift(job);persist();renderTable();return job;
+ const job=createImageTask(r,s.builds,reason);s.builds.unshift(job);persist();renderTable();return job;
 }
 function retryImageTask(id){
  const r=ROWS[activeRow],s=state(activeRow);if(!modelMutationAllowed(r))return;
  const old=s.builds.find(j=>j.id===id);if(!old||old.status!=='failed'||s.builds.some(j=>j.status==='running'))return;
- if(enqueueImageTask(activeRow,old.runtime||r.buildRuntime,'已使用当前材料重新提交镜像处理任务'))drawService();
+ if(enqueueImageTask(activeRow,'已使用当前材料重新提交镜像处理任务'))drawService();
 }
 
 function buildError(msg){$('svcError').hidden=false;$('svcError').textContent=msg;$('svcError').scrollIntoView({block:'nearest'});}
@@ -788,12 +803,12 @@ function simulate(i,kind,job){const steps=['分配推理资源并拉取镜像','
 function deployUI(){const r=ROWS[activeRow],s=state(activeRow),built=s.builds.filter(b=>b.status==='success');if(!built.length)return '<div class="svc-empty">暂无可部署的镜像，请查看材料处理进度。<br><button type="button" class="btn primary mt14" onclick="openService('+activeRow+',\'build\')">查看构建记录</button></div>';
  const a=s.active,c=a||s.deploys.find(d=>d.service)||{};return (a?runtimeUI(a):'')+'<form id="deployForm" onsubmit="submitDeploy(event)"><div class="sec-hd"><h3>服务配置</h3></div><div class="grid-2">'+field('服务名称<span class="req">*</span>','dName',c.service||r.no.toLowerCase()+'-service','required pattern="[a-z][a-z0-9\\x2D]{2,49}" '+(a?'readonly':''),'3–50 位小写字母、数字或连字符。')+select('部署镜像<span class="req">*</span>','dImage',built.map((b,j)=>opt(b.id,b.tag+' · '+b.kind,j===0)).join(''),'onchange="syncImage()"')+field('镜像地址','dURI','','readonly class="svc-code"')+select('部署资源池','dPool',opt('inference','推理算力池 · x86_64'))+'</div><div class="grid-2 mt14">'+field('启动命令','dCommand',c.command||'','placeholder="留空使用镜像默认 CMD / ENTRYPOINT"','HTTP 服务需监听 0.0.0.0，与服务端口一致。')+unit('服务端口<span class="req">*</span>','dPort',c.port||8000,'端口',1,65535)+'</div><div class="sec-hd mt"><h3>实例资源</h3><span class="svc-muted">以下配置均为单副本规格</span></div><div class="grid-3">'+unit('CPU','dCPU',c.cpu||4,'核',1,128)+unit('内存','dMem',c.mem||8,'GiB',1,1024)+unit('临时存储','dDisk',c.disk||20,'GiB',10,2048)+select('GPU 类型','dGPU',opt('none','不使用 GPU')+opt('t4','NVIDIA T4 · 16 GiB')+opt('a100','NVIDIA A100 · 40 GiB'),'onchange="syncGPU()"')+unit('GPU 数量','dCards',0,'卡',0,8)+unit('副本数量','dReplicas',c.replicas||1,'个',1,10)+'</div><p class="svc-help" id="resourceTotal"></p><details class="svc-advanced"><summary>高级配置 · 健康检查、环境变量与调用设置</summary><div><div class="grid-2">'+select('健康检查','dHealth',opt('http','HTTP GET')+opt('tcp','TCP 端口'),'onchange="syncHealth()"')+field('健康检查路径','dHealthPath','/health','required pattern="/.*"')+unit('启动等待时间','dWait',120,'秒',10,1800)+unit('请求超时','dRequestTimeout',60,'秒',1,600)+'</div><p class="svc-help">通过健康检查后才接入请求；未实现 HTTP 检查接口的镜像可选择 TCP 检查。</p><div class="fld mt14"><label>环境变量</label><div id="envRows"></div><button type="button" class="lnk" onclick="addEnv()">＋ 添加变量</button></div><div class="grid-2 mt14">'+field('访问范围','dAccess','平台内部','readonly')+field('调用鉴权','dAuth','平台统一鉴权','readonly')+'</div></div></details>'+(a?'<div class="svc-confirm"><label><input type="checkbox" id="dConfirm" required>确认更新当前服务。新实例就绪后切换流量，失败时保留原服务。</label></div>':'')+'</form>';
 }
-function syncImage(){const b=state(activeRow).builds.find(x=>x.id===$('dImage')?.value);if(!b)return;$('dURI').value=b.image;$('dCommand').value=b.command||'';$('dPort').value=b.port||8000;$('dGPU').value=b.runtime==='gpu'?'t4':'none';syncGPU();}
+function syncImage(){const b=state(activeRow).builds.find(x=>x.id===$('dImage')?.value);if(!b)return;$('dURI').value=b.image;$('dCommand').value=b.command||'';$('dPort').value=b.port||8000;$('dGPU').value='none';syncGPU();}
 function syncGPU(){const gpu=$('dGPU').value!=='none';$('dCards').disabled=!gpu;$('dCards').min=gpu?1:0;$('dCards').value=gpu?Math.max(1,Number($('dCards').value)):0;resourceTotal();}
 function syncHealth(){$('dHealthPath').disabled=$('dHealth').value==='tcp';$('dHealthPath').required=!$('dHealthPath').disabled;}
 function resourceTotal(){const n=Number($('dReplicas')?.value||1);$('resourceTotal').textContent='合计资源：'+Number($('dCPU').value)*n+' 核 CPU / '+Number($('dMem').value)*n+' GiB 内存 / '+Number($('dCards').value)*n+' 张 GPU';}
 function addEnv(){if(!modelMutationAllowed(ROWS[activeRow]))return;const row=document.createElement('div');row.className='svc-env';row.innerHTML='<input class="inp" aria-label="变量名" required pattern="[A-Za-z_][A-Za-z0-9_]*" placeholder="变量名"><input class="inp" aria-label="变量值" required placeholder="变量值"><button type="button" class="lnk" onclick="this.parentElement.remove()">删除</button>';$('envRows').append(row);}
-function submitDeploy(e){e.preventDefault();if(!modelMutationAllowed(ROWS[activeRow]))return;const i=activeRow,r=ROWS[i],s=state(i);if(s.deploys.some(x=>x.status==='running'))return;const b=s.builds.find(x=>x.id===$('dImage').value&&x.status==='success');if(!b)return buildError('请选择当前模型版本构建成功的镜像。');if(b.runtime==='gpu'&&$('dGPU').value==='none')return buildError('当前镜像需要 GPU 运行环境，请配置 GPU。');const env=Array.from(document.querySelectorAll('.svc-env')).map(row=>Array.from(row.querySelectorAll('input')).map(n=>n.value));if(new Set(env.map(x=>x[0])).size!==env.length)return buildError('环境变量名不可重复。');const form=$('deployForm');const config=Object.fromEntries(Array.from(form.querySelectorAll('input,select')).filter(n=>n.id).map(n=>[n.id,n.type==='checkbox'?n.checked:n.value]));const job={id:'D-'+Date.now(),date:stamp(),status:'running',image:b.image,tag:b.tag,service:$('dName').value.trim(),cpu:+$('dCPU').value,mem:+$('dMem').value,gpu:+$('dCards').value,disk:+$('dDisk').value,replicas:+$('dReplicas').value,port:+$('dPort').value,command:$('dCommand').value,config,env,logs:['[演示] 部署任务已提交，关联镜像 '+b.tag]};s.deploys.unshift(job);persist();renderTable();serviceTab('records');simulate(i,'deploy',job);}
+function submitDeploy(e){e.preventDefault();if(!modelMutationAllowed(ROWS[activeRow]))return;const i=activeRow,r=ROWS[i],s=state(i);if(s.deploys.some(x=>x.status==='running'))return;const b=s.builds.find(x=>x.id===$('dImage').value&&x.status==='success');if(!b)return buildError('请选择当前模型版本构建成功的镜像。');const env=Array.from(document.querySelectorAll('.svc-env')).map(row=>Array.from(row.querySelectorAll('input')).map(n=>n.value));if(new Set(env.map(x=>x[0])).size!==env.length)return buildError('环境变量名不可重复。');const form=$('deployForm');const config=Object.fromEntries(Array.from(form.querySelectorAll('input,select')).filter(n=>n.id).map(n=>[n.id,n.type==='checkbox'?n.checked:n.value]));const job={id:'D-'+Date.now(),date:stamp(),status:'running',image:b.image,tag:b.tag,service:$('dName').value.trim(),cpu:+$('dCPU').value,mem:+$('dMem').value,gpu:+$('dCards').value,disk:+$('dDisk').value,replicas:+$('dReplicas').value,port:+$('dPort').value,command:$('dCommand').value,config,env,logs:['[演示] 部署任务已提交，关联镜像 '+b.tag]};s.deploys.unshift(job);persist();renderTable();serviceTab('records');simulate(i,'deploy',job);}
 function runtimeUI(a){return '<div class="svc-runtime"><div class="svc-history-head"><strong>'+esc(a.service)+'</strong>'+dot('ok','运行中')+'</div><p class="svc-help">当前镜像：'+esc(a.tag)+'　｜　副本 '+a.replicas+' / '+a.replicas+'　｜　'+a.cpu+' 核 / '+a.mem+' GiB</p><div class="svc-log">POST /api/model-services/'+esc(a.service)+'/predict<br>Authorization: Bearer &lt;平台授权令牌&gt;</div><div class="actions"><button type="button" class="lnk" onclick="testService()">调用验证</button><button type="button" class="lnk" onclick="askStop()">停止服务</button></div><div id="runtimeFeedback"></div></div>';}
 function testService(){$('runtimeFeedback').innerHTML='<div class="svc-log">[模拟调用] HTTP 200 · 128 ms\n当前服务连接正常。正式接入时需按模型输入规范提交样例数据。</div>';}
 function askStop(){if(!modelMutationAllowed(ROWS[activeRow]))return;if(state(activeRow).deploys.some(d=>d.status==='running'))return toast('请等待部署任务结束后再停止服务');$('runtimeFeedback').innerHTML='<div class="svc-confirm">停止后将释放运行资源，接口暂不可用。<div class="actions"><button type="button" class="btn sm" onclick="this.closest(\'.svc-confirm\').remove()">取消</button><button type="button" class="btn primary sm" onclick="stopService()">确认停止</button></div></div>';}
@@ -801,23 +816,23 @@ function recordsUI(){
  const r=ROWS[activeRow],s=state(activeRow),build=svcMode==='build',jobs=build?s.builds:s.deploys,busy=s.builds.some(j=>j.status==='running');
  let head='';
  if(build)head='<div class="svc-history-head"><div><strong>'+esc(materialLabel(r.materialType))+'</strong><p class="svc-help">'+esc((r.files||[]).join('、')||'暂无材料')+'</p></div>'+(!modelLocked(r)?'<button type="button" class="btn sm" '+(busy?'disabled':'')+' onclick="uplReplaceMaterials('+JSON.stringify(r.key).replace(/"/g,'&quot;')+')">重新上传材料</button>':'')+'</div>';
- return head+(!build&&s.active?runtimeUI(s.active):'')+(!jobs.length?'<div class="svc-empty">'+(build?'暂无处理记录，提交材料后会自动开始镜像处理。':'暂无部署记录')+'</div>':jobs.map((j,k)=>{
+ return head+(!build&&s.active?runtimeUI(s.active):'')+(!jobs.length?'<div class="svc-empty">'+(build?'':'暂无部署记录')+'</div>':jobs.map((j,k)=>{
   const label=build?(j.kind==='镜像导入'?'镜像导入':'镜像构建'):'部署';
-  const status=({success:build?'镜像已就绪':'部署成功',running:label+'中',failed:label+'失败',replaced:'已替换',stopped:'已停止'})[j.status];
+  const status=({success:build?'构建成功':'部署成功',running:build?'构建中':'部署中',failed:build?'构建失败':'部署失败',replaced:'已替换',stopped:'已停止'})[j.status];
   let actions='';
   if(build&&j.status==='success')actions='<button type="button" class="lnk mt14" onclick="deployBuild('+JSON.stringify(j.id).replace(/"/g,'&quot;')+')">使用此镜像部署 →</button>';
   if(j.status==='failed')actions=build?(k===0?'<button type="button" class="lnk mt14" '+(busy?'disabled':'')+' onclick="retryImageTask('+JSON.stringify(j.id).replace(/"/g,'&quot;')+')">重试</button>':''):'<button type="button" class="lnk mt14" onclick="serviceTab(\'config\')">调整配置并重试</button>';
-  return '<div class="svc-history"><div class="svc-history-head"><strong>'+esc(j.id)+'</strong>'+dot(j.status==='success'?'ok':j.status==='running'?'warn':j.status==='failed'?'no':'gray',status)+'</div><p class="svc-help">'+esc(j.date)+'　·　张明　·　镜像 '+esc(j.tag)+'　'+esc(j.kind||j.service)+'</p>'+(j.backgroundDemo&&j.status==='running'?'<p class="svc-help">上传已完成，'+label+'由后台处理，可关闭窗口后查看结果。</p>':'')+(j.image?'<p class="svc-help" style="overflow-wrap:anywhere">'+esc(j.image)+'</p>':'')+'<details '+(k===0?'open':'')+'><summary class="svc-help" style="cursor:pointer">任务日志与配置</summary><pre class="svc-log">'+esc(j.logs.join('\n'))+'</pre>'+(j.config?'<pre class="svc-log">'+esc(Object.entries(j.config).filter(([key])=>!['bDockerText','bDeps','bBase','bModel'].includes(key)).map(([key,v])=>(configNames[key]||key)+'：'+v).join('\n'))+'</pre>':'')+'</details>'+actions+'</div>';
+  return '<div class="svc-history"><div class="svc-history-head"><strong>'+esc(j.id)+'</strong>'+dot(j.status==='success'?'ok':j.status==='running'?'warn':j.status==='failed'?'no':'gray',status)+'</div><p class="svc-help">'+esc(j.date)+'　·　张明　·　镜像 '+esc(j.tag)+'　'+esc(j.kind||j.service)+'</p>'+(j.backgroundDemo&&j.status==='running'?'<p class="svc-help">上传已完成，'+label+'由后台处理，可关闭窗口后查看结果。</p>':'')+(j.image?'<p class="svc-help" style="overflow-wrap:anywhere">'+esc(j.image)+'</p>':'')+'<details '+(k===0?'open':'')+'><summary class="svc-help" style="cursor:pointer">任务日志与配置</summary><pre class="svc-log">'+esc(j.logs.join('\n'))+'</pre>'+(j.config?'<pre class="svc-log">'+esc(Object.entries(j.config).filter(([key])=>!['bDockerText','bDeps','bBase','bModel','bHardware'].includes(key)).map(([key,v])=>(configNames[key]||key)+'：'+v).join('\n'))+'</pre>':'')+'</details>'+actions+'</div>';
  }).join(''));
 }
 
 function deployBuild(id){if(!modelMutationAllowed(ROWS[activeRow]))return;svcMode='deploy';svcTab='config';drawService();$('dImage').value=id;syncImage();}
-const configNames={bArchive:'构建材料',bHardware:'运行硬件',bDockerfile:'Dockerfile 位置',bContext:'构建上下文',bTag:'镜像版本',bRepo:'镜像仓库',bResource:'构建资源',bTimeout:'超时（分钟）',bCache:'复用缓存',bRemark:'备注',dName:'服务名称',dImage:'构建任务',dURI:'部署镜像',dPool:'资源池',dCommand:'启动命令',dPort:'端口',dCPU:'CPU（核）',dMem:'内存（GiB）',dDisk:'存储（GiB）',dGPU:'GPU 类型',dCards:'GPU 数量',dReplicas:'副本数',dHealth:'健康检查方式',dHealthPath:'检查路径',dWait:'启动等待（秒）',dRequestTimeout:'请求超时（秒）',dAccess:'访问范围',dAuth:'鉴权',dConfirm:'确认更新'};
+const configNames={bArchive:'构建材料',bDockerfile:'Dockerfile 位置',bContext:'构建上下文',bTag:'镜像版本',bRepo:'镜像仓库',bResource:'构建资源',bTimeout:'超时（分钟）',bCache:'复用缓存',bRemark:'备注',dName:'服务名称',dImage:'构建任务',dURI:'部署镜像',dPool:'资源池',dCommand:'启动命令',dPort:'端口',dCPU:'CPU（核）',dMem:'内存（GiB）',dDisk:'存储（GiB）',dGPU:'GPU 类型',dCards:'GPU 数量',dReplicas:'副本数',dHealth:'健康检查方式',dHealthPath:'检查路径',dWait:'启动等待（秒）',dRequestTimeout:'请求超时（秒）',dAccess:'访问范围',dAuth:'鉴权',dConfirm:'确认更新'};
 $('serviceMask').addEventListener('click',e=>{if(e.target===$('serviceMask'))closeService();});
 document.addEventListener('input',e=>{if(['dCPU','dMem','dCards','dReplicas'].includes(e.target.id))resourceTotal();});
 document.addEventListener('keydown',e=>{if($('mdDialog')?.open||!$('serviceMask').classList.contains('open'))return;if(e.key==='Escape')closeService();if(e.key==='Tab'){const els=Array.from($('serviceMask').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],summary')).filter(n=>n.getClientRects().length);const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
 
-function commitNewModel(go){if([...$('newFiles').files].some(f=>!materialValid(f,newMaterialType()))){toast('请选择有效的'+materialLabel(newMaterialType()));return;}const no=$('newNo').value.trim(),name=$('newName').value.trim(),ver=$('newVer').value.trim(),files=Array.from($('newFiles').files);if(!no||!name||!ver)return toast('请填写模型名称和版本号');if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(no))return toast('模型编号请使用字母、数字、连字符或下划线');if(!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(ver))return toast('版本号请使用字母、数字、点或连字符');if(!files.length)return toast('请上传镜像压缩包或 Dockerfile 构建包');if(ROWS.some(r=>r.no===no&&r.ver===ver))return toast('相同模型编号和版本已存在');const r={key:'new-'+Date.now(),no,name,ver,files:files.map(f=>f.name),materialType:newMaterialType(),buildRuntime:$('newImageHardware').value,inferencePrecision:$('newPrecision').value||null,interfaceDoc:mdNewValue(),who:'张明',d:stamp().slice(0,10),t:stamp().slice(11,16),up:'none',src:'new'};ROWS.push(r);persist();TOTAL=ROWS.length;currentPage=Math.ceil(ROWS.length/PS);renderTable();closeModal();if(go)location.href=EDIT_NEW+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r));else toast('模型及材料已保存（原型演示）');return r;}
+function commitNewModel(go){if([...$('newFiles').files].some(f=>!materialValid(f,newMaterialType()))){toast('请选择有效的'+materialLabel(newMaterialType()));return;}const no=$('newNo').value.trim(),name=$('newName').value.trim(),ver=$('newVer').value.trim(),files=Array.from($('newFiles').files);if(!no||!name||!ver)return toast('请填写模型名称和版本号');if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(no))return toast('模型编号请使用字母、数字、连字符或下划线');if(!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(ver))return toast('版本号请使用字母、数字、点或连字符');if(!files.length)return toast('请上传镜像压缩包或 Dockerfile 构建包');if(ROWS.some(r=>r.no===no&&r.ver===ver))return toast('相同模型编号和版本已存在');const r={key:'new-'+Date.now(),no,name,ver,files:files.map(f=>f.name),materialType:newMaterialType(),inferencePrecision:$('newPrecision').value||null,interfaceDoc:mdNewValue(),who:'张明',d:stamp().slice(0,10),t:stamp().slice(11,16),up:'none',src:'new'};ROWS.push(r);serviceData[r.key]={builds:[createImageTask(r)],deploys:[],active:null};persist();TOTAL=ROWS.length;currentPage=Math.ceil(ROWS.length/PS);renderTable();closeModal();if(go)location.href=EDIT_NEW+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r));else toast('模型及材料已保存（原型演示）');return r;}
 // Keep record links and pagination independent of display-material completeness.
 let currentPage=1;
 const baseRenderTable=renderTable;
@@ -1150,13 +1165,12 @@ let maEditing=null,maCover='',maDirty=false;
 function maField(label,id,value='',required=false){return '<div class="fld"><label for="'+id+'">'+label+(required?'<span class="req">*</span>':'')+'</label><input class="inp" id="'+id+'" value="'+esc(value)+'" '+(required?'required':'')+'></div>';}
 function maText(label,id,value='',required=false){return '<div class="fld mt14"><label for="'+id+'">'+label+(required?'<span class="req">*</span>':'')+'</label><textarea class="inp" id="'+id+'" '+(required?'required':'')+'>'+esc(value)+'</textarea></div>';}
 function maSelect(label,id,values,value){return '<div class="fld"><label for="'+id+'">'+label+'</label><select class="inp" id="'+id+'">'+values.map(x=>opt(x,x,x===value)).join('')+'</select></div>';}
-function maOpen(key='',view=false){const r=ROWS.find(r=>r.key===key)||{no:'',name:'',ver:'v1.0',access:'api'};maEditing=key||null;maCover=r.cover||'';maDirty=false;$('maTitle').textContent=view?'模型展示资料':key?'编辑接口接入模型':'新建模型';$('maBody').innerHTML='<form id="maForm" onsubmit="maSave(event)">'+(key?'<p class="svc-help">接入方式：接口接入</p>':'<div class="fld"><label for="maAccess">接入方式</label><select class="inp" id="maAccess" onchange="maSwitch(this.value)"><option value="api">接口接入</option><option value="platform">平台部署</option></select></div>')+'<div class="sec-hd mt"><h3>基本信息</h3></div><div class="grid-3">'+maField('模型编号','maNo',r.no,true)+maField('模型名称','maName',r.name,true)+maField('版本号','maVer',r.ver,true)+maField('提供方','maOwner',r.owner,true)+maSelect('模型类型','maType',['基础与农业增强模型','农业专业模型','农业机理模型'],r.modelType||'农业专业模型')+maSelect('来源','maOrigin',['实验室','合作','自建','第三方'],r.origin||'合作')+maField('业务能力','maBusiness',r.business,true)+maField('适用作物','maCrop',r.crop,true)+'</div>'+maText('模型简介','maSummary',r.summary,true)+'<div class="grid-2 mt14">'+maField('输入内容概述','maInput',r.inputSummary,true)+maField('输出内容概述','maOutput',r.outputSummary,true)+'</div><div class="fld mt14"><label>模型封面</label><input type="file" id="maCoverFile" accept="image/png,image/jpeg" onchange="maReadCover(this)"><div id="maCoverPreview">'+(maCover?'<img src="'+esc(maCover)+'" alt="模型封面" style="max-height:110px;margin-top:8px">':'')+'</div></div><div class="sec-hd mt"><h3>模型详情</h3></div>'+maText('模型介绍','maIntro',r.intro,true)+maText('应用案例','maCases',r.cases)+'<p class="share-error" id="maError" role="alert"></p></form>';
+function maOpen(key='',view=false){const r=ROWS.find(r=>r.key===key)||{no:'',name:'',ver:'v1.0',access:'api'};maEditing=key||null;maCover=r.cover||'';maDirty=false;$('maTitle').textContent=view?'模型展示资料':key?'编辑接口接入模型':'新建模型';$('maBody').innerHTML='<form id="maForm" onsubmit="maSave(event)">'+(key?'<p class="svc-help">接入方式：接口接入</p>':'')+'<div class="sec-hd mt"><h3>基本信息</h3></div><div class="grid-3">'+maField('模型编号','maNo',r.no,true)+maField('模型名称','maName',r.name,true)+maField('版本号','maVer',r.ver,true)+maField('提供方','maOwner',r.owner,true)+maSelect('模型类型','maType',['基础与农业增强模型','农业专业模型','农业机理模型'],r.modelType||'农业专业模型')+maSelect('来源','maOrigin',['实验室','合作','自建','第三方'],r.origin||'合作')+maField('业务能力','maBusiness',r.business,true)+maField('适用作物','maCrop',r.crop,true)+'</div>'+maText('模型简介','maSummary',r.summary,true)+'<div class="grid-2 mt14">'+maField('输入内容概述','maInput',r.inputSummary,true)+maField('输出内容概述','maOutput',r.outputSummary,true)+'</div><div class="fld mt14"><label>模型封面</label><input type="file" id="maCoverFile" accept="image/png,image/jpeg" onchange="maReadCover(this)"><div id="maCoverPreview">'+(maCover?'<img src="'+esc(maCover)+'" alt="模型封面" style="max-height:110px;margin-top:8px">':'')+'</div></div><div class="sec-hd mt"><h3>模型详情</h3></div>'+maText('模型介绍','maIntro',r.intro,true)+maText('应用案例','maCases',r.cases)+'<p class="share-error" id="maError" role="alert"></p></form>';
  const locked=!!key&&(maBound(key)||modelLocked(r));if(locked){$('maNo').readOnly=true;$('maVer').readOnly=true;}
  if(modelLocked(r)){['maInput','maOutput'].forEach(id=>$(id).readOnly=true);if(!view)$('maTitle').textContent='编辑模型元数据';}
  if(view){$('maBody').querySelectorAll('input,select,textarea').forEach(x=>x.disabled=true);$('maFoot').innerHTML='<button class="btn" onclick="maClose()">关闭</button><button class="btn primary" onclick="maOpen('+esc(JSON.stringify(key))+')">编辑资料</button>';}
  else $('maFoot').innerHTML='<button class="btn" onclick="maClose()">取消</button><button type="submit" form="maForm" class="btn primary">保存资料</button>';
  $('maDialog').showModal();}
-function maSwitch(v){if(v==='platform'){if(maDirty&&!confirm('是否放弃当前填写内容并切换接入方式？')){$('maAccess').value='api';return;}$('maDialog').close();maDirty=false;openModal();$('newAccess').value='platform';}}
 function maClose(){if(maDirty&&!confirm('资料尚未保存，是否放弃修改？'))return;maDirty=false;$('maDialog').close();}
 async function maReadCover(input){const f=input.files[0];if(!f)return;if(!['image/png','image/jpeg'].includes(f.type)||f.size>5*1024*1024){input.value='';return toast('请选择不超过 5 MB 的 JPG 或 PNG 图片');}maCover=await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.readAsDataURL(f);});$('maCoverPreview').innerHTML='<img src="'+esc(maCover)+'" alt="模型封面" style="max-height:110px;margin-top:8px">';maDirty=true;}
 function maSave(e){e.preventDefault();const f=$('maForm');if(!f.reportValidity())return;const get=id=>$(id).value.trim();const no=get('maNo'),name=get('maName'),ver=get('maVer');if(!no||!name||!ver)return $('maError').textContent='请填写模型编号、名称和版本号';if(!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(no)||!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(ver))return $('maError').textContent='模型编号和版本号请使用字母、数字及连字符等有效字符';if(ROWS.some(r=>r.key!==maEditing&&r.no===no&&r.ver===ver))return $('maError').textContent='相同模型编号和版本已存在';let r=ROWS.find(r=>r.key===maEditing);if(!r){r={key:'new-api-'+Date.now(),files:[],who:'张明',up:'none',src:'new',access:'api'};ROWS.push(r);}applyModelEdit(r,{no,name,ver,owner:get('maOwner'),modelType:get('maType'),origin:get('maOrigin'),business:get('maBusiness'),crop:get('maCrop'),summary:get('maSummary'),intro:get('maIntro'),inputSummary:get('maInput'),outputSummary:get('maOutput'),cases:get('maCases'),cover:maCover,d:stamp().slice(0,10),t:stamp().slice(11,16)});maDirty=false;persist();$('maDialog').close();currentPage=Math.floor(Math.max(0,ROWS.findIndex(x=>x.key===r.key))/PS)+1;renderTable();toast('模型展示资料已保存');}
@@ -1167,8 +1181,7 @@ function nextLocalModelNo(){
   return prefix+String(largest+1).padStart(3,'0');
 }
 const maOldOpen=openModal;
-openModal=function(){mdResetNew();maOldOpen();$('newPrecision').value='';$('newAccess').value='platform';$('newNo').value=nextLocalModelNo();document.querySelector('[name=newMaterialType][value=image]').checked=true;newMaterialMode();};
-function maAccessChange(v){if(v==='api'){closeModal();maOpen();}}
+openModal=function(){mdResetNew();maOldOpen();$('newPrecision').value='';$('newNo').value=nextLocalModelNo();document.querySelector('[name=newMaterialType][value=image]').checked=true;newMaterialMode();};
 const maOriginalOpenService=openService;
 openService=function(i,...args){if(ROWS[i]?.access==='api')return toast('接口接入模型通过已登记接口提供服务，无需构建部署');maOriginalOpenService(i,...args);};
 const maBaseRender=renderTable;
@@ -1238,12 +1251,13 @@ function uplBytes(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFi
 function uplMeta(f){return {name:f.name,size:f.size,lastModified:f.lastModified};}
 function uplSame(f,m){return !!f&&f.name===m.name&&f.size===m.size&&f.lastModified===m.lastModified;}
 function uplSnapshot(){
- return {version:2,fields:[...$('newModelForm').querySelectorAll('input:not([type=file]),select,textarea')].map(n=>({value:n.value,checked:n.checked})),tags:[...$('newModelForm').querySelectorAll('.msel')].map(n=>n.innerHTML),interfaceDoc:mdNewValue()};
+ return {version:4,fields:[...$('newModelForm').querySelectorAll('input:not([type=file]),select,textarea')].map(n=>({value:n.value,checked:n.checked})),tags:[...$('newModelForm').querySelectorAll('.msel')].map(n=>n.innerHTML),interfaceDoc:mdNewValue()};
 }
 function uplRestore(t){
  const fields=[...$('newModelForm').querySelectorAll('input:not([type=file]),select,textarea')];
- const targetFields=t.form.version===2?fields:fields.filter(n=>!(n.name==='newMaterialType'&&n.value==='dockerfile'));
- t.form.fields.forEach((v,i)=>{if(targetFields[i]){targetFields[i].value=v.value;if(typeof v.checked==='boolean')targetFields[i].checked=v.checked;}});
+ const targetFields=t.form.version>=2?fields:fields.filter(n=>!(n.name==='newMaterialType'&&n.value==='dockerfile'));
+ const savedFields=[...t.form.fields];if((t.form.version||1)<3)savedFields.splice(t.form.version===2?8:7,1);if((t.form.version||1)<4)savedFields.shift();
+ savedFields.forEach((v,i)=>{if(targetFields[i]){targetFields[i].value=v.value;if(typeof v.checked==='boolean')targetFields[i].checked=v.checked;}});
  document.querySelector('[name=newMaterialType][value="'+(t.materialType||'image')+'"]').checked=true;newMaterialHelp();
  t.form.tags.forEach((html,i)=>{const n=$('newModelForm').querySelectorAll('.msel')[i];if(n)n.innerHTML=html;});
  mdNewDraft=t.form.interfaceDoc?JSON.parse(JSON.stringify(t.form.interfaceDoc)):null;mdNewSummary();cnt('scope','scopeCnt');
@@ -1291,7 +1305,7 @@ closeModal=function(){if(uplIsOpen()){toast('上传尚未完成，请等待完�
 saveNewModel=function(go){
  if(uplIsOpen()||!uplValidate())return;
  const file=$('newFiles').files[0];
- uplTask={id:'UP-'+Date.now(),file:uplMeta(file),materialType:newMaterialType(),replaceKey:uplReplacementKey,demoFile:uplIsDemoFile(file),form:uplSnapshot(),go:!!go,done:0,parts:Math.min(20,file.size),status:'uploading',hardware:$('newImageHardware').value};
+ uplTask={id:'UP-'+Date.now(),file:uplMeta(file),materialType:newMaterialType(),replaceKey:uplReplacementKey,demoFile:uplIsDemoFile(file),form:uplSnapshot(),go:!!go,done:0,parts:Math.min(20,file.size),status:'uploading'};
  if(!uplPersist()){uplTask=null;return;}
  uplOriginalFile=file;uplCancelPrompt=false;$('newUploadError').textContent='';$('newUploadFile').value='';uplLock(true);uplPaint();$('newUploadCancel').focus();uplRun();
 };
@@ -1326,10 +1340,10 @@ function uplFinish(){
  let r=task.replaceKey?ROWS.find(x=>x.key===task.replaceKey):null;
  if(task.replaceKey&&(!r||!modelMutationAllowed(r))){uplInterrupt('当前模型不可更新材料，请取消本次上传。');return;}
  uplTask=null;uplLock(false);
- if(r){r.files=[task.file.name];r.materialType=task.materialType||'image';r.buildRuntime=task.hardware;uplBaseClose();}
+ if(r){r.files=[task.file.name];r.materialType=task.materialType||'image';delete r.buildRuntime;uplBaseClose();}
  else r=commitNewModel(false);
  if(!r){uplTask=task;uplTask.status='paused';uplLock(true);uplPaint();return;}
- const i=ROWS.indexOf(r);enqueueImageTask(i,task.hardware);uplPersist();uplBanner();uplOriginalFile=null;uplSetReplacement(null);renderTable();
+ const i=ROWS.indexOf(r);if(task.replaceKey)enqueueImageTask(i);uplPersist();uplBanner();uplOriginalFile=null;uplSetReplacement(null);renderTable();
  if(task.go&&!task.replaceKey)location.href=EDIT_NEW+'?record='+encodeURIComponent(r.key)+'&data='+encodeURIComponent(JSON.stringify(r));
  else{openService(i,'build','records');toast('上传完成，镜像正在后台处理，可关闭窗口');}
 }
@@ -1359,7 +1373,6 @@ function uplReplaceMaterials(key){
  closeService();if(uplRead()){uplRecover();return;}
  uplBaseOpen();uplSetReplacement(key);$('newNo').value=r.no;$('newName').value=r.name;$('newVer').value=r.ver;
  document.querySelector('[name=newMaterialType][value="'+(r.materialType==='dockerfile'?'dockerfile':'image')+'"]').checked=true;newMaterialMode();
- $('newImageHardware').value=r.buildRuntime||state(ROWS.indexOf(r)).builds[0]?.runtime||'cpu';
 }
 
 window.addEventListener('offline',()=>uplInterrupt('网络连接已断开。'));
