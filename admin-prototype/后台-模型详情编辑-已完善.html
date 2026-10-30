@@ -1,12 +1,191 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+<head><style>.sx-editor{margin-top:22px;border:1px solid #dce5e1;border-radius:6px;padding:16px;background:#fff;}
+.sx-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;}
+.sx-head h4{margin:0;font-size:14px;font-weight:600;color:#183b35;}
+.sx-tools{display:flex;gap:14px;flex-wrap:wrap;}
+.sx-head button,.sx-text-head button,.sx-file-actions button{border:0;background:none;padding:2px 0;color:#07655c;font:13px inherit;cursor:pointer;white-space:nowrap;}
+.sx-head button:disabled,.sx-text-head button:disabled{color:#9ba8a2;cursor:default;}
+.sx-empty{font-size:13px;color:#81928b;text-align:center;margin:0;border:1px dashed #d9e3de;border-radius:5px;padding:22px;}
+.sx-text-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:12px;color:#6f8379;}
+.sx-editor textarea{display:block;width:100%;box-sizing:border-box;min-height:86px;resize:vertical;border:1px solid #d6e1db;border-radius:4px;padding:10px;font:13px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;color:#17394a;background:#fff;}
+.sx-editor textarea:focus{outline:2px solid #d3e6df;outline-offset:1px;border-color:#087065;}
+.sx-files{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px;}
+.sx-file{display:flex;align-items:center;gap:12px;border:1px solid #dce5e1;border-radius:5px;padding:10px;min-width:0;background:#fff;}
+.sx-file-info{min-width:0;flex:1;}
+.sx-file-info b{display:block;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17394a;}
+.sx-file-info>span{font-size:12px;color:#82928c;display:block;margin:3px 0;}
+.sx-file-actions{display:flex;gap:12px;align-items:center;}
+.sx-file-actions .sx-remove{color:#b04a40;}
+.sx-file-icon{display:flex;align-items:center;justify-content:center;background:#eff5f2;border-radius:5px;min-width:60px;width:60px;height:64px;font-size:11px;font-weight:650;color:#557e6a;}
+.sx-thumb{border:1px solid #dce5e1;border-radius:4px;background:#f5f8f6;cursor:zoom-in;width:86px;min-width:86px;height:64px;overflow:hidden;padding:0;}
+.sx-thumb img{width:100%;height:100%;object-fit:contain;display:block;font-size:10px;}
+.sx-error{color:#b64236;font-size:12px;margin:8px 0 0;}.sx-error:empty{display:none;}
+.sx-progress{color:#668176;font-size:12px;margin-top:8px;}
+.sx-view{margin-top:14px;}.sx-view h5{font-size:13px;margin:0 0 8px;font-weight:600;}
+.sx-text-view{font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f8f6;border:1px solid #dce5e1;border-radius:5px;padding:12px;margin:0;}
+.sx-lightbox{border:0;border-radius:8px;padding:0;max-width:90vw;width:max-content;max-height:90vh;color:#17394a;}
+.sx-lightbox::backdrop{background:rgba(15,30,40,.65);}
+.sx-lightbox header{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:14px 18px;border-bottom:1px solid #e1e8e4;}
+.sx-lightbox h3{font-size:15px;margin:0;}.sx-lightbox button{border:0;background:none;font-size:25px;cursor:pointer;color:#617b70;}
+.sx-lightbox>div{padding:16px;overflow:auto;}.sx-lightbox img{display:block;max-width:85vw;max-height:74vh;object-fit:contain;}
+@media(max-width:640px){.sx-head{align-items:flex-start;flex-direction:column;}.sx-files{grid-template-columns:1fr;}}
+</style><script>// Reusable text/file/image examples. Binary files stay outside model metadata.
+window.ModelExamples = (() => {
+  const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const clone = value => JSON.parse(JSON.stringify(value));
+  let database;
+  function db() {
+    if (!database) database=new Promise((resolve,reject)=>{
+      const request=indexedDB.open('bdh-model-example-files',1);
+      request.onupgradeneeded=()=>request.result.createObjectStore('files',{keyPath:'id'});
+      request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);
+    });
+    return database;
+  }
+  async function transact(mode,operation) {
+    const database=await db();
+    return new Promise((resolve,reject)=>{
+      const tx=database.transaction('files',mode),request=operation(tx.objectStore('files'));
+      tx.oncomplete=()=>resolve(request.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('文件保存中断'));
+    });
+  }
+  const getFile = id => transact('readonly',store=>store.get(id));
+  const removeFile = id => transact('readwrite',store=>store.delete(id));
+  const imageFile = file => /^image\/(png|jpeg|gif|webp|bmp|avif)$/i.test(file.type||'') || /\.(png|jpe?g|gif|webp|bmp|avif)$/i.test(file.name||'');
+  const size = n => n>=1024*1024?(n/1024/1024).toFixed(1)+' MB':n>=1024?(n/1024).toFixed(1)+' KB':n+' B';
+  function values(doc={}) {
+    const examples=doc.examples||{};
+    return Object.fromEntries(['input','output'].map(role=>{
+      const old=role==='input'?doc.requestExample:doc.example;
+      const data=examples[role]||{};
+      return [role,{description:typeof data.description==='string'?data.description:'',text:typeof data.text==='string'?data.text:(typeof old==='string'?old:''),files:Array.isArray(data.files)?clone(data.files):[]}];
+    }));
+  }
+  const picture = file => imageFile(file);
+  function fileHTML(file,editable=false) {
+    const image=picture(file);
+    const icon=image?'<button type="button" class="sx-thumb" data-ex-open="'+esc(file.id)+'" data-ex-name="'+esc(file.name)+'" data-px-own="true" aria-label="查看图片 '+esc(file.name)+'"><img data-ex-image="'+esc(file.id)+'" alt="'+esc(file.name)+'"></button>':'<div class="sx-file-icon" aria-hidden="true">'+esc((file.name.split('.').pop()||'FILE').slice(0,6).toUpperCase())+'</div>';
+    return '<div class="sx-file" data-ex-file="'+esc(file.id)+'">'+icon+'<div class="sx-file-info"><b title="'+esc(file.name)+'">'+esc(file.name)+'</b><span>'+size(file.size||0)+'</span><div class="sx-file-actions">'+(image?'<button type="button" data-ex-open="'+esc(file.id)+'" data-ex-name="'+esc(file.name)+'" data-px-own="true">查看图片</button>':'')+'<button type="button" data-ex-download="'+esc(file.id)+'" data-ex-name="'+esc(file.name)+'" data-px-own="true">下载</button>'+(editable?'<button type="button" class="sx-edit sx-remove" data-ex-action="remove" data-ex-id="'+esc(file.id)+'" data-px-own="true">移除</button>':'')+'</div></div></div>';
+  }
+  const urls=new Map();
+  new MutationObserver(()=>{for(const [node,url] of urls)if(!node.isConnected){URL.revokeObjectURL(url);urls.delete(node);}}).observe(document.documentElement,{childList:true,subtree:true});
+  async function hydrate(root=document) {
+    for(const img of root.querySelectorAll('img[data-ex-image]:not([data-ex-loaded])')) {
+      img.dataset.exLoaded='true';
+      try {
+        const stored=await getFile(img.dataset.exImage);if(!img.isConnected)continue;
+        if(!stored?.blob)throw new Error('文件不存在');
+        const url=URL.createObjectURL(stored.blob);urls.set(img,url);img.src=url;
+        img.onerror=()=>{img.alt='图片无法预览';};
+      } catch {img.alt='图片未保存在当前浏览器';}
+    }
+  }
+  function render(doc) {
+    const data=values(doc);
+    return ['input','output'].map(role=>{
+      const label=role==='input'?'输入示例':'输出示例',sample=data[role];
+      return '<section class="sx-view"><h5>'+label+'</h5>'+(sample.text?'<pre class="sx-text-view">'+esc(sample.text)+'</pre>':'')+(sample.files.length?'<div class="sx-files">'+sample.files.map(file=>fileHTML(file)).join('')+'</div>':'')+(sample.description?'<p class="sx-description-view">'+esc(sample.description)+'</p>':'')+(!sample.text&&!sample.files.length&&!sample.description?'<p class="sx-empty">尚未添加'+label+'</p>':'')+'</section>';
+    }).join('');
+  }
+  function mount(root,doc,readonly=false) {
+    let samples=values(doc),closed=false,committed=false,pending=0;
+    const created=new Set(),showText={input:!!samples.input.text,output:!!samples.output.text},errors={input:'',output:''};
+    function paint() {
+      if(closed)return;
+      root.innerHTML=['input','output'].map(role=>{
+        const sample=samples[role],label=role==='input'?'输入示例':'输出示例';
+        return '<section class="sx-editor" data-ex-role="'+role+'"><div class="sx-head"><h4>'+label+'</h4></div><div class="sx-text"><label class="sx-label">示例文本</label><textarea data-ex-text="'+role+'" aria-label="'+label+'文本" spellcheck="false" placeholder="填写文本或 JSON 示例" '+(readonly?'disabled':'')+'>'+esc(sample.text)+'</textarea></div><div class="sx-upload-box"><div class="sx-head"><span class="sx-label">文件 / 图片</span><button type="button" class="sx-edit" data-ex-action="upload" data-px-own="true" '+(readonly||pending?'disabled':'')+'>＋ 添加文件 / 图片</button><input class="sx-file-input" type="file" multiple hidden '+(readonly?'disabled':'')+' aria-label="上传'+label+'文件"></div>'+(sample.files.length?'<div class="sx-files">'+sample.files.map(file=>fileHTML(file,!readonly)).join('')+'</div>':'<p class="sx-empty">暂无文件或图片</p>')+'</div><div class="sx-description"><label class="sx-label">文件 / 图片说明</label><textarea data-ex-description="'+role+'" aria-label="'+label+'附件说明" placeholder="填写文件或图片的说明" '+(readonly?'disabled':'')+'>'+esc(sample.description)+'</textarea></div>'+(pending?'<p class="sx-progress" role="status">正在保存示例文件…</p>':'')+'<p class="sx-error" role="alert">'+esc(errors[role])+'</p></section>' ;
+      }).join('');
+      hydrate(root);
+    }
+    root.oninput=e=>{const role=e.target.dataset.exText;if(role&&!readonly)samples[role].text=e.target.value;const desc=e.target.dataset.exDescription;if(desc&&!readonly)samples[desc].description=e.target.value;};
+    root.onclick=e=>{
+      const button=e.target.closest('[data-ex-action]');if(!button||readonly||closed)return;
+      const section=button.closest('[data-ex-role]'),role=section.dataset.exRole;
+      if(button.dataset.exAction==='upload'){section.querySelector('input[type=file]').click();return;}
+      if(button.dataset.exAction==='text'){showText[role]=true;paint();root.querySelector('[data-ex-text='+role+']').focus();}
+      if(button.dataset.exAction==='remove-text'){showText[role]=false;samples[role].text='';paint();}
+      if(button.dataset.exAction==='remove'){
+        const id=button.dataset.exId;samples[role].files=samples[role].files.filter(f=>f.id!==id);
+        if(created.has(id)){created.delete(id);removeFile(id).catch(()=>{});}paint();
+      }
+    };
+    root.onchange=async e=>{
+      if(e.target.type!=='file'||readonly||closed)return;
+      const role=e.target.closest('[data-ex-role]').dataset.exRole,files=[...e.target.files];
+      if(!files.length)return;pending++;errors[role]='';paint();
+      for(const file of files) {
+        const id='example-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+        try {
+          await transact('readwrite',store=>store.put({id,blob:file}));
+          if(closed){await removeFile(id);continue;}
+          created.add(id);samples[role].files.push({id,name:file.name,type:file.type,size:file.size});
+        } catch {if(!closed)errors[role]='示例文件未能保存，请重新选择。';}
+      }
+      pending--;paint();
+    };
+    paint();
+    return {
+      read:()=>({examples:clone(samples),requestExample:samples.input.text.trim(),example:samples.output.text.trim()}),
+      pending:()=>pending>0,
+      commit:()=>{committed=true;},
+      setReadonly:value=>{if(readonly!==value){readonly=value;paint();}},
+      destroy:()=>{closed=true;root.oninput=root.onclick=root.onchange=null;if(!committed)for(const id of created)removeFile(id).catch(()=>{});},
+    };
+  }
+  async function download(id,name) {
+    const file=await getFile(id);if(!file?.blob)throw new Error('当前浏览器中没有该示例文件，请重新上传');
+    const url=URL.createObjectURL(file.blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  async function view(id,name) {
+    const file=await getFile(id);if(!file?.blob)throw new Error('当前浏览器中没有该图片，请重新上传');
+    const url=URL.createObjectURL(file.blob),dialog=document.createElement('dialog');dialog.className='sx-lightbox';
+    dialog.innerHTML='<header><h3>'+esc(name)+'</h3><button type="button" aria-label="关闭图片" data-px-own="true">×</button></header><div><img alt="'+esc(name)+'"></div>';
+    dialog.querySelector('img').src=url;document.body.append(dialog);
+    dialog.querySelector('button').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{URL.revokeObjectURL(url);dialog.remove();});dialog.showModal();
+  }
+  document.addEventListener('click',e=>{
+    const target=e.target.closest('[data-ex-download],[data-ex-open]');if(!target||target.disabled)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    const action=target.dataset.exDownload?download(target.dataset.exDownload,target.dataset.exName):view(target.dataset.exOpen,target.dataset.exName);
+    action.catch(error=>window.toast?.(error.message));
+  },true);
+  return {mount,render,hydrate,values,getFile};
+})();
+</script>
+<script>
+// One saved interface document per model-version record. Deployments retain snapshots.
+window.ModelInterfaceStore = (() => {
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const blank = () => ({usage:'',content:'JSON',inputs:[],outputs:[],requestExample:'',example:''});
+  const readJSON = (key,fallback) => {try{return JSON.parse(localStorage.getItem(key)) ?? fallback;}catch{return fallback;}};
+  const keyFor = (record,pageKey) => (record ? 'agri-model-detail:' + record : pageKey) + ':interfaceDoc';
+  function read(record,fallback = null,pageKey = window.PX?.key) {
+    const saved = readJSON(keyFor(record,pageKey),null);
+    const state = record ? readJSON('bdh-model-service-v3',{}) : {};
+    const row = (state.newRows || []).find(r => r.key === record) || Object.values(state.edits || {}).find(r => r.key === record);
+    const service = state.services?.[record];
+    const doc = saved || row?.interfaceDoc || fallback || service?.active?.interfaceDoc || service?.deploys?.find(d => d.interfaceDoc)?.interfaceDoc || blank();
+    return clone({...blank(),...doc,inputs:doc.inputs || [],outputs:doc.outputs || []});
+  }
+  function write(record,doc,pageKey = window.PX?.key) {
+    const snapshot = clone(doc);
+    localStorage.setItem(keyFor(record,pageKey),JSON.stringify(snapshot));
+    window.dispatchEvent(new CustomEvent('model-interface-saved',{detail:{record,doc:snapshot}}));
+    return snapshot;
+  }
+  return {read,write,keyFor,clone,blank};
+})();
+
+</script>
+
 <script>
 // Listing state is shared with model management; published records expose metadata edits only.
 window.ModelEditPolicy=(()=>{
  const qs=new URLSearchParams(location.search),key=qs.get('record');let original=null;
  try{original=JSON.parse(qs.get('data')||'null');}catch{}
- const metadata=new Set(['name','alias','owner','modelType','origin','business','crop','summary','intro','cases','cover','d','t','detailPage']);
+ const metadata=new Set(['name','alias','owner','modelType','origin','business','crop','summary','intro','introOverview','introAbility','cases','cover','d','t','detailPage']);
  const baselines=new Map(),message='模型已上架，仅可编辑元数据；请先下架后再修改其他信息。';
  const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}};
  function current(){const s=read('bdh-model-service-v3',{}),r=(s.newRows||[]).find(r=>r.key===key)||Object.values(s.edits||{}).find(r=>r.key===key),c=read('bdh-model-catalog-v1',[]).find(r=>r.key===key);return {...(original||{}),...(r||{}),...(c?{up:c.up}:{})};}
@@ -287,7 +466,7 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
 <style>/* 补全原型公共交互样式 */
 .px-mask{position:fixed;inset:0;background:rgba(12,35,39,.42);z-index:9998;display:flex;align-items:center;justify-content:center;padding:28px}.px-dialog{width:780px;max-width:95vw;max-height:90vh;background:#fff;border-radius:12px;box-shadow:0 24px 80px #1235;display:flex;flex-direction:column;color:#203c49;text-align:left}.px-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid #e3ece8;font-size:18px;font-weight:650}.px-dialog>header button{border:0;background:none;font-size:26px;color:#69807b;cursor:pointer}.px-body{padding:24px 26px;overflow:auto}.px-dialog footer{padding:16px 26px;border-top:1px solid #e3ece8;display:flex;justify-content:flex-end;gap:10px}.px-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}.px-field{display:flex;flex-direction:column;gap:8px;font-size:13px}.px-field.wide{grid-column:1/-1}.px-field input,.px-field select,.px-field textarea,.px-input{border:1px solid #d7e4df;border-radius:6px;background:white;padding:10px 12px;font:inherit;color:#27443f;min-width:0}.px-field textarea{min-height:100px;resize:vertical}.px-help{font-size:12px;color:#72867f;line-height:1.7;margin:12px 0}.px-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #cfded7;border-radius:6px;padding:8px 15px;background:#fff;color:#215547;font-size:13px;cursor:pointer;gap:6px;text-decoration:none}.px-btn.primary{background:#146c52;border-color:#146c52;color:white}.px-btn.danger{color:#b94f46}.px-btn:disabled{opacity:.5;cursor:not-allowed}.px-chip{display:inline-block;background:#edf7f1;color:#257151;border-radius:4px;padding:4px 9px;font-size:12px}.px-table{border-collapse:collapse;width:100%;font-size:13px}.px-table th{background:#f4f8f6;color:#70837b;font-weight:500}.px-table th,.px-table td{padding:14px 15px;border-bottom:1px solid #e9efec;text-align:left}.px-table td small{display:block;margin-top:5px;color:#8a9a94}.px-table button{margin-right:7px}.px-empty{padding:48px;text-align:center;color:#80928b}.px-card{background:#fff;border:1px solid #e0eae5;border-radius:10px;margin-bottom:20px;overflow:hidden}.px-card-head{padding:18px 22px;border-bottom:1px solid #e5ece8;display:flex;align-items:center;justify-content:space-between}.px-card-head h2{font-size:16px;margin:0}.px-filter{display:flex;gap:12px;align-items:center;padding:20px;flex-wrap:wrap}.px-filter input{width:260px}.px-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.px-tabs .on{background:#e4f3ec;color:#106448;border-color:#8bb7a0}.px-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.px-metric{padding:22px;background:#fff;border:1px solid #e0eae5;border-radius:9px;color:#71877e}.px-metric b{display:block;font-size:27px;color:#214b40;margin-top:14px}.px-log{background:#16302a;color:#cee7d9;white-space:pre-wrap;padding:18px;border-radius:7px;font:13px/1.8 monospace;overflow-wrap:anywhere}.px-pager{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:16px 20px;color:#74857f;font-size:13px}.px-checks{display:flex;gap:12px;flex-wrap:wrap}.px-checks label{display:flex;align-items:center;gap:7px;border:1px solid #dce7e1;border-radius:6px;padding:9px 13px;cursor:pointer}.px-upload{padding:14px;background:#f5faf7;border:1px dashed #a8cdb8;border-radius:7px;margin-top:10px}.px-preview{max-width:100%;max-height:420px;border-radius:8px}.px-kv{display:grid;grid-template-columns:130px 1fr;gap:15px;font-size:14px;line-height:1.6}.px-kv dt{color:#7a8d83}.px-kv dd{margin:0;overflow-wrap:anywhere}.px-fullscreen{position:fixed!important;inset:15px!important;z-index:9990!important;background:#fff!important;overflow:auto!important;padding:24px!important}.px-pagehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.px-pagehead h1{font-size:23px;margin:0}.px-scroller{overflow:auto}.px-error{color:#bb4034;font-size:13px;margin-top:12px}.px-layout{display:grid;grid-template-columns:220px 1fr;gap:18px}.px-filetree{background:#f4f8f5;padding:16px;border-radius:8px}.px-filetree button{display:block;margin:7px 0;width:100%;text-align:left}.px-timeline{border-left:2px solid #bad7c8;padding-left:18px;margin-left:8px}.px-timeline p{margin:0 0 18px}.px-timeline small{display:block;color:#7b9185}.px-size{padding:6px;border:1px solid #dae7df;border-radius:5px;color:#36564a;background:white}@media(max-width:800px){.px-grid,.px-layout{grid-template-columns:1fr}.px-metrics{grid-template-columns:repeat(2,1fr)}}
 [hidden]{display:none!important}
-</style></head>
+</style><style>.sx-label{display:block;font-size:13px;color:#526c61;margin-bottom:7px}.sx-upload-box{border:1px solid #dce5e1;border-radius:5px;padding:12px;margin:14px 0}.sx-upload-box .sx-head{margin-bottom:8px}.sx-description textarea{min-height:66px;font-family:inherit}.sx-description-view{white-space:pre-wrap;font-size:13px;line-height:1.8;margin:10px 0;color:#526c61}</style></head>
 <body>
 
 <header class="site-header">
@@ -506,8 +685,8 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
         <div class="col-l">
           <section class="card">
             <div class="tabs" role="tablist">
-              <button type="button" class="tab active" role="tab" onclick="switchTab(this)">模型介绍</button>
-              <button type="button" class="tab" role="tab" onclick="switchTab(this)">对外提供</button>
+              <button type="button" class="tab active" role="tab" id="modelIntroductionTab" aria-selected="true" aria-controls="modelIntroductionPanel" onclick="switchTab(this)">模型介绍</button>
+              <button type="button" class="tab" role="tab" id="modelExternalTab" aria-selected="false" aria-controls="modelExternalPanel" onclick="switchTab(this)">对外提供</button>
             </div>
 
             <div class="blk">
@@ -526,11 +705,11 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
               <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">支持 .md、.txt</div>
             </div>
 
-            <div class="blk model-intro">
-              <div class="model-intro-heading"><h4 id="modelIntroLabel">模型介绍</h4></div>
-              <div class="rte" id="modelIntroEditor">
+            <div class="blk model-intro" id="modelIntroductionPanel" role="tabpanel" aria-labelledby="modelIntroductionTab">
+              <div class="model-intro-heading"><h4 id="modelIntroLabel">模型介绍 <span class="mi-required">*</span></h4></div>
+              <div class="rte" id="modelIntroEditor" hidden aria-hidden="true">
                 <div class="rte-tb" id="tb1"></div>
-                <div class="rte-bd" id="modelIntroContent" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="modelIntroLabel" data-placeholder="请输入模型介绍"><h3>模型概述</h3>
+                <div id="modelIntroContent" contenteditable="false" role="textbox" aria-multiline="true" aria-labelledby="modelIntroLabel" data-placeholder="请输入模型介绍"><h3>模型概述</h3>
 <p>融合多时相卫星影像与农田气象观测，估测水稻地块单产及区域总产，支持生育期内滚动更新。</p>
 <h3>输入输出规范</h3>
 <table>
@@ -555,6 +734,13 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
                   </table>
                   <p class="note">示例数据。</p></div>
               </div>
+              <div class="model-intro-plain">
+                <div><label for="modelOverviewText">模型概述</label><textarea id="modelOverviewText" name="introOverview" rows="5" placeholder="请输入模型概述"></textarea></div>
+                <div><label for="modelCapabilityText">业务能力</label><textarea id="modelCapabilityText" name="introAbility" rows="6" placeholder="请输入业务能力，可分行填写"></textarea></div>
+              </div>
+            </div>
+            <div class="blk" id="modelExternalPanel" role="tabpanel" aria-labelledby="modelExternalTab" hidden>
+              <h4>使用方式</h4><div class="px-grid"><label class="px-field">运行方式<select id="px-runmode"><option>在线运行 / 申请使用</option><option>申请使用</option></select></label><label class="px-field">使用条件<select id="px-access"><option>授权使用</option><option>限制使用</option></select></label><label class="px-field wide">使用说明<textarea id="px-usage">通过平台申请使用本模型，授权后在科研开发空间内运行。输入数据与输出结果保留在平台内。</textarea></label></div>
             </div>
           </section>
         </div>
@@ -663,9 +849,16 @@ document.addEventListener('click',function(e){
 });
 function cnt(){var v=document.getElementById('scope').value||'';document.getElementById('c1').textContent=v.length+'/500';}
 function switchTab(el){
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  el.classList.add('active');
-  toast(el.textContent+'（内容同上，原型演示不切换数据）');
+  const tabs=el.closest('.tabs'),card=tabs?.closest('.card');
+  const panel=card?.querySelector('#modelExternalPanel');
+  if(!tabs||!panel)return;
+  const external=el.id==='modelExternalTab';
+  tabs.querySelectorAll('[role="tab"]').forEach(tab=>{
+    tab.classList.toggle('active',tab===el);
+    tab.setAttribute('aria-selected',String(tab===el));
+  });
+  Array.from(card.children).filter(block=>block!==tabs&&block!==panel).forEach(block=>block.hidden=external);
+  panel.hidden=!external;
 }
 function rmChip(e,el){
   e.stopPropagation();
@@ -759,7 +952,7 @@ PX.confirm=(title,desc,fn)=>PX.modal(title,'<p>'+PX.e(desc)+'</p>',()=>{fn()},'�
 PX.audit=(action,obj)=>{let a=PX.get('agri-audit',[]);a.unshift({时间:new Date().toLocaleString('zh-CN'),操作人:'张明',操作:action,对象:obj,结果:'成功'});PX.put('agri-audit',a)};
 PX.formState=()=>Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true],.drawer.open input,.drawer.open textarea,.modal-mask.open input,.modal-mask.open textarea')).map((el,i)=>({id:el.id,i,val:el.isContentEditable?el.innerHTML:el.value,html:el.isContentEditable}));
 PX.save=()=>{PX.put(PX.key+':fields',PX.formState());PX.audit('保存',file);toast('已保存当前页面内容')};
-PX.upload=(el,mode)=>{let input=document.createElement('input');input.type='file';input.accept=mode==='image'?'image/png,image/jpeg,image/webp':mode==='readme'?'.md,.txt':'';input.multiple=mode==='files';input.onchange=async()=>{for(let f of input.files){let slot=document.createElement('div');slot.className='px-upload';if(mode==='image'){if(f.size>5*1024*1024){toast('图片不能超过 5MB');continue}let url=await new Promise(r=>{let fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});slot.innerHTML='<img class="px-preview" style="max-height:160px" src="'+url+'"><p>'+PX.e(f.name)+'</p>';let old=el.parentElement.querySelector('.px-upload');old?.remove();}else{slot.innerHTML='<b>'+PX.e(f.name)+'</b>　'+(f.size/1024).toFixed(1)+' KB';if(mode==='readme'){let content=await f.text();let editor=document.querySelector('[contenteditable=true]');if(editor)editor.textContent=content;slot.innerHTML+='<pre style="white-space:pre-wrap">'+PX.e(content.slice(0,8000))+'</pre>';}}let del=document.createElement('button');del.type='button';del.className='px-btn';del.textContent='移除';del.onclick=()=>slot.remove();slot.append(del);el.parentElement.append(slot)}toast('已选择文件');};input.click();};
+PX.upload=(el,mode)=>{let input=document.createElement('input');input.type='file';input.accept=mode==='image'?'image/png,image/jpeg,image/webp':mode==='readme'?'.md,.txt':'';input.multiple=mode==='files';input.onchange=async()=>{for(let f of input.files){let slot=document.createElement('div');slot.className='px-upload';if(mode==='image'){if(f.size>5*1024*1024){toast('图片不能超过 5MB');continue}let url=await new Promise(r=>{let fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});slot.innerHTML='<img class="px-preview" style="max-height:160px" src="'+url+'"><p>'+PX.e(f.name)+'</p>';let old=el.parentElement.querySelector('.px-upload');old?.remove();}else{slot.innerHTML='<b>'+PX.e(f.name)+'</b>　'+(f.size/1024).toFixed(1)+' KB';if(mode==='readme'){let content=await f.text();let editor=document.querySelector('[contenteditable=true]');if(editor&&!window.ModelIntroFields)editor.textContent=content;slot.innerHTML+='<pre style="white-space:pre-wrap">'+PX.e(content.slice(0,8000))+'</pre>';}}let del=document.createElement('button');del.type='button';del.className='px-btn';del.textContent='移除';del.onclick=()=>slot.remove();slot.append(del);el.parentElement.append(slot)}toast('已选择文件');};input.click();};
 PX.multi=(el,label)=>{let options=/需求方向/.test(label)?['分析评估','调查摸底','监测预警','方案咨询','技术研发','其他需求']:/所需服务/.test(label)?['图像解译','统计分析','现场调查','数据采集','模型开发','数据整理','方案编制']:/作物/.test(label)?['水稻','玉米','大豆','小麦','其他']: /技术任务/.test(label)?['图像分类','目标检测','语义分割','回归估测','时序预测']: /业务|方向/.test(label)?['长势监测','产量估测','病虫害识别','土壤墒情','种植结构']:['遥感','深度学习','长势监测','黑土地','水稻'];let text=el.innerText;PX.modal(label,'<div class="px-checks">'+options.map(x=>'<label><input type="checkbox" name="tags" value="'+x+'" '+(text.includes(x)?'checked':'')+'>'+x+'</label>').join('')+'</div>',fd=>{let vals=fd.getAll('tags');el.innerHTML=vals.length?vals.map(x=>'<span class="px-chip">'+x+'</span>').join(' '):'请选择';el.dataset.values=vals.join(',')})};
 PX.preview=()=>{let main=document.querySelector('main');let editors=Array.from(document.querySelectorAll('[contenteditable=true]'));PX.modal('内容预览','<article style="line-height:1.9">'+(editors.length?editors.map(e=>'<section>'+e.innerHTML+'</section>').join('<hr>'):main?.innerHTML||'')+'</article>');document.querySelectorAll('#pxMask [onclick],#pxMask a,#pxMask button:not(header button):not(footer button)').forEach(e=>{e.removeAttribute('onclick');if(e.tagName==='BUTTON')e.disabled=true})};
 PX.editor=(el,cmd)=>{let wrap=el.closest('.rte,.editor,.rich-editor')||el.parentElement.parentElement,editor=wrap.querySelector('[contenteditable=true]')||document.querySelector('[contenteditable=true]');if(!editor)return;editor.focus();if(PX.range){let sel=window.getSelection();sel.removeAllRanges();sel.addRange(PX.range)}let map={'加粗':'bold','斜体':'italic','下划线':'underline','无序列表':'insertUnorderedList','有序列表':'insertOrderedList','缩进':'indent','增加缩进':'indent','撤销':'undo','重做':'redo','引用':'formatBlock','左对齐':'justifyLeft','居中对齐':'justifyCenter','右对齐':'justifyRight','减少缩进':'outdent'};if(map[cmd])document.execCommand(map[cmd],false,cmd==='引用'?'blockquote':null);else if(cmd==='字号'||cmd==='字号选择'||cmd==='正文')PX.modal('字号','<div class="px-grid">'+PX.field('字号','size','16','text',['12','14','16','18','20','24','32'])+'</div>',fd=>{editor.focus();if(PX.range){let s=getSelection();s.removeAllRanges();s.addRange(PX.range)}document.execCommand('fontSize',false,'7');editor.querySelectorAll('font[size="7"]').forEach(e=>{e.removeAttribute('size');e.style.fontSize=fd.get('size')+'px'})});else if(cmd==='插入链接')PX.modal('插入链接','<div class="px-grid">'+PX.field('链接文字','text','查看详情')+PX.field('链接地址','url','','url')+'</div>',fd=>{let u=fd.get('url');if(!/^https?:\/\//.test(u))return false;editor.focus();document.execCommand('insertHTML',false,'<a href="'+PX.e(u)+'">'+PX.e(fd.get('text'))+'</a>')});else if(cmd==='插入表格')document.execCommand('insertHTML',false,'<table border="1" style="border-collapse:collapse;width:100%"><tr><th>字段</th><th>说明</th></tr><tr><td>名称</td><td>填写内容</td></tr></table><p><br></p>');else if(cmd==='插入图片'){let i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{editor.focus();document.execCommand('insertHTML',false,'<img style="max-width:100%" src="'+r.result+'">')};r.readAsDataURL(f)};i.click()}else if(/全屏/.test(cmd))wrap.classList.toggle('px-fullscreen');};
@@ -776,7 +969,7 @@ if(/模型/.test(name)){return PX.confirm(name,r.name||'当前模型',()=>{if(/�
 return PX.detail(name,{'名称':tr?.cells[0]?.innerText||name,'状态':'可查看','更新时间':'2026-09-24','所属模块':document.querySelector('h1')?.innerText||'管理后台'});
 }; window.ph=PX.ph;
 PX.action=(msg,el)=>{msg=msg.replace(/[（(].*?[）)]/g,'').trim();
-if(msg==='门户首页')return PX.go('后台-工作台总览');
+if(msg==='门户首页')return PX.go('index');
 if(msg==='消息中心')return PX.go('后台-消息中心');
 if(msg==='个人资料')return PX.go('后台-个人资料');
 if(msg==='账号安全')return PX.go('后台-账号安全');
@@ -926,9 +1119,7 @@ if(f==='后台-数据集管理.html'){
  window.createDone=()=>{let dialog=document.getElementById('m-create'),fields=Array.from(dialog.querySelectorAll('input,select,textarea')),name=fields.find(x=>x.closest('.fld')?.querySelector('label')?.textContent.includes('数据名称'))||fields.find(x=>x.placeholder.includes('名称'));if(!name?.value.trim()){toast('请填写数据名称');return}let r={...DS[0],id:'DS'+Date.now(),name:name.value,desc:document.getElementById('createIntro').value,pub:'none',todo:true,src:'manual'};if(!PB[r.pub])r.pub=Object.keys(PB).find(x=>x!=='on'&&x!=='off')||'off';DS.unshift(r);PX.put('agri-datasets',DS);closeM('m-create');renderGrid();toast('数据集已保存，可从列表编辑详情')};
  renderGrid();
 }
-if(f.startsWith('后台-模型详情编辑')){
- const tab=document.querySelector('.tabs'),card=tab?.closest('.card');if(card){let blocks=Array.from(card.children).filter(x=>x!==tab),panel=document.createElement('div');panel.className='blk';panel.hidden=true;panel.innerHTML='<h4>使用方式</h4><div class="px-grid"><label class="px-field">运行方式<select id="px-runmode"><option>在线运行 / 申请使用</option><option>申请使用</option></select></label><label class="px-field">使用条件<select id="px-access"><option>授权使用</option><option>限制使用</option></select></label><label class="px-field wide">使用说明<textarea id="px-usage">通过平台申请使用本模型，授权后在科研开发空间内运行。输入数据与输出结果保留在平台内。</textarea></label></div>';card.append(panel);window.switchTab=el=>{tab.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===el));let external=el.textContent.includes('对外提供');blocks.forEach(x=>x.hidden=external);panel.hidden=!external};}
-}
+
 })();
 (()=>{
 const saved=PX.get(PX.key+':fields',[]);const inputs=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{const el=x.id?document.getElementById(x.id):inputs[x.i];if(el&&x.html)el.innerHTML=x.val});
@@ -1034,7 +1225,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
   <form class="mu-form" novalidate>
     <div class="mu-body">
       <div class="mu-field"><label for="modelUsageText">使用说明<span class="mu-required">*</span></label><textarea class="mu-control" id="modelUsageText" required></textarea></div>
-      <div class="mu-field"><label for="modelUsageContent">内容类型</label><select class="mu-control" id="modelUsageContent"><option value="JSON">JSON</option><option value="form-data">form-data</option></select></div>
+      <div class="mu-field"><label for="modelUsageContent">请求内容类型</label><select class="mu-control" id="modelUsageContent"><option value="JSON">JSON</option><option value="form-data">form-data</option></select></div>
       <section class="mu-section" aria-labelledby="modelUsageInputsTitle">
         <div class="mu-section-head"><h3 id="modelUsageInputsTitle">入参</h3><button type="button" class="mu-add" data-mu-add="inputs" data-px-own="true">＋ 添加入参</button></div>
         <div class="mu-table-wrap"><table class="mu-table"><colgroup><col style="width:23%"><col style="width:18%"><col style="width:64px"><col><col style="width:64px"></colgroup><thead><tr><th scope="col">参数名称</th><th scope="col">类型</th><th scope="col" class="mu-check-cell">必填</th><th scope="col">参数说明</th><th scope="col">操作</th></tr></thead><tbody id="modelUsageInputs"></tbody></table></div>
@@ -1043,7 +1234,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
         <div class="mu-section-head"><h3 id="modelUsageOutputsTitle">出参</h3><button type="button" class="mu-add" data-mu-add="outputs" data-px-own="true">＋ 添加出参</button></div>
         <div class="mu-table-wrap"><table class="mu-table"><colgroup><col style="width:23%"><col style="width:18%"><col><col style="width:64px"></colgroup><thead><tr><th scope="col">参数名称</th><th scope="col">类型</th><th scope="col">参数说明</th><th scope="col">操作</th></tr></thead><tbody id="modelUsageOutputs"></tbody></table></div>
       </section>
-      <div class="mu-field"><label for="modelUsageExample">返回示例</label><textarea class="mu-control" id="modelUsageExample" spellcheck="false"></textarea></div>
+      <div id="modelSampleEditor"></div>
     </div>
     <div class="mu-foot"><p class="mu-error" id="modelUsageError" role="alert" aria-live="polite"></p><div class="mu-actions"><button type="button" class="btn" data-mu-close data-px-own="true">取消</button><button type="submit" class="btn primary" data-px-own="true">保存</button></div></div>
   </form>
@@ -1061,7 +1252,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
   const outputBody = document.getElementById('modelUsageOutputs');
   const usage = document.getElementById('modelUsageText');
   const content = document.getElementById('modelUsageContent');
-  const example = document.getElementById('modelUsageExample');
+  let sampleEditor=null;
   const error = document.getElementById('modelUsageError');
   const opener = document.createElement('button');
   opener.type = 'button';
@@ -1078,11 +1269,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
 
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const readStore = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
-  const getDocument = () => {
-    const saved = readStore(storageKey, null);
-    const service = record ? readStore(serviceKey, {}).services?.[record] : null;
-    return saved || service?.active?.interfaceDoc || service?.deploys?.find(d => d.interfaceDoc)?.interfaceDoc || {usage:'',content:'JSON',inputs:[],outputs:[],example:''};
-  };
+  const getDocument = () => window.ModelIntroRich?.getDocument() || ModelInterfaceStore.read(record,ModelEditPolicy.current()?.interfaceDoc);
   let loaded = null;
   let previousOverflow = '';
   function emptyState(body, input) {
@@ -1094,7 +1281,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
     const tr = document.createElement('tr');
     tr.dataset.muRow = 'true';
     tr._originalParameter = parameter;
-    const types = ['string','number','integer','boolean','object','array',...(input ? ['file'] : [])];
+    const types = ['string','number','integer','boolean','object','array','file'];
     tr.innerHTML = '<td><input class="mu-control" data-mu="name" aria-label="参数名称" value="' + escape(parameter.name) + '" required></td><td><select class="mu-control" data-mu="type" aria-label="参数类型">' + types.map(type => '<option value="' + type + '"' + (type === (parameter.type || 'string') ? ' selected' : '') + '>' + type + '</option>').join('') + '</select></td>' + (input ? '<td class="mu-check-cell"><input type="checkbox" data-mu="required" aria-label="必填"' + (parameter.required ? ' checked' : '') + '></td>' : '') + '<td><input class="mu-control" data-mu="description" aria-label="参数说明" value="' + escape(parameter.description) + '"></td><td><button type="button" class="mu-delete" data-px-own="true" aria-label="删除' + (input ? '入参' : '出参') + '">删除</button></td>';
     tr.querySelector('.mu-delete').addEventListener('click', () => { tr.remove(); emptyState(body, input); error.textContent = ''; });
     body.append(tr);
@@ -1105,7 +1292,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
     loaded = getDocument();
     usage.value = loaded.usage || '';
     content.value = loaded.content === 'form-data' ? 'form-data' : 'JSON';
-    example.value = loaded.example || '';
+    sampleEditor?.destroy();sampleEditor=ModelExamples.mount(document.getElementById('modelSampleEditor'),loaded,ModelEditPolicy.locked());
     inputBody.innerHTML = '';
     outputBody.innerHTML = '';
     (loaded.inputs || []).forEach(p => addParameter(inputBody, true, p));
@@ -1134,7 +1321,7 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
   }
   opener.addEventListener('click', openDialog);
   dialog.querySelectorAll('[data-mu-close]').forEach(b => b.addEventListener('click', () => dialog.close()));
-  dialog.addEventListener('close', () => { document.body.style.overflow = previousOverflow; opener.focus({preventScroll:true}); });
+  dialog.addEventListener('close', () => { sampleEditor?.destroy(); document.body.style.overflow = previousOverflow; opener.focus({preventScroll:true}); });
   dialog.addEventListener('cancel', e => { e.preventDefault(); dialog.close(); });
   dialog.addEventListener('click', e => {
     if (e.target !== dialog) return;
@@ -1151,7 +1338,8 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
     e.preventDefault();
     if (ModelEditPolicy.locked()) return showError(ModelEditPolicy.message);
     dialog.querySelectorAll('[aria-invalid]').forEach(n => n.removeAttribute('aria-invalid'));
-    const doc = {...loaded, usage:usage.value.trim(),content:content.value,inputs:collect(inputBody,true),outputs:collect(outputBody,false),example:example.value.trim()};
+    if(sampleEditor.pending())return showError('示例文件正在保存，请稍候');
+    const doc = {...loaded, usage:usage.value.trim(),content:content.value,inputs:collect(inputBody,true),outputs:collect(outputBody,false),...sampleEditor.read()};
     if (!doc.usage) return showError('请填写使用说明', usage);
     for (const [body, parameters] of [[inputBody,doc.inputs],[outputBody,doc.outputs]]) {
       const names = new Set();
@@ -1163,10 +1351,10 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
       }
     }
     if (doc.content !== 'form-data' && doc.inputs.some(p => p.type === 'file')) return showError('文件入参需要选择 form-data', content);
-    try { localStorage.setItem(storageKey, JSON.stringify(doc)); }
+    try { ModelInterfaceStore.write(record,doc); }
     catch { return showError('使用说明未能保存，请重试'); }
-    dialog.close();
-    window.toast?.('使用说明已保存');
+    sampleEditor.commit();dialog.close();
+    window.toast?.('输入输出规范与示例已保存，部署时自动带入');
   });
 })();
 </script>
@@ -1175,5 +1363,265 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
 <script>
 (()=>{const upload=PX.upload;PX.upload=(el,mode)=>{if(ModelEditPolicy.locked()&&mode!=='image')return toast(ModelEditPolicy.message);return upload(el,mode);};const save=PX.save;PX.save=(...args)=>{ModelEditPolicy.beforeSave();return save(...args);};ModelEditPolicy.apply();document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(()=>ModelEditPolicy.apply()));})();
 </script>
+<!-- model-intro-rich:start -->
+<style>
+.model-intro-plain{display:grid;gap:20px;}
+.model-intro-plain label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;}
+.model-intro-plain textarea{display:block;box-sizing:border-box;width:100%;min-height:130px;padding:12px 14px;border:1px solid var(--border);border-radius:5px;font-family:inherit;font-size:14px;line-height:1.8;color:var(--text);background:#fff;resize:vertical;}
+.model-intro-plain textarea:focus{outline:2px solid #2e785b33;border-color:var(--brand);}
+.model-intro-plain textarea::placeholder{color:var(--text-muted);}
+#modelIntroContent h3{font-size:14px;margin:18px 0 8px;font-weight:600;}
+#modelIntroContent h3:first-child{margin-top:0;}
+.mi-section{margin-top:28px;}
+.mi-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.mi-section-head h4{font-size:14px;margin:0;font-weight:600;}
+.mi-section h5,.mi-preview h5{font-size:13px;font-weight:600;margin:16px 0 8px;}
+.mi-meta{font-size:12px;color:var(--text-secondary);line-height:1.8;margin:0 0 10px;}
+.mi-meta span{margin-left:16px;color:var(--text-muted);}
+.mi-usage{font-size:13px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;}
+.mi-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:5px;}
+.mi-table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:13px;}
+.mi-table th{padding:10px 12px;background:#f6f9f8;color:var(--text-secondary);font-weight:500;text-align:left;}
+.mi-table td{padding:11px 12px;border-top:1px solid var(--border);vertical-align:top;overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.7;}
+.mi-empty{font-size:13px;color:var(--text-muted);border:1px dashed var(--border);border-radius:4px;padding:18px;text-align:center;}
+.mi-example pre{font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f8f6;border:1px solid var(--border);border-radius:4px;padding:12px;margin:0;}
+.mi-preview{font-size:14px;line-height:1.85;overflow-wrap:anywhere;}
+.mi-preview h3{font-size:15px;margin:0 0 12px;}
+.mi-preview section+section{margin-top:24px;}
+.mi-preview img{max-width:100%;height:auto;}
+.mi-preview table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.mi-preview th,.mi-preview td{padding:10px 12px;border:1px solid #e1e8e5;text-align:left;vertical-align:top;font-size:13px;}
+.mi-preview th{background:#f5f8f6;font-weight:500;}
+#modelUsageDialog #modelUsageInputExample{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;}
+@media(max-width:700px){.mi-table th,.mi-table td{padding:8px;}.mi-meta span{display:block;margin-left:0;}}
+
+.model-intro{padding:20px 24px;border:1px solid #dce5e9;border-radius:8px;background:#fff;color:#244c36;font-size:14px;}
+.model-intro .model-intro-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 9px;}
+.model-intro .model-intro-heading h4{font-size:13.5px;font-weight:600;color:#10213a;margin:0;}
+.model-intro .mi-required{color:#b15c45;font-weight:400;}
+.model-intro .intro-template-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;font-family:inherit;font-size:13px;font-weight:400;line-height:1.5;border:1px solid #b6cfca;border-radius:4px;color:#005653;background:#fff;white-space:nowrap;margin-left:auto;}
+.model-intro .intro-template-link:hover{background:#edf6f2;border-color:#005653;}
+.model-intro-plain{display:grid;gap:20px;padding:0 20px 20px;}
+.model-intro-plain label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;}
+.model-intro-plain textarea{display:inline-block;box-sizing:border-box;width:100%;min-height:130px;padding:12px 14px;border:1px solid #dce5e9;border-radius:5px;font-family:inherit;font-size:14px;line-height:1.8;color:#10213a;background:#fff;resize:vertical;}
+.model-intro-plain textarea:focus{outline:2px solid #d3e6df;border-color:#005653;}
+.model-intro-plain textarea::placeholder{color:var(--text-muted);}
+#modelIntroEditor[hidden]{display:none!important;}
+.model-intro .mi-section{margin:20px;padding:20px 0 0;border-top:1px solid #dce5e9;}
+.model-intro .mi-section-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 0 12px;margin:0 0 9px;}
+.model-intro .mi-section-head h4{font-size:13.5px;color:#10213a;margin:0;font-weight:600;}
+.model-intro #modelExamplesLabel{color:#244c36;font-size:14px;}
+.model-intro .model-usage-open{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;font-family:inherit;font-size:13px;font-weight:400;line-height:1.5;border:1px solid #b6cfca;border-radius:4px;color:#005653;background:#fff;white-space:nowrap;margin-left:auto;}
+.model-intro .model-usage-open:hover{background:#edf6f2;border-color:#005653;}
+.model-intro .mi-meta,.model-intro .mi-empty{font-size:13px;color:#6b778c;}
+.model-intro .mi-empty{border:0;padding:0;text-align:left;}
+.model-intro .mi-table th,.model-intro .mi-table td{padding:10px;text-align:left;border:0;border-bottom:1px solid #dce5e9;overflow-wrap:anywhere;}
+.model-intro .mi-table th{background:#f5f8f7;}
+.model-intro .mi-table-wrap{border-color:#dce5e9;}
+@media(max-width:700px){.model-intro{padding:16px;}.model-intro-plain{padding:0 0 20px;}.model-intro .mi-section{margin:20px 0;}}
+</style>
+<script>
+// The same plain-text introduction fields and structured IO document as outcome upload.
+(() => {
+  const root = document.querySelector('.model-intro');
+  const editor = document.getElementById('modelIntroContent');
+  const opener = document.getElementById('modelUsageOpen');
+  if (!root || !editor || !opener || !window.PX) return;
+  const record = new URLSearchParams(location.search).get('record');
+  const marker = '__modelIntroRichV3';
+  const escape = PX.e;
+  const clean = html => {
+    const template = document.createElement('template');template.innerHTML = html || '';
+    template.content.querySelectorAll('script,style,iframe,object,embed,link,meta,form,input,textarea,select,button').forEach(n=>n.remove());
+    template.content.querySelectorAll('*').forEach(n=>[...n.attributes].forEach(a=>{
+      if (/^on/i.test(a.name) || ['srcdoc','contenteditable','id'].includes(a.name)) n.removeAttribute(a.name);
+      if (['href','src'].includes(a.name) && !/^(https?:|data:image\/(png|jpeg|gif|webp);|#|\/)/i.test(a.value)) n.removeAttribute(a.name);
+    }));
+    return template.innerHTML;
+  };
+  function textOf(html) {
+    const el=document.createElement('div');el.innerHTML=html || '';
+    el.querySelectorAll('br').forEach(n=>n.replaceWith('\n'));
+    el.querySelectorAll('table').forEach(table=>{
+      const rows=[...table.rows],headers=table.querySelector('th')?[...(rows.shift()?.cells || [])].map(c=>c.textContent.trim()):[];
+      table.replaceWith(document.createTextNode(rows.map(tr=>[...tr.cells].map((c,i)=>(headers[i]?headers[i]+'：':'')+c.textContent.trim()).join('\n')).join('\n\n')));
+    });
+    el.querySelectorAll('li,p,div').forEach(n=>n.append('\n'));
+    return el.textContent.replace(/\n[ \t]+/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  }
+  const paragraph = text => '<p>'+escape(text).replace(/\n/g,'<br>')+'</p>';
+  const legacy = {usage:'',requestExample:'',example:''};
+  function addNarrative(key,value) {
+    if (!value) return '';
+    if (/输入输出|输入说明|输出说明/.test(key)) {legacy.usage += (legacy.usage?'\n\n':'')+key+'：\n'+value;return '';}
+    if (/^(输入|请求)(示例|样例)$/.test(key)) {legacy.requestExample=value;return '';}
+    if (/^(输出|返回)(示例|样例)$/.test(key)) {legacy.example=value;return '';}
+    return '<h3>'+escape(key)+'</h3>'+paragraph(value);
+  }
+  const fields = PX.get(PX.key+':fields',[]);
+  const selected = ModelEditPolicy.current() || {};
+  const submitted = {...(selected.metadata || {}), ...selected};
+  const hasSavedIntro = fields.some(x=>['modelIntroContent','modelOverviewText','modelCapabilityText','__modelIntroV2'].includes(x.id));
+  if (!hasSavedIntro && typeof submitted.intro === 'string') editor.innerHTML=clean(submitted.intro);
+  const current = fields.find(x=>x.id===marker)?.val;
+  const previous = fields.find(x=>x.id==='__modelIntroV2')?.val;
+  if (!current) {
+    if (previous?.schema===2) {
+      let html = previous.overview ? '<h3>模型概述</h3>'+clean(previous.overview) : '';
+      for (const field of previous.fields || []) html+=addNarrative(field.key,field.value);
+      for (const [key,spec] of [['输入说明',previous.inputs],['输出说明',previous.outputs]]) {
+        if (spec?.content || spec?.format) html+=addNarrative(key,[spec.content,spec.format&&'格式与单位：'+spec.format].filter(Boolean).join('\n'));
+      }
+      editor.innerHTML=html;
+    } else {
+      const source=document.createElement('div');source.innerHTML=clean(editor.innerHTML);
+      let rich='',heading='',nodes=[];
+      const flush=()=>{
+        if (!nodes.length&&!heading) return;
+        const block=document.createElement('div');nodes.forEach(n=>block.append(n.cloneNode(true)));
+        if (/^(输入|请求)(示例|样例)$/.test(heading)) legacy.requestExample=textOf(block.innerHTML);
+        else if (/^(输出|返回)(示例|样例)$/.test(heading)) legacy.example=textOf(block.innerHTML);
+        else if (heading==='输入输出规范') {
+          const table=block.querySelector('table');
+          if (table) [...table.rows].forEach(tr=>{
+            const cells=[...tr.cells],type=cells[0]?.textContent.trim();
+            if (cells.length>=3&&['输入','输出'].includes(type)) {
+              rich+=addNarrative(type+'说明',cells[1].textContent.trim()+'\n格式与单位：'+cells[2].textContent.trim());tr.remove();
+            }
+          });
+          if(table&&![...table.rows].some(tr=>!tr.querySelector('th')))table.remove();
+          if(textOf(block.innerHTML))rich+=addNarrative('输入输出说明',textOf(block.innerHTML));
+        } else rich+=(heading?'<h3>'+escape(heading)+'</h3>':'')+block.innerHTML;
+        nodes=[];
+      };
+      [...source.childNodes].forEach(n=>{if(n.nodeType===1&&/^H[1-6]$/.test(n.tagName)){flush();heading=n.textContent.trim();}else nodes.push(n);});flush();
+      editor.innerHTML=rich;
+    }
+  }
+  {
+    const host=document.createElement('div');host.innerHTML=clean(editor.innerHTML);
+    let title='模型概述',overview='',ability='';
+    for(const node of [...host.childNodes]){
+      if(node.nodeType===1&&/^H[1-6]$/.test(node.tagName)){title=node.textContent.trim();continue;}
+      const html=node.outerHTML||escape(node.textContent);
+      if(title==='业务能力')ability+=html;
+      else if(['模型概述','模型介绍','概述'].includes(title))overview+=html;
+    }
+    editor.innerHTML='<h3>模型概述</h3>'+(overview||'<p><br></p>')+'<h3>业务能力</h3>'+(ability||'<p><br></p>');
+  }
+  editor.innerHTML=clean(editor.innerHTML);
+  // Keep legacy HTML serialization for existing records and previews only.
+  const plain=root.querySelector('.model-intro-plain');
+  const wrapper=document.getElementById('modelIntroEditor');wrapper.hidden=true;editor.contentEditable='false';
+  const overviewInput=plain.querySelector('#modelOverviewText'),abilityInput=plain.querySelector('#modelCapabilityText');
+  let part=overviewInput;
+  const parts=new Map([[overviewInput,[]],[abilityInput,[]]]);
+  [...editor.childNodes].forEach(n=>{if(n.nodeType===1&&/^H[1-6]$/.test(n.tagName)){part=n.textContent.trim()==='业务能力'?abilityInput:overviewInput;}else parts.get(part).push(n.outerHTML||escape(n.textContent));});
+  for(const [input,nodes] of parts){
+    const saved=fields.find(x=>x.id===input.id);
+    const supplied=submitted[input.name];
+    input.value=saved?String(saved.val??''):!hasSavedIntro&&typeof supplied==='string'?supplied:textOf(nodes.join(''));
+  }
+  function syncIntro(){editor.innerHTML='<h3>模型概述</h3>'+paragraph(overviewInput.value)+'<h3>业务能力</h3>'+paragraph(abilityInput.value);}
+  plain.addEventListener('input',syncIntro);syncIntro();
+  const storeKey=ModelInterfaceStore.keyFor(record,PX.key);
+  function getDocument() {
+    const doc=ModelInterfaceStore.read(record,submitted.interfaceDoc);
+    const canonical=localStorage.getItem(storeKey);
+    if(!canonical&&!current){if(!doc.usage)doc.usage=legacy.usage;if(!doc.requestExample)doc.requestExample=legacy.requestExample;if(!doc.example)doc.example=legacy.example;}
+    return doc;
+  }
+  const spec=document.createElement('section');spec.className='mi-section';spec.setAttribute('aria-labelledby','modelSpecLabel');
+  spec.innerHTML='<div class="mi-section-head"><h4 id="modelSpecLabel">输入输出规范</h4></div><div id="modelInterfaceSummary"></div>';
+  spec.querySelector('.mi-section-head').append(opener);root.append(spec);
+  const examples=document.createElement('section');examples.className='mi-section';examples.setAttribute('aria-labelledby','modelExamplesLabel');
+  examples.innerHTML='<div class="mi-section-head"><h4 id="modelExamplesLabel">输入输出示例</h4></div><div id="modelInterfaceExamples"></div>';root.append(examples);
+  document.getElementById('modelUsageTitle').textContent='输入输出规范与示例';
+  const table = (rows,input) => '<div class="mi-table-wrap"><table class="mi-table"><thead><tr><th>参数名称</th><th>类型</th>'+(input?'<th>必填</th>':'')+'<th>参数说明</th></tr></thead><tbody>'+rows.map(p=>'<tr><td>'+escape(p.name)+'</td><td>'+escape(p.type)+'</td>'+(input?'<td>'+(p.required?'是':'否')+'</td>':'')+'<td>'+escape(p.description)+'</td></tr>').join('')+'</tbody></table></div>';
+  const empty = label => '<p class="mi-empty">'+label+'</p>';
+  function renderSpec(doc) {
+    return (doc.usage?'<p class="mi-usage">'+escape(doc.usage)+'</p>':'')+'<p class="mi-meta">请求内容类型：'+escape(doc.content||'JSON')+'</p><h5>入参</h5>'+(doc.inputs.length?table(doc.inputs,true):empty('暂无入参'))+'<h5>出参</h5>'+(doc.outputs.length?table(doc.outputs,false):empty('暂无出参'));
+  }
+  const renderExamples = doc => ModelExamples.render(doc);
+  function refresh() {
+    const doc=getDocument();document.getElementById('modelInterfaceSummary').innerHTML=renderSpec(doc);document.getElementById('modelInterfaceExamples').innerHTML=renderExamples(doc);ModelExamples.hydrate(root);
+    opener.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M3 4h5a4 4 0 0 1 4 2 4 4 0 0 1 4-2h5v15h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3z"/></svg>'+(ModelEditPolicy.locked()?'查看规范与示例':'编辑规范与示例');
+  }
+  function previewHTML() {
+    syncIntro();const doc=getDocument();return '<article class="mi-preview">'+(editor.textContent.trim()||editor.querySelector('img,table')?'<section><h3>模型介绍</h3>'+clean(editor.innerHTML)+'</section>':'')+'<section><h3>输入输出规范</h3>'+renderSpec(doc,true)+'</section><section><h3>输入输出示例</h3>'+renderExamples(doc)+'</section></article>';
+  }
+  PX.formState=()=>[...document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true],.drawer.open input,.drawer.open textarea,.modal-mask.open input,.modal-mask.open textarea')].map((el,i)=>({id:el.id,i,val:el.isContentEditable?clean(el.innerHTML):el.value,html:el.isContentEditable})).concat({id:'modelIntroContent',i:-1,html:true,val:clean(editor.innerHTML)},{id:marker,i:-1,html:false,val:{schema:3}});
+  const persistDocument=()=>{
+    if(ModelEditPolicy.locked())return true;
+    try{ModelInterfaceStore.write(record,getDocument());return true;}catch{toast('输入输出规范与示例未能保存，请重试');return false;}
+  };
+  PX.save=()=>{
+    syncIntro();ModelEditPolicy.beforeSave();if(!persistDocument())return false;
+    if(!PX.put(PX.key+':fields',PX.formState()))return false;
+    PX.audit('保存',PX.file);toast('已保存当前页面内容');return true;
+  };
+  const selectedSave=window.saveSelectedModelDetail;
+  if(selectedSave)window.saveSelectedModelDetail=row=>{
+    syncIntro();if(!persistDocument())return false;
+    row.introOverview=overviewInput.value;row.introAbility=abilityInput.value;row.intro=clean(editor.innerHTML);
+    if(!ModelEditPolicy.locked())row.interfaceDoc=getDocument();
+    return selectedSave(row);
+  };
+  PX.preview=()=>{PX.modal('模型介绍预览',previewHTML());ModelExamples.hydrate(document.getElementById('pxMask'));};
+  window.ModelIntroRich={getDocument,previewHTML,collect:()=>({schema:3,introOverview:overviewInput.value,introAbility:abilityInput.value,rich:clean(editor.innerHTML),doc:getDocument()})};
+  window.ModelIntroFields=window.ModelIntroRich;
+  window.addEventListener('model-interface-saved',e=>{if(e.detail.record===record)refresh();});
+  window.addEventListener('storage',e=>{if(e.key===storeKey)refresh();});
+  refresh();
+})();
+
+</script>
+<!-- model-intro-rich:end -->
+
+<!-- model-introduction-template:start -->
+<style>
+.intro-template-link{margin-left:auto;color:var(--brand);font-size:13px;border:0;background:transparent;cursor:pointer;padding:5px 0;}
+#introTemplateDialog{width:680px;max-width:calc(100vw - 32px);max-height:calc(100vh - 48px);padding:0;border:0;border-radius:8px;color:var(--text);box-shadow:0 18px 65px #1234;}
+#introTemplateDialog::backdrop{background:rgba(20,40,50,.42);}
+#introTemplateDialog header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border);}
+#introTemplateDialog h2{font-size:17px;margin:0;}#introTemplateDialog header button{border:0;background:none;font-size:24px;color:var(--text-secondary);cursor:pointer;}
+.it-body{padding:20px 24px;overflow:auto;max-height:calc(100vh - 220px);font-size:13px;line-height:1.8;}
+.it-body h3{font-size:14px;margin:0 0 7px;}.it-body section+section{margin-top:20px;}.it-body p{margin:0 0 9px;color:var(--text-secondary);}
+.it-sample{background:#f5f9f7;border:1px solid var(--border);border-radius:5px;padding:13px 15px;color:var(--text);white-space:pre-wrap;}
+#introTemplateDialog footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:12px;background:#fff;color:#10213a;margin-top:0;}
+#introTemplateDialog footer .btn{color:#10213a;background:#fff;font-size:14px;line-height:1.5;}
+#introTemplateDialog footer .btn:hover{color:#005653;background:#edf6f2;}
+#introTemplateDialog footer .btn.primary{color:#fff;background:#005653;border-color:#005653;}
+#introTemplateDialog footer .btn.primary:hover{color:#fff;background:#004542;}
+#introTemplateStatus{font-size:12px;color:var(--brand);margin-right:auto;}
+</style>
+<dialog id="introTemplateDialog" aria-labelledby="introTemplateTitle">
+<header><h2 id="introTemplateTitle">模型介绍填写模板</h2><button type="button" data-it-close data-px-own="true" aria-label="关闭模板">×</button></header>
+<div class="it-body">
+<section><h3>模型概述</h3><p>说明模型面向什么对象、解决什么问题，以及主要用途。</p><div class="it-sample" id="introOverviewTemplate">本模型面向【适用对象或业务场景】，用于【解决的问题或任务】。通过【主要方法或技术思路】，实现【主要作用】，为【应用工作】提供支持。</div></section>
+<section><h3>业务能力</h3><p>按模型实际具备的能力逐项填写，每项说明“能做什么、用于什么工作”。</p><div class="it-sample" id="introCapabilityTemplate">• 【能力名称】：支持【具体功能】，用于【业务用途】。
+• 【能力名称】：支持【具体功能】，用于【业务用途】。</div></section>
+<p style="margin:18px 0 0;font-size:12px;">将【】中的提示替换为实际内容。参数、格式和示例在下方“输入输出规范与示例”中填写。</p>
+</div>
+<footer><span id="introTemplateStatus" role="status" aria-live="polite"></span><button class="btn" type="button" data-it-close data-px-own="true">关闭</button><button class="btn" type="button" id="introTemplateCopy" data-px-own="true">复制概述模板</button><button class="btn primary" type="button" id="introCapabilityCopy" data-px-own="true">复制业务能力模板</button></footer>
+</dialog>
+<script>
+(()=>{
+ const heading=document.querySelector('.model-intro-heading'),dialog=document.getElementById('introTemplateDialog');if(!heading)return;
+ const button=document.createElement('button');button.type='button';button.className='intro-template-link';button.textContent='填写模板';button.dataset.pxOwn='true';button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls',dialog.id);heading.append(button);
+ button.onclick=()=>{document.getElementById('introTemplateStatus').textContent='';dialog.showModal();};
+ dialog.querySelectorAll('[data-it-close]').forEach(b=>b.onclick=()=>dialog.close());dialog.addEventListener('close',()=>button.focus({preventScroll:true}));
+ const copyTemplate=async(id,label)=>{
+  const text=document.getElementById(id).textContent;
+  let ok=false;try{if(navigator.clipboard){await navigator.clipboard.writeText(text);ok=true;}}catch{}
+  if(!ok){const area=document.createElement('textarea');area.value=text;area.style.cssText='position:fixed;left:0;top:0;opacity:0';dialog.append(area);area.select();try{ok=document.execCommand('copy');}catch{}area.remove();}
+  document.getElementById('introTemplateStatus').textContent=ok?label+'模板已复制，可粘贴到对应文本框':'复制未成功，请选中模板文字复制';
+ };
+ document.getElementById('introTemplateCopy').onclick=()=>copyTemplate('introOverviewTemplate','概述');
+ document.getElementById('introCapabilityCopy').onclick=()=>copyTemplate('introCapabilityTemplate','业务能力');
+})();
+</script>
+<!-- model-introduction-template:end -->
+
 </body>
 </html>

@@ -38,3 +38,6 @@
 .approval-page .main-nav a{padding:0 12px}
 @media(max-width:1100px){.approval-page .main-nav{height:44px;overflow:auto;flex-shrink:0}.approval-page .main-nav a{height:38px}.approval-page .header-inner{padding:8px 0}.admin-app{grid-template-columns:180px minmax(0,1fr)}.approval-filters input{width:230px}}
 @media(max-width:760px){.approval-page .container{padding:0 16px}.admin-app{grid-template-columns:minmax(0,1fr);gap:16px}.admin-side{display:flex;flex-wrap:wrap;gap:4px}.side-title{width:100%;padding:6px 14px}.snav.cur::before{display:none}.snav{flex:1;justify-content:center;padding:0 10px}.approval-filters{padding:16px;gap:10px}.approval-filters input{width:100%}.approval-search{flex:1;min-width:200px}.approval-page .page-title h1{font-size:22px}.approval-page .tabs{padding:0 16px}.approval-page .pager{padding:14px 16px}.approval-page .pager .pg-right{margin-left:0}.approval-page .brand span{display:inline;font-size:15px}.approval-page .u-name{display:none}}
+
+/* 1030-fix:approval-nav-narrow */
+@media (max-width:1278px){.approval-page .main-nav{ display:none !important; }}

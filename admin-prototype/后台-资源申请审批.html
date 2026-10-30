@@ -178,6 +178,10 @@ table.tbl th:last-child,table.tbl td:last-child{padding-right:var(--s5);}
 }
 </style>
 <link rel="stylesheet" href="assets/meeting/meeting.css"><link rel="stylesheet" href="assets/meeting/approval-center.css">
+<style>/* 1030-fix:approval-nav-narrow */
+/* approval-page 的 .main-nav{display:flex} 无媒体限定，权重高于全局 1278px 折叠规则 ⇒ 窄屏不折叠导致页头横向溢出。 */
+@media (max-width:1278px){.approval-page .main-nav{ display:none !important; }}
+</style>
 </head><body class="approval-page"><header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="index.html" aria-label="北大荒智慧农业协同创新平台">

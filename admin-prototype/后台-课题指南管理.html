@@ -232,7 +232,11 @@ body:has(#drawer.open) .mtdev-btn{display:none!important}
 #drawer .guide-tabs button:focus-visible,#drawer .guide-add:focus-visible{outline:2px solid #8db5a5;outline-offset:-3px}
 @media(max-width:760px){#drawer .guide-tabbar{padding:0 18px;gap:8px}#drawer .guide-tabs{gap:16px}#drawer .guide-tag-options{gap:8px}#drawer .guide-tag-choice{font-size:12px;padding:7px 9px}#drawer .drawer-ft{flex-wrap:wrap}#guideEditError:not(:empty){flex-basis:100%}}
 
-</style></head>
+</style><style>/* 1030-fix:filter-narrow */
+/* 本页缺窄屏筛选栏规则：筛选控件固定宽度在 ≤430px 撑破视口。 */
+@media (max-width:680px){.filter-row{ gap:var(--s3); }.filter-row > *{ flex:1 1 100%; min-width:0; }.filter-row .f-field{ display:block; width:100%; }.filter-row .f-field > label{ display:block; margin-bottom:6px; min-width:auto; }.filter-row select, .filter-row input[type=text], .filter-row input:not([type]){ width:100%; max-width:100%; }.search-wrap{ min-width:0; width:100%; flex:1 1 100%; }.search-in{ width:100%; min-width:0; }}
+</style>
+</head>
 <body>
 
 <header class="site-header">
@@ -596,7 +600,7 @@ if(/模型/.test(name)){return PX.confirm(name,r.name||'当前模型',()=>{if(/�
 return PX.detail(name,{'名称':tr?.cells[0]?.innerText||name,'状态':'可查看','更新时间':'2026-09-24','所属模块':document.querySelector('h1')?.innerText||'管理后台'});
 }; window.ph=PX.ph;
 PX.action=(msg,el)=>{msg=msg.replace(/[（(].*?[）)]/g,'').trim();
-if(msg==='门户首页')return PX.go('后台-工作台总览');
+if(msg==='门户首页')return PX.go('index');
 if(msg==='消息中心')return PX.go('后台-消息中心');
 if(msg==='个人资料')return PX.go('后台-个人资料');
 if(msg==='账号安全')return PX.go('后台-账号安全');

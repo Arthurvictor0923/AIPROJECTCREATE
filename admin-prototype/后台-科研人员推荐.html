@@ -380,7 +380,7 @@ if(/模型/.test(name)){return PX.confirm(name,r.name||'当前模型',()=>{if(/�
 return PX.detail(name,{'名称':tr?.cells[0]?.innerText||name,'状态':'可查看','更新时间':'2026-09-24','所属模块':document.querySelector('h1')?.innerText||'管理后台'});
 }; window.ph=PX.ph;
 PX.action=(msg,el)=>{msg=msg.replace(/[（(].*?[）)]/g,'').trim();
-if(msg==='门户首页')return PX.go('后台-工作台总览');
+if(msg==='门户首页')return PX.go('index');
 if(msg==='消息中心')return PX.go('后台-消息中心');
 if(msg==='个人资料')return PX.go('后台-个人资料');
 if(msg==='账号安全')return PX.go('后台-账号安全');

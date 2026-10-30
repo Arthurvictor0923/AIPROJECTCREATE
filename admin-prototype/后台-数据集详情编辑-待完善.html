@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-prototype-file="后台-数据集详情编辑-待完善.html">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -521,7 +521,7 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
 <style>/* 补全原型公共交互样式 */
 .px-mask{position:fixed;inset:0;background:rgba(12,35,39,.42);z-index:9998;display:flex;align-items:center;justify-content:center;padding:28px}.px-dialog{width:780px;max-width:95vw;max-height:90vh;background:#fff;border-radius:12px;box-shadow:0 24px 80px #1235;display:flex;flex-direction:column;color:#203c49;text-align:left}.px-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid #e3ece8;font-size:18px;font-weight:650}.px-dialog>header button{border:0;background:none;font-size:26px;color:#69807b;cursor:pointer}.px-body{padding:24px 26px;overflow:auto}.px-dialog footer{padding:16px 26px;border-top:1px solid #e3ece8;display:flex;justify-content:flex-end;gap:10px}.px-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}.px-field{display:flex;flex-direction:column;gap:8px;font-size:13px}.px-field.wide{grid-column:1/-1}.px-field input,.px-field select,.px-field textarea,.px-input{border:1px solid #d7e4df;border-radius:6px;background:white;padding:10px 12px;font:inherit;color:#27443f;min-width:0}.px-field textarea{min-height:100px;resize:vertical}.px-help{font-size:12px;color:#72867f;line-height:1.7;margin:12px 0}.px-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #cfded7;border-radius:6px;padding:8px 15px;background:#fff;color:#215547;font-size:13px;cursor:pointer;gap:6px;text-decoration:none}.px-btn.primary{background:#146c52;border-color:#146c52;color:white}.px-btn.danger{color:#b94f46}.px-btn:disabled{opacity:.5;cursor:not-allowed}.px-chip{display:inline-block;background:#edf7f1;color:#257151;border-radius:4px;padding:4px 9px;font-size:12px}.px-table{border-collapse:collapse;width:100%;font-size:13px}.px-table th{background:#f4f8f6;color:#70837b;font-weight:500}.px-table th,.px-table td{padding:14px 15px;border-bottom:1px solid #e9efec;text-align:left}.px-table td small{display:block;margin-top:5px;color:#8a9a94}.px-table button{margin-right:7px}.px-empty{padding:48px;text-align:center;color:#80928b}.px-card{background:#fff;border:1px solid #e0eae5;border-radius:10px;margin-bottom:20px;overflow:hidden}.px-card-head{padding:18px 22px;border-bottom:1px solid #e5ece8;display:flex;align-items:center;justify-content:space-between}.px-card-head h2{font-size:16px;margin:0}.px-filter{display:flex;gap:12px;align-items:center;padding:20px;flex-wrap:wrap}.px-filter input{width:260px}.px-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.px-tabs .on{background:#e4f3ec;color:#106448;border-color:#8bb7a0}.px-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.px-metric{padding:22px;background:#fff;border:1px solid #e0eae5;border-radius:9px;color:#71877e}.px-metric b{display:block;font-size:27px;color:#214b40;margin-top:14px}.px-log{background:#16302a;color:#cee7d9;white-space:pre-wrap;padding:18px;border-radius:7px;font:13px/1.8 monospace;overflow-wrap:anywhere}.px-pager{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:16px 20px;color:#74857f;font-size:13px}.px-checks{display:flex;gap:12px;flex-wrap:wrap}.px-checks label{display:flex;align-items:center;gap:7px;border:1px solid #dce7e1;border-radius:6px;padding:9px 13px;cursor:pointer}.px-upload{padding:14px;background:#f5faf7;border:1px dashed #a8cdb8;border-radius:7px;margin-top:10px}.px-preview{max-width:100%;max-height:420px;border-radius:8px}.px-kv{display:grid;grid-template-columns:130px 1fr;gap:15px;font-size:14px;line-height:1.6}.px-kv dt{color:#7a8d83}.px-kv dd{margin:0;overflow-wrap:anywhere}.px-fullscreen{position:fixed!important;inset:15px!important;z-index:9990!important;background:#fff!important;overflow:auto!important;padding:24px!important}.px-pagehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.px-pagehead h1{font-size:23px;margin:0}.px-scroller{overflow:auto}.px-error{color:#bb4034;font-size:13px;margin-top:12px}.px-layout{display:grid;grid-template-columns:220px 1fr;gap:18px}.px-filetree{background:#f4f8f5;padding:16px;border-radius:8px}.px-filetree button{display:block;margin:7px 0;width:100%;text-align:left}.px-timeline{border-left:2px solid #bad7c8;padding-left:18px;margin-left:8px}.px-timeline p{margin:0 0 18px}.px-timeline small{display:block;color:#7b9185}.px-size{padding:6px;border:1px solid #dae7df;border-radius:5px;color:#36564a;background:white}@media(max-width:800px){.px-grid,.px-layout{grid-template-columns:1fr}.px-metrics{grid-template-columns:repeat(2,1fr)}}
 [hidden]{display:none!important}
-</style></head>
+</style><script>window.DatasetPrototypeRoutes={"list": "后台-数据集管理.html", "pending": "后台-数据集详情编辑-待完善.html", "preview": "后台-数据集详情编辑-数据预览.html", "complete": "后台-数据集详情编辑-已完善.html"};</script></head>
 <body>
 
 <header class="site-header">
@@ -681,18 +681,18 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
 
   <div class="two-col">
     <div class="col-l">
-          <section class="card">
+          <section class="card" id="datasetLegacyCard">
             <div class="tabs" role="tablist">
               <button type="button" class="tab active" role="tab" onclick="switchTab(this,'p1')">数据介绍</button>
               <button type="button" class="tab" role="tab" onclick="switchTab(this,'p2')">数据预览</button>
             </div>
             <div class="tabpane on" id="p1">
               <div class="rte"><div class="rte-tb" id="tb1"></div>
-                <div class="rte-bd">请输入数据介绍，可补充关键参数、适用方向等内容</div></div>
+                <div class="rte-bd" id="datasetLegacyIntro" contenteditable="true">请输入数据介绍，可补充关键参数、适用方向等内容</div></div>
             </div>
             <div class="tabpane" id="p2">
               <div class="rte"><div class="rte-tb" id="tb2"></div>
-                <div class="rte-bd">请输入数据预览说明，可补充样例内容与预览方式</div></div>
+                <div class="rte-bd" id="datasetLegacyPreview" contenteditable="true">请输入数据预览说明，可补充样例内容与预览方式</div></div>
             <div class="pv-entry">
               <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M9.5 10v9"/></svg></span>
               <div class="tx"><b>数据预览入口</b><span>入口按数据类型匹配预览组件。当前尚未选择数据类型，暂不提供预览入口。</span></div>
@@ -707,8 +707,8 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
         <div class="kv">
           <div class="k"><span class="req">*</span>数据类型</div>
           <div class="v"><div class="dual">
-            <select class="sel"><option value="" selected>请选择类型</option><option>结构化</option><option>非结构化</option></select>
-            <select class="sel"><option value="" selected>请选择形态</option><option>表格</option><option>时序</option><option>无人机影像</option><option>遥感栅格</option><option>矢量</option><option>压缩包</option></select>
+            <select class="sel" id="dataType" name="dataType"><option value="" selected>请选择类型</option><option>结构化</option><option>非结构化</option></select>
+            <select class="sel" id="dataModality" name="modality"><option value="" selected>请选择形态</option><option>表格</option><option>时序</option><option>无人机影像</option><option>遥感栅格</option><option>矢量</option><option>压缩包</option></select>
           </div></div>
           <div class="k"><span class="req">*</span>作物类型</div>
           <div class="v">
@@ -957,7 +957,7 @@ cnt('intro','c1',1000);
 <script>
 (()=>{
 'use strict';
-const PX=window.PX={}; const file=decodeURIComponent(location.pathname.split('/').pop());
+const PX=window.PX={}; const file=document.documentElement.dataset.prototypeFile||decodeURIComponent(location.pathname.split('/').pop());
 PX.file=file; PX.key=new URLSearchParams(location.search).has('asset')?'agri-dataset-detail:'+new URLSearchParams(location.search).get('asset'):new URLSearchParams(location.search).has('item')?'agri-content-detail:'+file.split('-')[1]+':'+new URLSearchParams(location.search).get('item'):'agri-proto-v2:'+file; PX.last=null;
 PX.e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 PX.get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
@@ -988,7 +988,7 @@ if(/模型/.test(name)){return PX.confirm(name,r.name||'当前模型',()=>{if(/�
 return PX.detail(name,{'名称':tr?.cells[0]?.innerText||name,'状态':'可查看','更新时间':'2026-09-24','所属模块':document.querySelector('h1')?.innerText||'管理后台'});
 }; window.ph=PX.ph;
 PX.action=(msg,el)=>{msg=msg.replace(/[（(].*?[）)]/g,'').trim();
-if(msg==='门户首页')return PX.go('后台-工作台总览');
+if(msg==='门户首页')return PX.go('index');
 if(msg==='消息中心')return PX.go('后台-消息中心');
 if(msg==='个人资料')return PX.go('后台-个人资料');
 if(msg==='账号安全')return PX.go('后台-账号安全');
@@ -1020,7 +1020,7 @@ if(msg){let recognized=/门户首页|消息中心|个人资料|账号安全|退�
 },true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){PX.close();document.querySelector('.px-fullscreen')?.classList.remove('px-fullscreen')}});
 // Preserve editable content across refreshes without changing original inline handlers.
-const saved=PX.get(PX.key+':fields',[]);let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
+const saved=[];let fields=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{let el=x.id?document.getElementById(x.id):fields[x.i];if(el){if(x.html)el.innerHTML=x.val;else el.value=x.val}});
 // Static prototype pagers must reflect the actual sample row count.
 if(!['后台-模型管理.html','后台-审批中心.html','index.html'].includes(file)&&document.querySelector('#pgBtns'))PX.paginate();
 })();
@@ -1143,7 +1143,7 @@ if(f.startsWith('后台-模型详情编辑')){
 }
 })();
 (()=>{
-const saved=PX.get(PX.key+':fields',[]);const inputs=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{const el=x.id?document.getElementById(x.id):inputs[x.i];if(el&&x.html)el.innerHTML=x.val});
+const saved=[];const inputs=Array.from(document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]'));saved.forEach(x=>{const el=x.id?document.getElementById(x.id):inputs[x.i];if(el&&x.html)el.innerHTML=x.val});
 // Link the working overview cards to their existing modules.
 if(PX.file==='index.html'){
  document.querySelectorAll('.kpi').forEach(el=>{el.style.cursor='pointer';el.tabIndex=0;const jump=()=>{let s=el.textContent;if(s.includes('模型'))PX.go('后台-模型管理');else if(s.includes('数据'))PX.go('后台-数据集管理');else if(s.includes('空间'))PX.go('后台-科研空间管理');else PX.go('后台-科研人员推荐')};el.onclick=jump;el.onkeydown=e=>{if(e.key==='Enter')jump()}});
@@ -1168,11 +1168,286 @@ if(PX.file==='后台-科研空间详情.html'){
 if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
 
 </script>
-<!-- meeting-1010:start --><link rel="stylesheet" href="assets/meeting/meeting.css"><script src="assets/meeting/meeting-seed.js"></script><script src="assets/meeting/meeting-core.js"></script>
+<!-- meeting-1010:start --><link rel="stylesheet" href="assets/meeting/meeting.css"><script src="assets/meeting/meeting-seed.js"></script><script src="assets/meeting/meeting-core.js"></script><script>if(window.Meeting){Meeting.file=document.documentElement.dataset.prototypeFile||Meeting.file;Meeting.schemas.dataset=Meeting.schemas.dataset.filter(([key])=>key!=='scale');}</script>
 <script src="assets/meeting/approval-seeds.js"></script>
 <script src="assets/meeting/project-space-seeds.js"></script>
 <script src="assets/meeting/backend-seeds.js"></script>
-<script src="assets/meeting/backend-state.js"></script><script src="assets/meeting/meeting-features.js"></script><script src="assets/meeting/meeting-filters.js"></script><script src="assets/meeting/meeting-space.js"></script><!-- meeting-1010:end --><script src="assets/meeting/backend-integration.js"></script>
+<script src="assets/meeting/backend-state.js"></script><script>(() => {
+  const M=window.Meeting;
+  if(!M?.schemas?.dataset||!document.getElementById('datasetLegacyCard'))return;
+  const schema=M.schemas.dataset.filter(([key])=>key!=='scale');
+  // The detail page already owns its fields; no supplemental metadata card is needed.
+  M.schemas.dataset=[];
+  window.finishDatasetMetadataBridge=()=>{
+    M.schemas.dataset=schema;
+    const controls=M.editorControls;if(!controls)return;
+    const id=M.editorAsset,row=(M.read('agri-datasets',[])||[]).find(item=>String(item.id||item.key)===id);
+    const values={...(M.assets()[id]||{}),...(row?.metadata||{})};
+    const previous=M.read((window.PX?.key||'agri-dataset-detail:'+id)+':fields',[]);
+    for(const [key]of schema){if(!controls[key])controls[key]={value:previous.find(field=>field.id==='mt-editor-'+key)?.val??values[key]??row?.[key]??''};}
+  };
+})();
+</script><script src="assets/meeting/meeting-features.js"></script><script>window.finishDatasetMetadataBridge?.();delete window.finishDatasetMetadataBridge;</script><script src="assets/meeting/meeting-filters.js"></script><script src="assets/meeting/meeting-space.js"></script><!-- meeting-1010:end --><script src="assets/meeting/backend-integration.js"></script>
 <!-- devdoc-1012:start --><script src="assets/meeting/meeting-devdoc.js"></script><!-- devdoc-1012:end -->
+
+<!-- dataset-content-aligned:start -->
+<style>.info-form.info-line3.dataset-info-tags{grid-template-columns:74px minmax(0,1fr) 74px minmax(0,1fr);}
+.dataset-info-tags>.lb:first-child{align-self:start;padding-top:5px;}
+.dataset-tags-value{grid-column:2/-1;}
+#datasetTags{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px 20px;min-width:0;}
+.dataset-tag-formats{flex:1;min-width:180px;}
+.dataset-tag-annotation{flex:0 0 128px;}
+.dataset-tag-label{display:block;font-size:12px;color:#526078;line-height:18px;margin-bottom:6px;}
+.dataset-format-chips{display:flex;flex-wrap:wrap;gap:7px;min-height:38px;align-items:center;}
+.dataset-tag-chip{display:inline-flex;align-items:center;background:#edf6f2;color:#005653;border-radius:4px;padding:4px 8px;font-size:13px;line-height:22px;}
+.dataset-tag-empty{font-size:13px;color:#6b778c;}
+#datasetAnnotation{width:100%;min-height:38px;height:38px;font-size:13px;}
+@media(max-width:1024px){.info-form.info-line3.dataset-info-tags{grid-template-columns:52px minmax(0,1fr);}}
+@media(max-width:680px){.info-form.info-line3.dataset-info-tags{grid-template-columns:minmax(0,1fr);}.dataset-tags-value{grid-column:1/-1;}}
+</style>
+<style>
+.ds-editor{padding:20px;background:#fff;border:1px solid #dce5e9;border-radius:6px;margin:16px 0;color:#10213a;font:14px/1.7 "Microsoft YaHei",Arial,sans-serif}.ds-tabs{display:flex;gap:24px;border-bottom:1px solid #dce5e9;margin-bottom:20px}.ds-tabs button{padding:8px 0 12px;border:0;border-radius:0;background:none;color:#526078;font:inherit}.ds-tabs button[aria-selected=true]{color:#005653;border-bottom:2px solid #005653;font-weight:600}.ds-editor label{display:block;font-weight:500;margin:16px 0 8px}.ds-editor textarea,.ds-editor select,.ds-editor input{box-sizing:border-box;width:100%;border:1px solid #dce5e9;border-radius:4px;padding:9px 11px;background:#fff;color:#10213a;font:inherit}.ds-editor textarea{resize:vertical;min-height:86px}.ds-editor input{min-width:80px}.ds-editor [hidden]{display:none!important}.ds-heading{display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px}.ds-heading h4{margin:0}.ds-editor button{cursor:pointer}.ds-heading button,.ds-parameters button{background:#fff;color:#005653;border:1px solid #b6cfca;border-radius:4px;font:inherit;padding:5px 10px;white-space:nowrap}.ds-scroll{overflow:auto}.ds-editor table{border-collapse:collapse;width:100%;font-size:13px}.ds-editor th,.ds-editor td{padding:9px;border:1px solid #dce5e9;text-align:left;vertical-align:top;max-width:300px;overflow-wrap:anywhere}.ds-editor th{background:#f5f8f7;font-weight:500}.ds-parameters th:nth-child(1){width:27%}.ds-parameters th:nth-child(2){width:40%}.ds-parameters th:nth-child(3){width:20%}.ds-note,.ds-param-empty{color:#6b778c;font-size:12px;white-space:pre-wrap}.ds-preview{margin:12px 0 20px}.ds-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto;background:#f5f8f7;padding:12px}.ds-image{max-width:100%;max-height:280px;object-fit:contain}.ds-file-name{margin:0 0 10px}.ds-editor input:focus,.ds-editor textarea:focus,.ds-editor select:focus{outline:2px solid #d3e6df;border-color:#005653}
+
+.dp-map{width:100%;height:320px;background:#edf5f1;border:1px solid #c9dcd2;touch-action:none;cursor:grab}.dp-map-tools{display:flex;gap:8px;margin-bottom:8px}.dp-map-tools button,#ds-display-remove{padding:5px 12px;background:#fff;color:#005653;border:1px solid #b6cfca;border-radius:4px}.dp-content pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto}.dp-saved a{color:#005653}.dp-saved .ds-image{max-width:100%;max-height:320px}
+
+#datasetLegacyCard[hidden]{display:none!important;}
+.data-submit-style .ds-editor{margin:0 0 16px;padding:20px 24px;border-radius:5px;border-color:#dfe7e2;font-family:inherit;min-width:0;}
+.data-submit-style .ds-editor textarea{font-family:inherit;font-size:14px;line-height:1.8;border-color:#dce5e9;}
+.data-submit-style .ds-tabs button{font-size:14px;}
+.data-submit-style .ds-editor button:not([role=tab]){font-size:13px;}
+.data-submit-style .ds-parameters{min-width:500px;}
+.data-submit-style .ds-editor select{font-size:13px;}
+.data-submit-style .ds-editor input{min-width:0;}
+.dataset-content-summary{font-size:14px;line-height:1.8;color:#10213a;}
+.dataset-content-summary h3{font-size:14px;margin:18px 0 8px;}
+.dataset-content-summary table{width:100%;border-collapse:collapse;}
+.dataset-content-summary th,.dataset-content-summary td{padding:9px;border:1px solid #dce5e9;text-align:left;}
+@media(max-width:680px){.data-submit-style .ds-editor{padding:16px;}}
+</style>
+<script>window.DatasetPreview=(()=>{
+ const e=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function db(mode,fn){return new Promise((resolve,reject)=>{const r=indexedDB.open('agri-dataset-preview-materials',1);r.onupgradeneeded=()=>r.result.createObjectStore('files',{keyPath:'id'});r.onerror=()=>reject(r.error);r.onsuccess=()=>{const d=r.result,t=d.transaction('files',mode),q=fn(t.objectStore('files'));t.oncomplete=()=>{resolve(q?.result);d.close();};t.onerror=()=>{reject(t.error);d.close();};};});}
+ const modes=shape=>['遥感栅格','遥感影像','矢量','无人机影像'].includes(shape)?[['image','图片展示'],['map','地图预览'],['file','文件展示']]:shape==='图像'?[['image','图片展示'],['file','文件展示']]:[['file','文件展示'],['image','图片展示']];
+ async function save(file){const id='preview-'+crypto.randomUUID();await db('readwrite',s=>s.put({id,file}));return {id,name:file.name,size:file.size,type:file.type};}
+ function map(box,data){const geoms=data.type==='FeatureCollection'?data.features.map(f=>f.geometry):data.type==='Feature'?[data.geometry]:[data];const paths=[],points=[];function walk(g){if(!g)return;const line=c=>{if(!Array.isArray(c))return;const valid=c.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90);if(valid.length!==c.length)throw Error('坐标');points.push(...valid);return valid;};if(g.type==='Point'){const a=line([g.coordinates]);paths.push({point:a[0]});}else if(g.type==='MultiPoint')line(g.coordinates).forEach(p=>paths.push({point:p}));else if(g.type==='LineString')paths.push({line:line(g.coordinates)});else if(g.type==='MultiLineString')g.coordinates.forEach(c=>paths.push({line:line(c)}));else if(g.type==='Polygon')paths.push({rings:g.coordinates.map(line)});else if(g.type==='MultiPolygon')g.coordinates.forEach(c=>paths.push({rings:c.map(line)}));else if(g.type==='GeometryCollection')g.geometries.forEach(walk);}
+ geoms.forEach(walk);if(!points.length||points.length>100000)throw Error('范围');let minX=180,maxX=-180,minY=90,maxY=-90;for(const [x,y]of points){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}const scale=Math.min(540/(maxX-minX||.01),280/(maxY-minY||.01)),cx=(maxX+minX)/2,cy=(maxY+minY)/2;const xy=p=>[300+(p[0]-cx)*scale,160-(p[1]-cy)*scale];const d=ps=>ps.map((p,i)=>(i?'L':'M')+xy(p).join(' ')).join(' ');
+ box.innerHTML='<p class="ds-note">空间样例预览 · 经纬度坐标 · 无底图</p><div class="dp-map-tools"><button type="button" data-zoom="1.3">放大</button><button type="button" data-zoom="0.77">缩小</button><button type="button" data-zoom="reset">复位</button></div><svg class="dp-map" viewBox="0 0 600 320" role="img" aria-label="空间样例地图">'+paths.map(p=>p.point?'<circle cx="'+xy(p.point)[0]+'" cy="'+xy(p.point)[1]+'" r="4" fill="#005653"/>':p.rings?'<path d="'+p.rings.map(r=>d(r)+' Z').join(' ')+'" fill="#74ba9c77" fill-rule="evenodd" stroke="#005653" vector-effect="non-scaling-stroke"/>':'<path d="'+d(p.line)+'" fill="none" stroke="#005653" vector-effect="non-scaling-stroke"/>').join('')+'</svg>';let view=[0,0,600,320];const svg=box.querySelector('svg'),paint=()=>svg.setAttribute('viewBox',view.join(' '));box.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{if(b.dataset.zoom==='reset')view=[0,0,600,320];else{const f=Number(b.dataset.zoom),w=view[2]/f,h=view[3]/f;view=[view[0]+(view[2]-w)/2,view[1]+(view[3]-h)/2,w,h];}paint();});let start;svg.onpointerdown=ev=>{start={x:ev.clientX,y:ev.clientY,v:[...view]};svg.setPointerCapture(ev.pointerId);};svg.onpointermove=ev=>{if(!start)return;const rect=svg.getBoundingClientRect();view=[start.v[0]-(ev.clientX-start.x)*start.v[2]/rect.width,start.v[1]-(ev.clientY-start.y)*start.v[3]/rect.height,view[2],view[3]];paint();};svg.onpointerup=()=>start=null;svg.onpointercancel=()=>start=null;
+ }
+ async function show(box,meta,mode){const key=JSON.stringify([meta?.id,mode]);box.dataset.previewKey=key;if(!meta){box.textContent='尚未上传预览材料';return;}box.textContent='正在加载预览材料…';try{const item=meta.dataURL?.startsWith('data:image/png;base64,')?{file:new File([Uint8Array.from(atob(meta.dataURL.split(',')[1]),c=>c.charCodeAt(0))],meta.name,{type:'image/png'})}:await db('readonly',s=>s.get(meta.id));if(box.dataset.previewKey!==key||!box.isConnected)return;if(!item?.file){box.textContent=meta.name+'：当前浏览器暂无该预览文件';return;}const file=item.file,url=URL.createObjectURL(file);box.innerHTML='<p>'+e(meta.name)+' · '+Math.ceil(meta.size/1024)+' KB <a href="'+url+'" download="'+e(meta.name)+'">下载预览材料</a></p><div class="dp-content"></div>';const body=box.querySelector('.dp-content');const obs=new MutationObserver(()=>{if(!box.isConnected||box.dataset.previewKey!==key){URL.revokeObjectURL(url);obs.disconnect();}});obs.observe(document.body,{childList:true,subtree:true});
+ if(mode==='map'){if(!/\.(geojson|json)$/i.test(meta.name)){body.innerHTML='<p class="ds-note">当前原型支持带经纬度坐标的 GeoJSON 样例地图。此文件暂不能显示为地图，可切换为图片或文件展示。</p>';return;}try{map(body,JSON.parse(await file.text()));}catch{body.innerHTML='<p class="ds-note">未识别到可展示的经纬度几何数据，请检查样例文件或切换预览方式。</p>';}}
+ else if(/^image\/(png|jpeg|gif|webp)$/.test(file.type)||/\.(png|jpe?g|gif|webp)$/i.test(meta.name))body.innerHTML='<img class="ds-image" src="'+url+'" alt="'+e(meta.name)+'">';
+ else if(mode==='image')body.innerHTML='<p class="ds-note">请上传图片或成果截图用于图片展示。</p>';
+ else if(/\.pdf$/i.test(meta.name))body.innerHTML='<object type="application/pdf" data="'+url+'" width="100%" height="360"><p>请下载预览文档查看。</p></object>';
+ else if(/\.(txt|md|csv|sql|json|geojson)$/i.test(meta.name)){body.innerHTML='<pre></pre>';body.querySelector('pre').textContent=await file.slice(0,12000).text();}
+ else body.innerHTML='<p class="ds-note">此格式暂不支持在线展示，可下载预览材料查看。</p>';
+ }catch{box.textContent='预览材料读取失败，请重试。';}}
+ function view(d){return '<div class="dp-saved" data-dp-meta="'+e(JSON.stringify(d.previewMaterial||null))+'" data-dp-mode="'+e(d.previewMode||'file')+'"></div>';}
+ const observer=new MutationObserver(()=>{document.querySelectorAll('.dp-saved:not([data-loaded])').forEach(n=>{n.dataset.loaded='true';show(n,JSON.parse(n.dataset.dpMeta),n.dataset.dpMode);});});observer.observe(document.documentElement,{childList:true,subtree:true});
+ return {modes,save,show,view};
+})();
+</script>
+<script>window.DatasetUI=(()=>{
+ const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const choices={'结构化':['表格','时序'],'非结构化':['无人机影像','遥感栅格','遥感影像','矢量','图像','文本','压缩包']};
+ const plain=html=>{const d=document.createElement('div');d.innerHTML=html||'';d.querySelectorAll('br').forEach(n=>n.replaceWith('\n'));d.querySelectorAll('p,li,tr').forEach(n=>n.append('\n'));return d.textContent.trim();};
+ function initial(v){if(v.datasetContent)return JSON.parse(JSON.stringify(v.datasetContent));const d=document.createElement('div');d.innerHTML=v.intro||'';const out={overview:'',direction:'',parameters:[],structureFile:'',sampleFile:'',note:'',previews:{}};let key='overview';for(const n of d.childNodes){if(n.nodeType===1&&/^H[1-6]$/.test(n.tagName)){key=/适用/.test(n.textContent)?'direction':/参数/.test(n.textContent)?'parameters':/预览|样例/.test(n.textContent)?'note':'overview';continue;}const t=plain(n.outerHTML||e(n.textContent));if(t){if(key==='parameters')out.parameters.push({name:'关键参数',value:t,unit:''});else out[key]+=(out[key]?'\n':'')+t;}}return out;}
+ function render(){return '<section class="ds-editor"><div role="tablist" aria-label="数据内容" class="ds-tabs"><button type="button" id="ds-tab-intro" role="tab" aria-selected="true" aria-controls="ds-pane-intro" data-ds-tab="intro">数据介绍</button><button type="button" id="ds-tab-preview" role="tab" aria-selected="false" aria-controls="ds-pane-preview" data-ds-tab="preview">数据预览</button></div><section id="ds-pane-intro" role="tabpanel" aria-labelledby="ds-tab-intro"><label for="ds-overview">数据概述</label><textarea id="ds-overview" rows="5" placeholder="填写数据内容、来源及覆盖范围"></textarea><label for="ds-direction">适用方向</label><textarea id="ds-direction" rows="4" placeholder="填写适用的研究任务或业务场景"></textarea><div class="ds-heading"><h4>关键参数</h4><button type="button" data-ds-add>＋ 添加参数</button></div><div class="ds-scroll"><table class="ds-parameters"><thead><tr><th>参数名称</th><th>参数值</th><th>单位（选填）</th><th>操作</th></tr></thead><tbody id="ds-parameters"></tbody></table></div><datalist id="ds-param-options"><option>核心指标</option><option>时间分辨率</option><option>空间分辨率</option></datalist></section><section id="ds-pane-preview" role="tabpanel" aria-labelledby="ds-tab-preview" hidden><div id="ds-structured-preview"><p class="ds-note">从已上传的成果文件中选择；结构文件与样例数据可使用同一个文件。</p><div id="ds-structure-block"><label for="ds-structure-file">结构文件（选填）</label><select id="ds-structure-file"></select><div id="ds-structure-preview" class="ds-preview"></div></div><label for="ds-sample-file">样例数据文件</label><select id="ds-sample-file"></select><div id="ds-sample-preview" class="ds-preview"></div></div><div id="ds-display-preview" hidden><p class="ds-note">单独上传用于展示的节选、脱敏样例或截图，不默认展示完整成果文件。</p><label for="ds-display-mode">预览方式</label><select id="ds-display-mode"></select><label for="ds-display-file">预览材料</label><input id="ds-display-file" type="file"><p id="ds-display-status" class="ds-note" role="status"></p><button type="button" id="ds-display-remove">移除预览材料</button><div id="ds-display-content" class="ds-preview"></div></div><label for="ds-preview-note">预览说明（选填）</label><textarea id="ds-preview-note" rows="3" placeholder="补充字段含义、单位或样例说明"></textarea></section></section>';}
+ function csv(text,delimiter){const rows=[];let row=[],cell='',quote=false;for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quote&&text[i+1]==='"'){cell+='"';i++;}else quote=!quote;}else if(c===delimiter&&!quote){row.push(cell);cell='';}else if((c==='\n'||c==='\r')&&!quote){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x!==''))rows.push(row);row=[];cell='';if(rows.length>=21)return rows;}else cell+=c;}if(quote)throw Error('引号未闭合');if(cell||row.length){row.push(cell);rows.push(row);}return rows;}
+ function table(headers,rows){return '<div class="ds-scroll"><table><thead><tr>'+headers.map(x=>'<th>'+e(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+e(typeof x==='object'?JSON.stringify(x):x)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';}
+ function previewHTML(p,structure){if(!p)return '<p class="ds-note">请选择文件</p>';const title='<p class="ds-file-name">'+e(p.name)+'</p>';if(p.headers)return title+(structure?table(['字段名称'],p.headers.map(x=>[x])):table(p.headers,p.rows))+'<p class="ds-note">'+(structure?'从样例列名提取；字段含义与单位可在预览说明中补充。':'仅展示前 '+p.rows.length+' 条样例，不改变原文件。')+'</p>';if(p.text!==undefined)return title+'<pre>'+e(p.text)+'</pre><p class="ds-note">'+e(p.message||'文件内容节选')+'</p>';return title+'<p class="ds-note">'+e(p.message||'文件信息已保留')+'</p>';}
+ function mount(root,v,options){if(!root)return;const form=options.form||root.closest('form'),state=initial(v);state.previews??={};let token=0;const urls=[];const q=s=>root.querySelector(s),type=form.querySelector('[name=dataType]'),modality=form.querySelector('[name=modality]');
+ const rows=()=>[...q('#ds-parameters').querySelectorAll('tr[data-param]')].map(r=>Object.fromEntries([...r.querySelectorAll('input')].map(n=>[n.dataset.key,n.value]))).filter(r=>r.name||r.value||r.unit);
+ const add=(p={})=>{q('#ds-parameters .ds-param-empty')?.remove();const r=document.createElement('tr');r.dataset.param='true';r.innerHTML=['name','value','unit'].map((k,i)=>'<td><input data-key="'+k+'" aria-label="'+['参数名称','参数值','单位'][i]+'" '+(k==='name'?'list="ds-param-options"':'')+' value="'+e(p[k]||'')+'"></td>').join('')+'<td><button type="button" data-remove>删除</button></td>';r.querySelector('button').onclick=()=>{r.remove();empty();};q('#ds-parameters').append(r);};
+ function empty(){if(!q('#ds-parameters [data-param]'))q('#ds-parameters').innerHTML='<tr class="ds-param-empty"><td colspan="4">尚未添加参数</td></tr>';}
+ q('#ds-overview').value=state.overview||'';q('#ds-direction').value=state.direction||'';q('#ds-preview-note').value=state.note||'';(state.parameters||[]).forEach(add);empty();q('[data-ds-add]').onclick=()=>add();
+ function files(){return options.files().map((f,i)=>({...f,key:f.key||JSON.stringify([f.name,f.size??f.bytes??'',f.path||'']),index:i}));}
+ function refresh(){const list=files();for(const [role,key]of [['structure','structureFile'],['sample','sampleFile']]){const select=q('#ds-'+role+'-file');if(select.options.length)state[key]=select.value;const previous=state[key];select.innerHTML='<option value="">请选择已上传的文件</option>'+list.map(f=>'<option value="'+e(f.key)+'">'+e(f.name)+'</option>').join('');if(list.some(f=>f.key===previous))select.value=previous;else{state[key]='';delete state.previews[role];q('#ds-'+role+'-preview').innerHTML=previewHTML(null);}}}
+ async function show(role){const key=role==='structure'?'structureFile':'sampleFile',id=q('#ds-'+role+'-file').value;state[key]=id;const f=files().find(x=>x.key===id),box=q('#ds-'+role+'-preview'),ticket=++token;if(!f){delete state.previews[role];box.innerHTML=previewHTML(null);return;}box.textContent='正在读取预览…';let p={name:f.name};try{const blob=f.file||await options.read?.(f);if(!blob&&options.preview?.(f))p={...options.preview(f)};else if(!blob&&state.previews[role]?.name===f.name)p={...state.previews[role]};else if(!blob)p.message='当前文件仅有记录信息，暂无可读取的预览内容。可填写预览说明。';else if(/^image\/(png|jpeg|gif|webp)$/.test(blob.type)){p.message='图片文件';if(!root.isConnected||state[key]!==id)return;const url=URL.createObjectURL(blob);urls.push(url);state.previews[role]=p;box.innerHTML='<p>'+e(f.name)+'</p><img class="ds-image" src="'+url+'" alt="'+e(f.name)+'">';return;}else if(/\.(csv|tsv|json|sql|txt|md)$/i.test(f.name)){if(blob.size>2*1024*1024){p.message='文件较大，暂不自动解析；文件仍可提交，可另选样例文件。';}else{const txt=(await blob.text()).replace(/^\uFEFF/,'');if(/\.(csv|tsv)$/i.test(f.name)){const rr=csv(txt,/\.tsv$/i.test(f.name)?'\t':',');if(!rr.length)throw Error('没有可预览的数据');p.headers=rr[0];p.rows=rr.slice(1,21);}else if(/\.json$/i.test(f.name)){const data=JSON.parse(txt);if(Array.isArray(data)&&data.length&&data.every(x=>x&&typeof x==='object'&&!Array.isArray(x))){p.headers=[...new Set(data.slice(0,20).flatMap(Object.keys))];p.rows=data.slice(0,20).map(r=>p.headers.map(k=>r[k]??''));}else p.text=JSON.stringify(data,null,2).slice(0,12000);}else{p.text=txt.slice(0,12000);p.message=/\.sql$/i.test(f.name)?'SQL 源码预览，不执行脚本；字段结构可通过说明补充。':'文件内容节选';}}}else p.message='该格式暂不支持在线解析，文件仍可提交，可填写预览说明。';}catch{p.message='暂时无法解析该文件，文件仍可提交，可填写预览说明。';}if(!root.isConnected||state[key]!==id)return;state.previews[role]=p;box.innerHTML=previewHTML(p,role==='structure');}
+ for(const role of ['structure','sample'])q('#ds-'+role+'-file').onchange=()=>show(role);
+ let previewBusy=false;
+ function display(){const unstructured=type?.value==='非结构化';q('#ds-structured-preview').hidden=unstructured;q('#ds-display-preview').hidden=!unstructured;state.previewType=unstructured?'display':'structured';const modes=DatasetPreview.modes(modality?.value);if(!modes.some(([id])=>id===state.previewMode))state.previewMode=modes[0][0];q('#ds-display-mode').innerHTML=modes.map(([id,label])=>'<option value="'+id+'">'+label+'</option>').join('');q('#ds-display-mode').value=state.previewMode;q('#ds-display-remove').hidden=!state.previewMaterial;if(unstructured)DatasetPreview.show(q('#ds-display-content'),state.previewMaterial,state.previewMode);}
+ q('#ds-display-mode').onchange=()=>{state.previewMode=q('#ds-display-mode').value;DatasetPreview.show(q('#ds-display-content'),state.previewMaterial,state.previewMode);};
+ q('#ds-display-file').onchange=async event=>{const file=event.target.files[0];if(!file)return;previewBusy=true;q('#ds-display-status').textContent='正在保存预览材料…';try{const meta=await DatasetPreview.save(file);state.previewMaterial=meta;display();q('#ds-display-status').textContent='预览材料已添加';}catch{q('#ds-display-status').textContent='预览材料保存失败，请重试';}finally{previewBusy=false;event.target.value='';}};
+ q('#ds-display-remove').onclick=()=>{state.previewMaterial=null;q('#ds-display-status').textContent='';display();};
+ modality?.addEventListener('change',display);
+
+ function link(clear=false){if(!type||!modality)return;const selected=modality.value,opts=choices[type.value]||[];modality.innerHTML='<option value="">请选择</option>'+opts.map(x=>'<option>'+e(x)+'</option>').join('');modality.value=opts.includes(selected)?selected:'';modality.disabled=!type.value;q('#ds-structure-block').hidden=type.value!=='结构化';display();}
+ if(type){if(!type.value&&v.modality)type.value=['表格','时序'].includes(v.modality)?'结构化':'非结构化';type.addEventListener('change',()=>link(true));link();}
+ root.querySelectorAll('[data-ds-tab]').forEach(b=>b.onclick=()=>{root.querySelectorAll('[data-ds-tab]').forEach(n=>n.setAttribute('aria-selected',String(n===b)));q('#ds-pane-intro').hidden=b.dataset.dsTab!=='intro';q('#ds-pane-preview').hidden=b.dataset.dsTab!=='preview';if(b.dataset.dsTab==='preview'){if(type?.value==='非结构化')display();else{refresh();show('structure');show('sample');}}});
+ root._dataset={collect:()=>{refresh();return {...state,previewBusy,overview:q('#ds-overview').value,direction:q('#ds-direction').value,parameters:rows(),note:q('#ds-preview-note').value,...(type?.value!=='结构化'?{structureFile:'',sampleFile:'',previews:{}}:{})};},refresh};refresh();for(const role of ['structure','sample'])q('#ds-'+role+'-preview').innerHTML=previewHTML(state.previews[role],role==='structure');
+ const obs=new MutationObserver(()=>{if(!root.isConnected){urls.forEach(URL.revokeObjectURL);obs.disconnect();}});obs.observe(document.body,{childList:true,subtree:true});
+ }
+ function intro(d){const p=x=>'<p>'+e(x).replace(/\n/g,'<br>')+'</p>';return '<h3>数据概述</h3>'+p(d.overview)+'<h3>适用方向</h3>'+p(d.direction)+(d.parameters.length?'<h3>关键参数</h3>'+table(['参数名称','参数值','单位'],d.parameters.map(x=>[x.name,x.value,x.unit])):'');}
+ function collect(){const r=document.querySelector('.ds-editor');if(!r?._dataset)return null;const d=r._dataset.collect();return {datasetContent:d,intro:intro(d)};}
+ function view(d){return d?'<section class="ds-editor"><h3>数据预览</h3>'+(d.structureFile?'<h4>数据结构</h4>'+previewHTML(d.previews?.structure,true):'')+(d.previewType==='display'?'<h4>预览材料</h4>'+DatasetPreview.view(d):'<h4>参考数据</h4>'+previewHTML(d.previews?.sample,false))+(d.note?'<p class="ds-note">'+e(d.note)+'</p>':'')+'</section>':'';}
+ return {render,mount,collect,view,choices};
+})();
+</script>
+<script>window.DatasetDetailSource={"previewImage": null};</script>
+<script>(() => {
+  const legacyCard=document.getElementById('datasetLegacyCard');
+  if(!legacyCard||!window.DatasetUI||!window.PX)return;
+  const withoutScale=({scale,count,...values}={})=>values;
+  const originalControls=[...document.querySelectorAll('main input,main select,main textarea,main [contenteditable=true]')];
+  const restoredFields=PX.get(PX.key+':fields',[]);
+  const retiredIds=new Set(['mt-editor-version','mt-editor-format','mt-editor-annotation','mt-editor-scale']);
+  restoredFields.filter(field=>!retiredIds.has(field.id)).forEach((field,index)=>{
+    const control=field.id?document.getElementById(field.id):originalControls[index];
+    if(!control)return;if(field.html&&control.isContentEditable)control.innerHTML=field.val;else if(!field.html)control.value=field.val;
+  });
+  const type=document.getElementById('dataType'),modality=document.getElementById('dataModality');
+  const storageKey=PX.key+':datasetEditor';
+  const stored=PX.get(storageKey,null),cached=stored?withoutScale(stored):null;
+  const query=new URLSearchParams(location.search);
+  let passed={};try{passed=JSON.parse(query.get('data')||'{}');}catch{}
+  const asset=query.get('asset');
+  const linked=asset?(PX.get('agri-datasets',[])||[]).find(row=>String(row.id||row.key)===asset):null;
+  const incoming={...(linked||{}),...(passed||{})};
+  const registered=window.Meeting?.assets?.()[asset||window.Meeting?.editorAsset]||{};
+  const metadata=withoutScale({...registered,...(incoming.metadata||{}),...incoming});
+  if(linked&&!window.Meeting?.editorControls&&!restoredFields.length){
+    const name=document.querySelector('.info-form input[placeholder="请输入数据名称"]'),provider=document.querySelector('.info-form input[placeholder="请输入提供方"]');
+    if(name)name.value=metadata.name||name.value;
+    if(provider)provider.value=metadata.provider||metadata.org||provider.value;
+    const summary=document.getElementById('intro');if(summary&&(metadata.summary!==undefined||metadata.desc!==undefined))summary.value=metadata.summary??metadata.desc;
+    const idLabel=[...document.querySelectorAll('.info-line3 .lb')].find(label=>label.textContent.trim()==='数据集ID');
+    const idValue=idLabel?.nextElementSibling?.querySelector('.ro-val');if(idValue)idValue.textContent=asset;
+  }
+  const oldIntro=legacyCard.querySelector('#p1 .rte-bd'),oldPreview=legacyCard.querySelector('#p2 .rte-bd');
+  const firstPreview=legacyCard.querySelector('#p2')?.classList.contains('on');
+  const source=window.DatasetDetailSource||{};
+  const escape=PX.e;
+  const textOf=html=>{const box=document.createElement('div');box.innerHTML=html||'';box.querySelectorAll('br').forEach(n=>n.replaceWith('\n'));box.querySelectorAll('p,li,div,figcaption').forEach(n=>n.append('\n'));return box.textContent.replace(/[ \t]+\n/g,'\n').replace(/\n[ \t]+/g,'\n').replace(/\n{3,}/g,'\n\n').trim();};
+  function fileList(){
+    if(Array.isArray(metadata.files))return metadata.files.map((f,i)=>typeof f==='string'?{name:f,key:'submitted:'+i+':'+f}:f);
+    return [...document.querySelectorAll('#ofList .of-row,.of-table tbody tr')].map(n=>({name:n.querySelector('.of-name,.fn')?.textContent.trim(),size:n.querySelector('.of-size')?.textContent.trim()||n.cells?.[1]?.textContent.trim()})).filter(f=>f.name);
+  }
+  const fileKey=f=>f.key||JSON.stringify([f.name,f.size??f.bytes??'',f.path||'']);
+  function migrate(){
+    const doc={overview:'',direction:'',parameters:[],structureFile:'',sampleFile:'',note:'',previews:{}};
+    const content=document.createElement('div');content.innerHTML=metadata.intro||oldIntro?.innerHTML||'';
+    if(!/^请输入/.test(content.textContent.trim())){
+      let part='overview';
+      for(const node of content.childNodes){
+        if(node.nodeType===1&&/^H[1-6]$/.test(node.tagName)){part=/适用/.test(node.textContent)?'direction':/参数/.test(node.textContent)?'parameters':'overview';continue;}
+        if(part==='parameters'){
+          const items=node.querySelectorAll?.('li');
+          const lines=items?.length?[...items].map(n=>n.textContent.trim()):textOf(node.outerHTML||escape(node.textContent)).split('\n').filter(Boolean);
+          for(const line of lines){const split=line.search(/[：:]/);doc.parameters.push({name:split<0?'关键参数':line.slice(0,split).trim(),value:split<0?line:line.slice(split+1).trim(),unit:''});}
+        }else{
+          const value=textOf(node.outerHTML||escape(node.textContent));if(value)doc[part]+=(doc[part]?'\n':'')+value;
+        }
+      }
+    }
+    const preview=document.createElement('div');preview.innerHTML=metadata.preview||oldPreview?.innerHTML||'';
+    if(!/^请输入/.test(preview.textContent.trim())){
+      const table=preview.querySelector('table'),sample=fileList().find(f=>/\.csv$/i.test(f.name));
+      if(table&&sample){
+        const all=[...table.rows],headers=[...all.shift().cells].map(c=>c.textContent.trim()),rows=all.map(tr=>[...tr.cells].map(c=>c.textContent.trim()));
+        const snapshot={name:sample.name,headers,rows};
+        doc.structureFile=doc.sampleFile=fileKey(sample);doc.previews={structure:snapshot,sample:snapshot};
+      }
+      preview.querySelectorAll('h1,h2,h3,h4,h5,h6,table,figure,svg').forEach(n=>n.remove());doc.note=textOf(preview.innerHTML);
+    }
+    if(source.previewImage){
+      doc.previewMode='image';doc.previewType='display';
+      doc.previewMaterial={id:'original-preview:'+document.documentElement.dataset.prototypeFile,name:'无人机航拍影像示意.png',type:'image/png',size:Math.floor(source.previewImage.split(',')[1].length*3/4),dataURL:source.previewImage};
+    }
+    return doc;
+  }
+  const originalDocument=metadata.datasetContent||migrate();
+  const state=cached||{...metadata,datasetContent:originalDocument};
+  // Tags follow the same file-format dictionary and annotation choices as the upload form.
+  const tagHost=document.createElement('div');tagHost.id='datasetTags';
+  tagHost.innerHTML='<div class="dataset-tag-formats"><span class="dataset-tag-label" id="datasetFormatLabel">数据格式</span><div class="dataset-format-chips" aria-labelledby="datasetFormatLabel" aria-live="polite"></div></div><div class="dataset-tag-annotation"><label class="dataset-tag-label" for="datasetAnnotation">标注情况</label><select class="sel" id="datasetAnnotation" name="annotation"><option value="">请选择</option><option>有标注</option><option>无标注</option><option>未说明</option></select></div>';
+  const legacyTags=document.querySelector('.info-line3 .tagsel');
+  legacyTags?.closest('.info-line3').classList.add('dataset-info-tags');
+  legacyTags?.parentElement.classList.add('dataset-tags-value');
+  legacyTags?.replaceWith(tagHost);
+  const annotation=tagHost.querySelector('#datasetAnnotation');
+  const annotationChoices=['有标注','无标注','未说明'];
+  const savedTags=state.tags??metadata.tags;
+  const previousTags=Array.isArray(savedTags)?savedTags:String(savedTags||'').split(/[,，、;；]+/);
+  const annotationValue=state.annotation??metadata.annotation??previousTags.find(tag=>annotationChoices.includes(tag));
+  annotation.value=annotationChoices.includes(annotationValue)?annotationValue:'';
+  function collectTags(){
+    const formats=[...new Set(fileList().map(file=>{
+      const match=String(file.name||'').match(/\.([^.]+)$/);if(!match)return '无扩展名';
+      const ext=match[1].toLowerCase();
+      return ({csv:'CSV',xls:'Excel',xlsx:'Excel',parquet:'Parquet',json:'JSON / JSONL',jsonl:'JSON / JSONL',tif:'GeoTIFF',tiff:'GeoTIFF',geotiff:'GeoTIFF',geojson:'GeoJSON',shp:'Shapefile',shx:'Shapefile',dbf:'Shapefile',jpg:'JPEG / PNG',jpeg:'JPEG / PNG',png:'JPEG / PNG',nc:'NetCDF',netcdf:'NetCDF',h5:'HDF5',hdf5:'HDF5'})[ext]||ext.toUpperCase();
+    }))];
+    return {format:formats.join('、'),annotation:annotation.value,tags:[...formats,...(annotation.value?[annotation.value]:[])]};
+  }
+  function syncTags(){
+    const {format}=collectTags();
+    const chips=tagHost.querySelector('.dataset-format-chips');
+    chips.innerHTML=format?format.split('、').map(tag=>'<span class="dataset-tag-chip">'+escape(tag)+'</span>').join(''):'<span class="dataset-tag-empty">上传成果文件后显示</span>';
+  }
+  syncTags();
+  const originalFileList=document.getElementById('ofList');
+  if(originalFileList)new MutationObserver(syncTags).observe(originalFileList,{childList:true,subtree:true,characterData:true});
+  const previewSnapshots=new Map();
+  for(const document of [originalDocument,state.datasetContent]){
+    for(const role of ['structure','sample']){
+      const key=role==='structure'?'structureFile':'sampleFile';
+      const snapshot=document?.previews?.[role];
+      if(document?.[key]&&snapshot&&(snapshot.headers||snapshot.text!==undefined))previewSnapshots.set(document[key],snapshot);
+    }
+  }
+  if(state.dataType!==undefined)type.value=state.dataType;
+  if(state.modality!==undefined){if(![...modality.options].some(o=>o.value===state.modality))modality.add(new Option(state.modality,state.modality));modality.value=state.modality;}
+  const holder=document.createElement('div');holder.innerHTML=DatasetUI.render();
+  const editor=holder.firstElementChild;editor.id='datasetContentEditor';
+  legacyCard.hidden=true;legacyCard.setAttribute('aria-hidden','true');legacyCard.after(editor);
+  editor.parentElement.classList.add('data-submit-style');
+  // Readable file bytes may be supplied by the surrounding prototype; saved previews remain usable without them.
+  const readFile=async f=>{
+    if(f.file instanceof Blob)return f.file;
+    if(window.Meeting?.fileDB&&f.blobId)return (await Meeting.fileDB('readonly',store=>store.get(f.blobId)))?.file||null;
+    return null;
+  };
+  DatasetUI.mount(editor,state,{form:document.querySelector('main'),files:fileList,read:readFile,preview:f=>previewSnapshots.get(fileKey(f))});
+  const commonCollect=window.Meeting?.collectMetadata;
+  if(window.Meeting?.editorControls){
+    delete Meeting.editorControls.scale;Meeting.editorControls.annotation=annotation;
+    const previousVersion=restoredFields.find(field=>field.id==='mt-editor-version');
+    if(Meeting.editorControls.version)Meeting.editorControls.version.value=cached?.version??previousVersion?.val??metadata.version??Meeting.editorControls.version.value;
+    Meeting.editorControls.format={get value(){return collectTags().format;}};
+    Meeting.editorControls.tags={get value(){return collectTags().tags.join('、');}};
+  }
+  const collect=()=>({
+    ...withoutScale(commonCollect?.()||{}),
+    name:document.querySelector('.info-form input[placeholder="请输入数据名称"]')?.value??metadata.name??'',
+    provider:document.querySelector('.info-form input[placeholder="请输入提供方"]')?.value??metadata.provider??'',
+    summary:document.getElementById('intro')?.value??metadata.summary??'',
+    ...DatasetUI.collect(),dataType:type.value,modality:modality.value,...collectTags()
+  });
+  PX.formState=()=>originalControls.map((el,i)=>({id:el.id,i,val:el.isContentEditable?el.innerHTML:el.value,html:el.isContentEditable}));
+  PX.save=()=>{
+    const values=collect();
+    if(values.datasetContent.previewBusy){toast('预览材料正在保存，请稍候');return false;}
+    if(!PX.put(storageKey,values)||!PX.put(PX.key+':fields',PX.formState()))return false;
+    if(linked){
+      const rows=PX.get('agri-datasets',[]),row=rows.find(item=>String(item.id||item.key)===asset);
+      if(row){Object.assign(row,{name:values.name,desc:values.summary,org:values.provider,form:values.modality,...collectTags()});delete row.scale;delete row.count;row.metadata={...withoutScale(row.metadata||{}),...values};if(!PX.put('agri-datasets',rows))return false;}
+    }
+    const recordId=asset||window.Meeting?.editorAsset;
+    if(recordId){const key=window.Meeting?.metaKey||'bdh-asset-metadata-1010',assets=PX.get(key,{});assets[recordId]={...withoutScale(assets[recordId]||{}),id:recordId,kind:'dataset',...values};if(!PX.put(key,assets))return false;}
+    PX.audit('保存',PX.file);toast('已保存当前页面内容');return true;
+  };
+  window.saveDraft=window.saveUpd=()=>PX.save();
+  if(window.Meeting){Meeting.collectMetadata=collect;Meeting.saveMetadata=()=>PX.save();}
+  if(window.BackendIntegration&&asset){
+    document.querySelectorAll('.page-head button').forEach(button=>{if(['保存','保存更新','保存草稿'].includes(button.textContent.trim()))button.onclick=event=>{event.preventDefault();if(PX.save())location.href=window.DatasetPrototypeRoutes.list;};});
+  }
+  PX.preview=()=>{
+    const values=collect();
+    PX.modal('数据内容预览','<article class="dataset-content-summary">'+values.intro+'</article>'+DatasetUI.view(values.datasetContent));
+  };
+  window.DatasetDetailEditor={collect,save:()=>PX.save()};
+  if(firstPreview)editor.querySelector('[data-ds-tab="preview"]').click();
+})();
+</script>
+<!-- dataset-content-aligned:end -->
 </body>
 </html>
