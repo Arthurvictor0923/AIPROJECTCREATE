@@ -315,6 +315,20 @@ table.tbl th:last-child,table.tbl td:last-child{padding-right:var(--s5);}
 /* approval-page 的 .main-nav{display:flex} 无媒体限定，权重高于全局 1278px 折叠规则 ⇒ 窄屏不折叠导致页头横向溢出。 */
 @media (max-width:1278px){.approval-page .main-nav{ display:none !important; }}
 </style>
+<style id="demand-approval-css">
+.approval-id{max-width:180px;overflow-wrap:anywhere}
+.approval-filters [hidden]{display:none!important}
+.da-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.da-fields .da-full{grid-column:1/-1}
+.da-fields dd,.da-history-note{white-space:pre-wrap;overflow-wrap:anywhere}
+.da-work{padding:16px 0 18px}
+.da-work h4{color:var(--text-secondary);font-size:13px;margin:0 0 8px}
+.da-work ol{padding-left:20px;line-height:1.9;font-size:14px}
+.da-dialog footer .da-jump{margin-right:auto;border:0;padding:0;background:transparent}
+.da-dialog .mt-timeline{font-size:13px;margin:12px 0 0}
+#approval-review-form>h3{font-size:16px;font-weight:600;margin-bottom:16px}
+@media(max-width:600px){.da-fields{grid-template-columns:1fr}.da-dialog footer{gap:8px;flex-wrap:wrap}.da-dialog footer .mt-btn{padding:8px 12px}}
+</style>
 </head><body class="approval-page"><header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="index.html" aria-label="北大荒智慧农业协同创新平台">
@@ -349,9 +363,9 @@ table.tbl th:last-child,table.tbl td:last-child{padding-right:var(--s5);}
   </div>
 </header>
 <div class="container"><div class="admin-app">
-<aside class="admin-side" aria-label="审批中心二级导航"><div class="side-title">审批中心</div><a class="snav cur" aria-current="page" href="后台-审批中心.html">成果验收审批</a><a class="snav" href="后台-资源申请审批.html">资源申请审批</a></aside>
+<aside class="admin-side" aria-label="审批中心二级导航"><div class="side-title">审批中心</div><a class="snav cur" aria-current="page" data-approval-view="outcomes" href="#outcomes">成果验收审批</a><a class="snav" data-approval-view="resources" href="#resources">资源申请审批</a></aside>
 <main class="admin-main" id="approval-root" data-view="outcomes">
-<div class="page-title" id="outcomes"><h1>成果验收审批</h1></div>
+<div class="page-title" id="approval-page-title"><h1>成果验收审批</h1></div>
 <section class="card approval-card" aria-label="成果验收审批列表">
 <div class="tabs" role="tablist" aria-label="审批进度">
 <button class="tab active" type="button" id="approval-wait" role="tab" aria-selected="true" aria-controls="approval-results">待审批 <span class="cnt" id="approval-wait-count">0</span></button>
@@ -359,7 +373,7 @@ table.tbl th:last-child,table.tbl td:last-child{padding-right:var(--s5);}
 </div>
 <form id="approval-filters" class="approval-filters" role="search">
 <label class="approval-search">关键词<input type="search" id="approval-query" placeholder="成果名称、编号或提交人" autocomplete="off"></label>
-<label>成果类型<select id="approval-type"><option value="">全部类型</option><option>成果模型</option><option>成果数据</option></select></label>
+<label><span id="approval-type-label">成果类型</span><select id="approval-type"><option value="">全部类型</option><option>成果模型</option><option>成果数据</option></select></label>
 <label id="approval-result-filter" hidden>审批结果<select id="approval-status"><option value="">全部结果</option><option>通过</option><option>驳回</option><option>拒绝</option></select></label>
 <button class="btn primary" type="submit">查询</button><button class="btn" type="button" id="approval-reset">重置</button>
 </form>
@@ -906,79 +920,160 @@ window.BackendState={
   };
 })();
 
-</script><script data-inline-source="assets/meeting/approval-center.js">
-(()=>{'use strict';
-const M=window.Meeting,root=document.getElementById('approval-root');if(!M||!root)return;
-const view=root.dataset.view,resourcePage='后台-资源申请审批.html',outcomePage='后台-审批中心.html',params=new URLSearchParams(location.search);
-if(view==='outcomes'&&(params.has('spaceRequest')||['#mt-space-requests','#resources'].includes(location.hash))){location.replace(resourcePage+location.search);return;}
-if(view==='resources'&&params.has('outcome')){location.replace(outcomePage+location.search+'#outcomes');return;}
-const A=window.ApprovalCenter={view,state:{tab:'wait',type:'',query:'',status:'',page:1,pageSize:6}},Q=id=>document.getElementById(id);
-const legacyKey='agri-approvals',spaceKey='agri-space-applications-v8',E=M.e,call=(fn,...args)=>`ApprovalCenter.${fn}(${args.map(x=>JSON.stringify(x)).join(',')})`;
-const badge=s=>'<span class="tag '+({'待审批':'wait','通过':'ok','驳回':'back','拒绝':'no'}[s]||'gray')+'">'+E(s)+'</span>';
-const text=v=>v===undefined||v===null||v===''?'—':String(v);
-const status=s=>({'申请中':'待审批','可用':'通过','已通过':'通过','已驳回':'驳回','已拒绝':'拒绝'}[s]||s);
-const legacy=()=>M.read(legacyKey,null)||JSON.parse(JSON.stringify(window.ApprovalSeeds)),spaces=()=>M.read(spaceKey,[]);
-A.rows=()=>{
- if(view==='outcomes')return M.records().map(r=>({key:String(r.id),id:r.id,name:r.name,type:r.kind==='model'?'成果模型':'成果数据',who:r.applicant,org:r.spaceName,time:r.time,status:status(r.status),raw:r}));
- const s=legacy(),spaceRows=spaces(),spaceIds=new Set(spaceRows.map(r=>String(r.id))),dedup=new Map();
- ['WAIT','WAIT2','DONE'].forEach(k=>(s[k]||[]).forEach(r=>{if(!spaceIds.has(String(r.no)))dedup.set(String(r.no),{key:'legacy:'+r.no,id:r.no,source:'legacy',name:r.res,type:r.type,who:r.who,org:r.org,time:r.at,status:status(r.st),raw:r});}));
- spaceRows.forEach(r=>dedup.set('space:'+r.id,{key:'space:'+r.id,id:r.id,source:'space',name:r.name,type:'创建科研开发空间',who:r.who||r.applicant,org:r.team,time:r.time||r.at,status:status(r.state),raw:r}));
- return [...dedup.values()];
-};
-A.filtered=()=>A.rows().filter(r=>(!A.state.type||r.type===A.state.type)&&(!A.state.query||[r.id,r.name,r.who,r.org].some(x=>String(x??'').toLowerCase().includes(A.state.query.toLowerCase()))));
-A.list=()=>A.filtered().filter(r=>(A.state.tab==='wait'?r.status==='待审批':r.status!=='待审批')&&(A.state.tab==='wait'||!A.state.status||r.status===A.state.status)).sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
-A.render=()=>{
- const filtered=A.filtered(),rows=A.list(),pages=Math.max(1,Math.ceil(rows.length/A.state.pageSize));A.state.page=Math.max(1,Math.min(A.state.page,pages));
- ['wait','done'].forEach(tab=>{const n=Q('approval-'+tab);n.classList.toggle('active',A.state.tab===tab);n.setAttribute('aria-selected',String(A.state.tab===tab));Q('approval-'+tab+'-count').textContent=filtered.filter(r=>tab==='wait'?r.status==='待审批':r.status!=='待审批').length;});
- Q('approval-result-filter').hidden=A.state.tab==='wait';
- Q('approval-rows').innerHTML=rows.slice((A.state.page-1)*A.state.pageSize,A.state.page*A.state.pageSize).map(r=>{
-  const actions=M.link('查看',call('viewRecord',r.key))+(r.status==='待审批'?M.link(view==='outcomes'?'审批验收':'审批',call('review',r.key)):'');
-  const first=view==='outcomes'?'<td class="resource-cell"><strong>'+E(r.name)+'</strong><small>'+E(r.id)+'</small></td><td>'+E(r.type)+'<small>'+E(r.raw.metadata?.version||'—')+'</small></td>':'<td class="nowrap t-code">'+E(r.id)+'</td><td class="nowrap">'+E(r.type)+'</td><td class="resource-cell">'+E(text(r.name))+'</td>';
-  return '<tr>'+first+'<td>'+E(text(r.who))+'<small>'+E(r.org||'')+'</small></td><td class="nowrap">'+E(text(r.time))+'</td><td>'+badge(r.status)+'</td><td><div class="mt-actions">'+actions+'</div></td></tr>';
- }).join('')||'<tr><td class="approval-empty" colspan="'+(view==='outcomes'?6:7)+'">'+(A.state.query||A.state.type||(A.state.tab==='done'&&A.state.status)?'暂无符合筛选条件的记录':A.state.tab==='wait'?(view==='outcomes'?'暂无待验收的成果':'暂无待审批的资源申请'):'暂无已办审批记录')+'</td></tr>';
- Q('approval-total').textContent='共 '+rows.length+' 条';Q('approval-page-info').textContent=A.state.page+' / '+pages;
- Q('approval-prev').disabled=A.state.page<=1;Q('approval-next').disabled=A.state.page>=pages;
-};
-const grid=fields=>'<div class="mt-grid approval-detail">'+fields.map(([label,value])=>'<div><small class="mt-note">'+E(label)+'</small><p>'+E(text(value))+'</p></div>').join('')+'</div>';
-A.detail=r=>{
- const d=r.raw;
- if(r.source==='legacy')return grid([['申请编号',r.id],['申请类型',r.type],['申请人',d.who],['所属机构',d.org],['申请资源',d.res],['用途说明',d.use],['提交时间',d.at],['审批状态',r.status]])+'<h3 class="mt-section">审批记录</h3>'+((d.rounds||[]).map(x=>'<div class="mt-timeline"><strong>'+E(x.r)+'</strong> · '+E(x.by)+' · '+E(x.t)+'<p>'+E(x.note)+'</p></div>').join('')||'<p class="mt-note">暂无审批记录</p>');
- return grid([['申请编号',r.id],['审批状态',r.status],['空间名称',d.name],['所属团队',d.team],['研究用途',d.desc],['关联模型',d.model||'未关联模型'],['开发镜像',d.image],['运行环境',d.compute?.runtime],['系统环境',d.compute?.detail],['开发工具',d.ide],['CPU / 内存',text(d.cpu)+' 核 / '+text(d.ram)+' GB'],['GPU',text(d.gpu)+' 张 · 单卡显存 '+text(d.gpuMemory)+' GB'],['研究存储 / 系统盘',text(d.storage)+' GB / '+text(d.systemDisk)+' GB'],['审批意见',d.reviewNote||'尚未审批']]);
-};
-A.viewRecord=key=>{const r=A.rows().find(x=>x.key===key);if(!r){M.toast('未找到该审批记录');return;}if(view==='outcomes'){M.viewOutcome(r.id);return;}
- M.dialog('资源申请详情',A.detail(r),M.btn('关闭','Meeting.close()')+(r.status==='待审批'?M.btn('审批',call('review',key),true):''));
-};
-A.review=key=>{const r=A.rows().find(x=>x.key===key);if(!r||r.status!=='待审批'){M.toast('该申请已处理，请查看最新审批记录');A.render();return;}if(view==='outcomes'){M.review(r.id);return;}
- M.dialog('资源申请审批',A.detail(r)+'<form id="approval-review-form">'+M.field('resource-decision','审批结果','','select',['通过','驳回','拒绝'])+M.field('resource-opinion','审批意见','','textarea')+'<p id="approval-review-error" class="mt-error" role="alert"></p></form>',M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="approval-review-form">确认审批</button>');
- if(r.source==='legacy')Q('mt-resource-opinion').maxLength=500;
- Q('approval-review-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),decision=f.get('resource-decision'),opinion=String(f.get('resource-opinion')||'').trim();if(!['通过','驳回','拒绝'].includes(decision)||!opinion){Q('approval-review-error').textContent='请选择审批结果并填写审批意见';return;}A.commit(key,decision,opinion);};
-};
-A.commit=(key,decision,opinion)=>{
- if(!['通过','驳回','拒绝'].includes(decision)||!String(opinion||'').trim())return false;
- opinion=String(opinion).trim();const current=A.rows().find(x=>x.key===key);if(!current||current.status!=='待审批'){M.toast('该申请已处理，请查看最新审批记录');M.close();A.render();return false;}
- let saved=false;
- if(current.source==='legacy'){
-  const s=legacy(),r=['WAIT','WAIT2'].flatMap(k=>s[k]||[]).find(x=>String(x.no)===String(current.id));if(!r)return false;
-  r.st=decision;r.rounds=r.rounds||[];r.rounds.push({r:decision,by:'张明',t:M.date(),note:opinion});s.WAIT=(s.WAIT||[]).filter(x=>String(x.no)!==String(r.no));s.WAIT2=(s.WAIT2||[]).filter(x=>String(x.no)!==String(r.no));s.DONE=[r,...(s.DONE||[]).filter(x=>String(x.no)!==String(r.no))];saved=M.write(legacyKey,s);
-  if(saved){const log=M.read('agri-audit',[]);log.unshift({时间:new Date().toLocaleString('zh-CN'),操作人:'张明',操作:decision,对象:r.no,结果:'成功'});M.write('agri-audit',log);}
- }else if(current.source==='space'){
-  const rows=spaces(),r=rows.find(x=>String(x.id)===String(current.id));if(!r)return false;
-  r.state=decision==='通过'?'可用':decision==='驳回'?'已驳回':'已拒绝';r.reviewNote=opinion;r.instance=decision==='通过'?'已停止':'未开通';r.progress='审批'+decision+'：'+opinion;saved=M.write(spaceKey,rows);
- }
- if(saved){M.close();A.render();M.toast('审批结果已保存');}return saved;
-};
-Q('approval-filters').onsubmit=e=>{e.preventDefault();A.state.type=Q('approval-type').value;A.state.query=Q('approval-query').value.trim();A.state.status=Q('approval-status').value;A.state.page=1;A.render();};
-Q('approval-reset').onclick=()=>{['approval-type','approval-query','approval-status'].forEach(id=>Q(id).value='');Object.assign(A.state,{type:'',query:'',status:'',page:1});A.render();};
-['approval-type','approval-status'].forEach(id=>Q(id).onchange=()=>Q('approval-filters').requestSubmit());
-['wait','done'].forEach(tab=>Q('approval-'+tab).onclick=()=>{A.state.tab=tab;A.state.page=1;A.render();});
-Q('approval-page-size').onchange=e=>{A.state.pageSize=Number(e.target.value);A.state.page=1;A.render();};
-Q('approval-prev').onclick=()=>{A.state.page--;A.render();};Q('approval-next').onclick=()=>{A.state.page++;A.render();};
-document.addEventListener('click',e=>{const box=document.querySelector('.u-box'),menu=Q('userMenu');if(menu&&box&&!box.contains(e.target)){menu.classList.remove('open');document.querySelector('.u-name')?.setAttribute('aria-expanded','false');}});
-M.refreshReview=A.render;M.refreshSpaces=A.render;
-M.viewSpace=id=>A.viewRecord('space:'+id);M.reviewSpace=id=>A.review('space:'+id);
-window.addEventListener('storage',e=>{if([legacyKey,spaceKey,M.key,null].includes(e.key))A.render();});A.render();
-if(view==='outcomes'&&params.has('outcome')){const id=params.get('outcome'),r=A.rows().find(x=>x.key===id);if(r)(r.status==='待审批'?A.review:A.viewRecord)(id);else M.toast('未找到该成果记录，请在审批列表中查询');}
-if(view==='resources'&&params.has('spaceRequest'))A.viewRecord('space:'+params.get('spaceRequest'));
+</script><script id="demand-approval-samples">
+/* Only seed an absent prototype store; never overwrite portal submissions. */
+(()=>{const M=window.Meeting;if(!M)return;try{if(localStorage.getItem("agri-demands-v1")===null)M.write("agri-demands-v1",[{"id":"XQ2026-0011","applicantId":"research-demo-01","applicantName":"张研究员","title":"寒地水稻倒伏面积遥感核查","direction":"调查摸底","crops":"水稻","services":["图像解读","统计分析","报告编制"],"summary":"结合遥感影像与现场调查资料，核查寒地水稻倒伏范围并形成分区统计结果。","problem":"部分地块出现水稻倒伏，现场核查覆盖范围有限，希望通过遥感解译明确倒伏位置与面积，为后续分析提供依据。","material":"可提供研究区边界、同期遥感影像以及部分地块的现场调查记录。","work":["核对影像与地块边界，制定倒伏识别方案","开展倒伏范围解译与面积统计","结合现场记录核验结果并编制报告"],"output":"倒伏分布图、分区面积统计表、核查报告","deadline":"2026年12月前","publisher":"黑龙江省农业科学院","contact":"张研究员","phone":"0451-00000000","email":"research@example.com","status":"待审核","date":"2026-11-10","submittedAt":"2026-11-10 09:10","reject":"","getCount":0,"prototype":true,"approvalHistory":[{"action":"提交需求","by":"张研究员","time":"2026-11-10 09:10","note":""}]},{"id":"XQ2026-0012","applicantId":"research-demo-02","applicantName":"李研究员","title":"玉米长势监测与产量统计分析","direction":"分析评估","crops":"玉米","services":["数据整理","统计分析","报告编制"],"summary":"整理玉米观测与统计资料，分析长势差异并形成区域统计报告。","problem":"不同地块的观测记录较分散，希望统一整理并比较区域长势差异。","material":"","work":["整理地块观测记录与历史统计资料","开展长势差异与影响因素分析","汇总统计结果并提交报告"],"output":"整理后的数据表、统计分析报告","deadline":"","publisher":"农业信息研究中心","contact":"李研究员","phone":"","email":"analysis@example.com","status":"待审核","date":"2026-11-09","submittedAt":"2026-11-09 16:40","reject":"","getCount":0,"prototype":true,"approvalHistory":[{"action":"提交需求","by":"李研究员","time":"2026-11-09 16:40","note":""}]},{"id":"XQ2026-0009","applicantId":"research-demo-03","applicantName":"陈研究员","title":"黑土耕地质量调查与分析","direction":"调查摸底","crops":"大豆、玉米","services":["现场调查","数据采集","报告编制"],"summary":"开展样点调查，汇总黑土耕地质量状况并形成分析报告。","problem":"需要补充重点区域样点资料，梳理土壤质量差异。","material":"既有样点位置、历史调查表及地块边界。","work":["核对调查范围与样点安排","采集并整理土壤质量调查数据","编制耕地质量调查报告"],"output":"样点数据表、耕地质量调查报告","deadline":"由双方沟通确认","publisher":"耕地保护研究中心","contact":"陈研究员","phone":"0451-00000000","email":"","status":"发布中","date":"2026-11-09","submittedAt":"2026-11-08 10:20","reviewDecision":"通过","reviewNote":"需求内容与交付成果明确，同意发布。","reviewer":"张明","reviewedAt":"2026-11-09 11:20","reject":"","getCount":0,"prototype":true,"approvalHistory":[{"action":"提交需求","by":"陈研究员","time":"2026-11-08 10:20","note":""},{"action":"通过","by":"张明","time":"2026-11-09 11:20","note":"需求内容与交付成果明确，同意发布。"}]},{"id":"XQ2026-0010","applicantId":"research-demo-04","applicantName":"王研究员","title":"大豆病虫害图像识别模型开发","direction":"技术研发","crops":"大豆","services":["数据整理","模型开发"],"summary":"利用现有田间图像开发大豆病虫害识别模型。","problem":"现有识别主要依赖人工，需要提高图像筛查效率。","material":"可提供部分病虫害照片，标注情况需进一步核实。","work":["整理图像样本","开发并验证识别模型"],"output":"识别模型及使用说明","deadline":"","publisher":"大豆研究所","contact":"王研究员","phone":"","email":"soybean@example.com","status":"已驳回","date":"2026-11-09","submittedAt":"2026-11-08 15:30","reviewDecision":"驳回","reviewNote":"请补充样本数量、标注情况及预期识别范围后重新提交。","reviewer":"张明","reviewedAt":"2026-11-09 14:00","reject":"请补充样本数量、标注情况及预期识别范围后重新提交。","getCount":0,"prototype":true,"approvalHistory":[{"action":"提交需求","by":"王研究员","time":"2026-11-08 15:30","note":""},{"action":"驳回","by":"张明","time":"2026-11-09 14:00","note":"请补充样本数量、标注情况及预期识别范围后重新提交。"}]}]);}catch{}})();
+</script>
+<script data-inline-source="assets/meeting/approval-center.js">
+/* Resource approval includes demand submissions from the portal's existing store. */
+(() => {
+  'use strict';
+  const M = window.Meeting, root = document.getElementById('approval-root');
+  if (!M || !root) return;
+  const Q = id => document.getElementById(id), E = M.e;
+  const legacyKey = 'agri-approvals', spaceKey = 'agri-space-applications-v8', demandKey = 'agri-demands-v1';
+  let view = 'outcomes';
+  const A = window.ApprovalCenter = {view, state:{tab:'wait',type:'',query:'',status:'',page:1,pageSize:6}};
+  const call = (fn,...args) => `ApprovalCenter.${fn}(${args.map(x=>JSON.stringify(x)).join(',')})`;
+  const text = v => v === undefined || v === null || v === '' ? '—' : String(v);
+  const status = s => ({'申请中':'待审批','待审核':'待审批','可用':'通过','已通过':'通过','已驳回':'驳回','已拒绝':'拒绝'}[s] || s);
+  const badge = s => '<span class="tag '+({'待审批':'wait','通过':'ok','驳回':'back','拒绝':'no'}[s]||'gray')+'">'+E(s)+'</span>';
+  const legacy = () => M.read(legacyKey,null) || JSON.parse(JSON.stringify(window.ApprovalSeeds));
+  const spaces = () => M.read(spaceKey,[]);
+  const demands = () => {const rows=M.read(demandKey,[]);return Array.isArray(rows)?rows:[];};
+  const demandStatus = d => ['待审核','待审批','申请中'].includes(d.status) ? '待审批' : status(d.reviewDecision || ({'发布中':'通过','已获取联系方式':'通过'}[d.status]) || d.status);
+  const demandHistory = d => Array.isArray(d.approvalHistory) ? d.approvalHistory : [];
+  A.rows = () => {
+    if (view === 'outcomes') return M.records().map(r=>({key:String(r.id),id:r.id,name:r.name,type:r.kind==='model'?'成果模型':'成果数据',who:r.applicant,org:r.spaceName,time:r.time,status:status(r.status),raw:r}));
+    const s=legacy(), spaceRows=spaces(), spaceIds=new Set(spaceRows.map(r=>String(r.id))), dedup=new Map();
+    ['WAIT','WAIT2','DONE'].forEach(k=>(s[k]||[]).forEach(r=>{if(!spaceIds.has(String(r.no)))dedup.set(String(r.no),{key:'legacy:'+r.no,id:r.no,source:'legacy',name:r.res,type:r.type,who:r.who,org:r.org,time:r.at,status:status(r.st),raw:r});}));
+    spaceRows.forEach(r=>dedup.set('space:'+r.id,{key:'space:'+r.id,id:r.id,source:'space',name:r.name,type:'创建科研开发空间',who:r.who||r.applicant,org:r.team,time:r.time||r.at,status:status(r.state),raw:r}));
+    demands().forEach(r=>{
+      const st=demandStatus(r);
+      // Published operating records without a submission or review do not become fictitious approvals.
+      if(!r.id || !['待审批','通过','驳回','拒绝'].includes(st) || !(st==='待审批'||r.submittedAt||r.reviewDecision||demandHistory(r).length))return;
+      dedup.set('demand:'+r.id,{key:'demand:'+r.id,id:r.id,source:'demand',name:r.title,type:'需求发布申请',who:r.applicantName||r.applicant||r.applicantId,org:r.publisher,time:r.submittedAt||r.date,status:st,raw:r});
+    });
+    return [...dedup.values()];
+  };
+  A.filtered = () => A.rows().filter(r=>(!A.state.type||r.type===A.state.type)&&(!A.state.query||[r.id,r.name,r.who,r.org,r.source==='demand'?r.raw.contact:''].some(x=>String(x??'').toLowerCase().includes(A.state.query.toLowerCase()))));
+  A.list = () => A.filtered().filter(r=>(A.state.tab==='wait'?r.status==='待审批':r.status!=='待审批')&&(A.state.tab==='wait'||!A.state.status||r.status===A.state.status)).sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
+  A.render = () => {
+    const filtered=A.filtered(), rows=A.list(), pages=Math.max(1,Math.ceil(rows.length/A.state.pageSize));
+    A.state.page=Math.max(1,Math.min(A.state.page,pages));
+    ['wait','done'].forEach(tab=>{const n=Q('approval-'+tab);n.classList.toggle('active',A.state.tab===tab);n.setAttribute('aria-selected',String(A.state.tab===tab));Q('approval-'+tab+'-count').textContent=filtered.filter(r=>tab==='wait'?r.status==='待审批':r.status!=='待审批').length;});
+    Q('approval-result-filter').hidden=A.state.tab==='wait';
+    Q('approval-rows').innerHTML=rows.slice((A.state.page-1)*A.state.pageSize,A.state.page*A.state.pageSize).map(r=>{
+      const actions=M.link('查看',call('viewRecord',r.key))+(r.status==='待审批'?M.link(view==='outcomes'?'审批验收':'审批',call('review',r.key)):'');
+      const first=view==='outcomes'?'<td class="resource-cell"><strong>'+E(r.name)+'</strong><small>'+E(r.id)+'</small></td><td>'+E(r.type)+'<small>'+E(r.raw.metadata?.version||'—')+'</small></td>':'<td class="t-code approval-id">'+E(r.id)+'</td><td class="nowrap">'+E(r.type)+'</td><td class="resource-cell">'+E(text(r.name))+'</td>';
+      return '<tr data-approval-key="'+E(r.key)+'">'+first+'<td>'+E(text(r.who))+'<small>'+(r.source==='demand'?'发布单位：':'')+E(r.org||'')+'</small></td><td class="nowrap">'+E(text(r.time))+'</td><td>'+badge(r.status)+'</td><td><div class="mt-actions">'+actions+'</div></td></tr>';
+    }).join('')||'<tr><td class="approval-empty" colspan="'+(view==='outcomes'?6:7)+'">'+(A.state.query||A.state.type||(A.state.tab==='done'&&A.state.status)?'暂无符合筛选条件的记录':A.state.tab==='wait'?(view==='outcomes'?'暂无待验收的成果':'暂无待审批的资源申请'):'暂无已办审批记录')+'</td></tr>';
+    Q('approval-total').textContent='共 '+rows.length+' 条';Q('approval-page-info').textContent=A.state.page+' / '+pages;
+    Q('approval-prev').disabled=A.state.page<=1;Q('approval-next').disabled=A.state.page>=pages;
+  };
+  const grid = fields => '<div class="mt-grid approval-detail">'+fields.map(([label,value])=>'<div><small class="mt-note">'+E(label)+'</small><p>'+E(text(value))+'</p></div>').join('')+'</div>';
+  const section = (title,body) => '<section class="oa-section"><h3>'+E(title)+'</h3>'+body+'</section>';
+  const demandFields = fields => '<dl class="oa-fields da-fields">'+fields.map(([key,label,value,full])=>'<div data-field="'+E(key)+'"'+(full?' class="da-full"':'')+'><dt>'+E(label)+'</dt><dd>'+E(value===undefined||value===null||value===''?'未填写':Array.isArray(value)?value.join('、')||'未填写':value)+'</dd></div>').join('')+'</dl>';
+  A.demandDetail = r => {
+    const d=r.raw, work=Array.isArray(d.work)?d.work:String(d.work||'').split(/\r?\n/).filter(Boolean);
+    const history=demandHistory(d).slice();
+    if(!history.length)history.push({action:'提交需求',by:r.who||'申请人',time:r.time,note:''});
+    if(r.status!=='待审批'&&!history.some(x=>['通过','驳回','拒绝'].includes(x.action)))history.push({action:r.status,by:d.reviewer||'—',time:d.reviewedAt||'—',note:d.reviewNote||d.reject||'未记录审批意见'});
+    return '<div class="oa-summary"><div><h3>'+E(d.title)+'</h3><p>'+E(r.id)+'<span>申请人：'+E(text(r.who))+'</span><span>提交时间：'+E(text(r.time))+'</span></p></div><div class="oa-summary-status">'+badge(r.status)+(d.prototype?'<span class="oa-demo">示例数据</span>':'')+'</div></div>'+
+      section('需求信息',demandFields([['title','需求标题',d.title,true],['direction','需求方向',d.direction],['crops','涉及作物',d.crops],['services','所需服务',d.services,true],['summary','需求概述',d.summary,true]]))+
+      section('需求说明',demandFields([['problem','希望解决的问题',d.problem,true],['material','已有资料',d.material,true]])+'<div class="da-work" data-field="work"><h4>需要完成的工作</h4>'+(work.length?'<ol>'+work.map(x=>'<li>'+E(x)+'</li>').join('')+'</ol>':'<p>未填写</p>')+'</div>'+demandFields([['output','预期交付成果',d.output,true],['deadline','期望交付时间',d.deadline||'由双方沟通确认',true]]))+
+      section('发布方与联系方式',demandFields([['publisher','发布单位',d.publisher,true],['contact','联系人',d.contact],['phone','电话',d.phone],['email','邮箱',d.email,true]]))+
+      section('审批记录',history.map(x=>'<div class="mt-timeline"><strong>'+E(x.action)+'</strong> · '+E(text(x.by))+' · '+E(text(x.time))+(x.note?'<p class="da-history-note">'+E(x.note)+'</p>':'')+'</div>').join(''));
+  };
+  A.detail = r => {
+    const d=r.raw;
+    if(r.source==='demand')return A.demandDetail(r);
+    if(r.source==='legacy')return grid([['申请编号',r.id],['申请类型',r.type],['申请人',d.who],['所属机构',d.org],['申请资源',d.res],['用途说明',d.use],['提交时间',d.at],['审批状态',r.status]])+'<h3 class="mt-section">审批记录</h3>'+((d.rounds||[]).map(x=>'<div class="mt-timeline"><strong>'+E(x.r)+'</strong> · '+E(x.by)+' · '+E(x.t)+'<p>'+E(x.note)+'</p></div>').join('')||'<p class="mt-note">暂无审批记录</p>');
+    return grid([['申请编号',r.id],['审批状态',r.status],['空间名称',d.name],['所属团队',d.team],['研究用途',d.desc],['关联模型',d.model||'未关联模型'],['开发镜像',d.image],['运行环境',d.compute?.runtime],['系统环境',d.compute?.detail],['开发工具',d.ide],['CPU / 内存',text(d.cpu)+' 核 / '+text(d.ram)+' GB'],['GPU',text(d.gpu)+' 张 · 单卡显存 '+text(d.gpuMemory)+' GB'],['研究存储 / 系统盘',text(d.storage)+' GB / '+text(d.systemDisk)+' GB'],['审批意见',d.reviewNote||'尚未审批']]);
+  };
+  A.dialog = (title,body,footer,r) => {
+    const d=M.dialog(title,body,footer);
+    d.classList.toggle('oa-dialog',r.source==='demand');d.classList.toggle('da-dialog',r.source==='demand');
+    delete d.dataset.outcomeId;d.setAttribute('aria-labelledby','resource-dialog-title');d.querySelector('header h2').id='resource-dialog-title';
+    d.querySelector('.mt-body').scrollTop=0;return d;
+  };
+  A.viewRecord = key => {
+    const r=A.rows().find(x=>x.key===key);if(!r){M.toast('未找到该审批记录');return;}
+    if(view==='outcomes'){M.viewOutcome(r.id);return;}
+    A.dialog(r.source==='demand'?'需求申请详情':'资源申请详情',A.detail(r),M.btn('关闭','Meeting.close()')+(r.status==='待审批'?M.btn('审批',call('review',key),true):''),r);
+  };
+  A.review = key => {
+    const r=A.rows().find(x=>x.key===key);if(!r||r.status!=='待审批'){M.toast('该申请已处理，请查看最新审批记录');A.render();return;}
+    if(view==='outcomes'){M.review(r.id);return;}
+    const demand=r.source==='demand';
+    const dialog=A.dialog(demand?'需求申请审批':'资源申请审批',A.detail(r)+'<form id="approval-review-form"'+(demand?' class="oa-review-form"':'')+'><h3>审批处理</h3>'+M.field('resource-decision','审批结果','','select',['通过','驳回','拒绝'])+M.field('resource-opinion','审批意见','','textarea')+'<p id="approval-review-error" class="mt-error" role="alert"></p></form>',(demand?M.btn('填写审批意见','ApprovalCenter.jumpToReview()'):'')+M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="approval-review-form">确认审批</button>',r);
+    Q('mt-resource-opinion').maxLength=500;
+    const form=Q('approval-review-form');form.addEventListener('input',()=>{Q('approval-review-error').textContent='';});
+    form.onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),decision=f.get('resource-decision'),opinion=String(f.get('resource-opinion')||'').trim();if(!['通过','驳回','拒绝'].includes(decision)||!opinion){Q('approval-review-error').textContent='请选择审批结果并填写审批意见';return;}A.commit(key,decision,opinion);};
+    if(demand)dialog.querySelector('footer button').classList.add('da-jump');
+  };
+  A.jumpToReview = () => {const form=Q('approval-review-form');if(!form)return;form.scrollIntoView({block:'start',behavior:'smooth'});form.elements['resource-decision'].focus({preventScroll:true});};
+  A.commit = (key,decision,opinion) => {
+    if(!['通过','驳回','拒绝'].includes(decision)||!String(opinion||'').trim())return false;
+    opinion=String(opinion).trim();const current=A.rows().find(x=>x.key===key);
+    if(!current||current.status!=='待审批'){M.toast('该申请已处理，请查看最新审批记录');M.close();A.render();return false;}
+    let saved=false;
+    if(current.source==='demand'){
+      const rows=demands(),d=rows.find(x=>String(x.id)===String(current.id));if(!d)return false;
+      const now=M.date(),history=demandHistory(d).slice();
+      if(!history.length)history.push({action:'提交需求',by:current.who||'申请人',time:d.submittedAt||d.date,note:''});
+      history.push({action:decision,by:'张明',time:now,note:opinion});
+      Object.assign(d,{status:decision==='通过'?'发布中':decision==='驳回'?'已驳回':'已拒绝',reviewDecision:decision,reviewNote:opinion,reviewer:'张明',reviewedAt:now,reject:decision==='通过'?'':opinion,approvalHistory:history,date:now.slice(0,10)});
+      saved=M.write(demandKey,rows);
+    }else if(current.source==='legacy'){
+      const s=legacy(),r=['WAIT','WAIT2'].flatMap(k=>s[k]||[]).find(x=>String(x.no)===String(current.id));if(!r)return false;
+      r.st=decision;r.rounds=r.rounds||[];r.rounds.push({r:decision,by:'张明',t:M.date(),note:opinion});s.WAIT=(s.WAIT||[]).filter(x=>String(x.no)!==String(r.no));s.WAIT2=(s.WAIT2||[]).filter(x=>String(x.no)!==String(r.no));s.DONE=[r,...(s.DONE||[]).filter(x=>String(x.no)!==String(r.no))];saved=M.write(legacyKey,s);
+      if(saved){const log=M.read('agri-audit',[]);log.unshift({时间:new Date().toLocaleString('zh-CN'),操作人:'张明',操作:decision,对象:r.no,结果:'成功'});M.write('agri-audit',log);}
+    }else if(current.source==='space'){
+      const rows=spaces(),r=rows.find(x=>String(x.id)===String(current.id));if(!r)return false;
+      r.state=decision==='通过'?'可用':decision==='驳回'?'已驳回':'已拒绝';r.reviewNote=opinion;r.instance=decision==='通过'?'已停止':'未开通';r.progress='审批'+decision+'：'+opinion;saved=M.write(spaceKey,rows);
+    }
+    if(saved){M.close();A.render();M.toast(current.source==='demand'&&decision==='通过'?'审批通过，需求已发布':'审批结果已保存');}
+    return saved;
+  };
+  A.switchView = next => {
+    view=next==='resources'?'resources':'outcomes';A.view=view;root.dataset.view=view;M.close();
+    Object.assign(A.state,{tab:'wait',type:'',query:'',status:'',page:1});
+    Q('approval-query').value='';Q('approval-status').value='';
+    const outcomes=view==='outcomes',title=outcomes?'成果验收审批':'资源申请审批';
+    root.querySelector('.page-title h1').textContent=title;document.title=title+' — 北大荒智慧农业协同创新平台 · 管理后台';
+    root.querySelector('.approval-card').setAttribute('aria-label',title+'列表');
+    Q('approval-query').placeholder=outcomes?'成果名称、编号或提交人':'申请名称、编号、申请人或发布单位';
+    Q('approval-type-label').textContent=outcomes?'成果类型':'申请类型';
+    Q('approval-type').innerHTML='<option value="">全部类型</option>'+(outcomes?['成果模型','成果数据']:['数据使用申请','模型使用申请','算力申请','创建科研开发空间','需求发布申请']).map(x=>'<option>'+x+'</option>').join('');
+    root.querySelector('thead tr').innerHTML=(outcomes?['成果名称','成果类型 / 版本','提交人 / 科研空间','提交时间','审批状态','操作']:['申请编号','申请类型','申请名称','申请人 / 机构','提交时间','审批状态','操作']).map(x=>'<th scope="col">'+x+'</th>').join('');
+    document.querySelectorAll('[data-approval-view]').forEach(n=>{const on=n.dataset.approvalView===view;n.classList.toggle('cur',on);if(on)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current');});
+    A.render();window.dispatchEvent(new CustomEvent('approval:viewchange',{detail:{view}}));
+  };
+  Q('approval-filters').onsubmit=e=>{e.preventDefault();A.state.type=Q('approval-type').value;A.state.query=Q('approval-query').value.trim();A.state.status=Q('approval-status').value;A.state.page=1;A.render();};
+  Q('approval-reset').onclick=()=>{['approval-type','approval-query','approval-status'].forEach(id=>Q(id).value='');Object.assign(A.state,{type:'',query:'',status:'',page:1});A.render();};
+  ['approval-type','approval-status'].forEach(id=>Q(id).onchange=()=>Q('approval-filters').requestSubmit());
+  ['wait','done'].forEach(tab=>Q('approval-'+tab).onclick=()=>{A.state.tab=tab;A.state.page=1;A.render();});
+  Q('approval-page-size').onchange=e=>{A.state.pageSize=Number(e.target.value);A.state.page=1;A.render();};
+  Q('approval-prev').onclick=()=>{A.state.page--;A.render();};Q('approval-next').onclick=()=>{A.state.page++;A.render();};
+  document.addEventListener('click',e=>{const box=document.querySelector('.u-box'),menu=Q('userMenu');if(menu&&box&&!box.contains(e.target)){menu.classList.remove('open');document.querySelector('.u-name')?.setAttribute('aria-expanded','false');}});
+  M.refreshReview=A.render;M.refreshSpaces=A.render;
+  M.viewSpace=id=>A.viewRecord('space:'+id);M.reviewSpace=id=>A.review('space:'+id);
+  window.addEventListener('storage',e=>{if([legacyKey,spaceKey,demandKey,M.key,null].includes(e.key))A.render();});
+  window.addEventListener('focus',()=>A.render());
+  const route = () => {
+    const params=new URLSearchParams(location.search);
+    const next=['#resources','#mt-space-requests'].includes(location.hash)?'resources':location.hash==='#outcomes'?'outcomes':(params.has('spaceRequest')||params.has('request')||params.has('demand'))?'resources':'outcomes';
+    A.switchView(next);
+    let key=next==='outcomes'&&params.has('outcome')?params.get('outcome'):next==='resources'&&params.has('spaceRequest')?'space:'+params.get('spaceRequest'):next==='resources'&&params.has('demand')?'demand:'+params.get('demand'):next==='resources'&&params.has('request')?'legacy:'+params.get('request'):null;
+    if(key){const r=A.rows().find(x=>x.key===key);if(r)(r.status==='待审批'&&(params.get('action')==='review'||next==='outcomes')?A.review:A.viewRecord)(key);else M.toast('未找到该审批记录，请在列表中查询');}
+  };
+  document.querySelectorAll('[data-approval-view]').forEach(n=>n.addEventListener('click',e=>{
+    e.preventDefault();const target=n.dataset.approvalView;const url=new URL(location.href);
+    ['outcome','spaceRequest','request','demand','action'].forEach(k=>url.searchParams.delete(k));url.hash=target;
+    history.pushState(null,'',url);A.switchView(target);
+  }));
+  window.addEventListener('hashchange',route);window.addEventListener('popstate',route);route();
 })();
 
 </script>
@@ -2151,13 +2246,14 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
   /* -------------------------------------------------- 14 资源申请审批 */
   DOCS['后台-资源申请审批.html'] = {
     name: '资源申请审批',
-    intro: '数据 / 模型 / 资源的使用申请审批台账：待审批 / 已办审批两视图，单级审批三态。',
+    intro: '数据 / 模型 / 算力 / 科研开发空间 / 需求发布的申请审批台账：待审批 / 已办审批两视图。需求通过后进入发布中。',
     field: [
       {
         label: '📥 申请对象', sections: [
           {
             title: '一、列表与筛选', w: ['18%', '16%', '22%', '44%'], head: ['字段 / 筛选项', '类型', '取值', '说明'], rows: [
-              ['关键词', '搜索输入', '申请编号 / 申请资源 / 申请人', '检索入口'],
+              ['关键词', '搜索输入', '申请编号 / 申请名称 / 申请人 / 发布单位 / 联系人', '检索入口'],
+              ['申请类型', '下拉 · 单选', '数据使用申请 / 模型使用申请 / 算力申请 / 创建科研开发空间 / 需求发布申请', '需求与其他资源申请在同一列表筛选'],
               ['审批结果', '下拉 · 单选', '全部结果 / 通过 / 驳回 / 拒绝', '三态同成果验收'],
               ['列表列', '表格', '申请编号 / 申请类型 / 申请资源 / 申请人 / 所属机构 / 提交时间 / 审批状态 / 操作'],
               ['视图页签', 'Tab · 计数', '「待审批 (N)」/「已办审批 (N)」', '计数实时'],
@@ -2168,6 +2264,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
             title: '二、申请类型与授权', w: ['20%', '24%', '56%'], head: ['申请类型', '对应资源域', '授权口径'], rows: [
               ['数据使用申请', '<code>data</code>', '授权以<b>数据卡为最小单元</b>，获批后在科研开发空间内使用；<b>不下载、不出域</b>'],
               ['模型使用申请', '<code>model</code>', '获批后可直接调用 / 进运行台；试用免审批，业务与科研使用在此申请'],
+              ['需求发布申请', '需求中心 · 发布需求', '平台运营审核需求内容与联系方式，通过后对外展示'],
               ['资源（算力 / 存储 / 实例）申请', '<code>compute</code>', '按团队配额发放；配额制资源与申请制资源判权逻辑不同'],
               ['授权有效期', '—', '⭐ 授权<b>带有效期、可到期收回</b>；项目终止授权即时收回']
             ], note: '⚠️ 高权限用户在其可支配范围内<b>不产生这类申请</b>（免申请直通）；本页处理的是低权限路径。'
@@ -4007,9 +4104,20 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
     }]
   });
 
+  DOCS['后台-资源申请审批.html'].field.unshift({
+    label:'需求发布申请',sections:[
+      {title:'需求信息',head:['字段','前端口径'],rows:[['需求标题','必填，最多 40 字'],['需求方向','必填，沿用需求中心方向选项'],['涉及作物','选填'],['所需服务','必填，可多选'],['需求概述','必填，最多 200 字']]},
+      {title:'需求说明',head:['字段','前端口径'],rows:[['希望解决的问题','必填，多行文本'],['已有资料','选填，多行文本'],['需要完成的工作','必填，一行一条，详情按条目展示'],['预期交付成果','必填'],['期望交付时间','选填，未填显示“由双方沟通确认”']]},
+      {title:'发布方与联系方式',head:['字段','前端口径'],rows:[['发布单位','必填，默认取账号机构，可修改'],['联系人','必填'],['电话 / 邮箱','至少填写一项，详情分别展示']]},
+      {title:'审批处理',head:['审批结果','对应需求状态','记录'],rows:[['通过','发布中','保留审批人、时间与意见'],['驳回','已驳回','保留意见，供申请人修改后重新提交'],['拒绝','已拒绝','保留拒绝意见']]}]
+  });
+  DOCS['后台-资源申请审批.html'].guide.unshift({
+    label:'需求审批演示',sections:[{title:'操作流程',head:['操作','结果'],rows:[['进入资源申请审批，申请类型选择“需求发布申请”','筛选需求申请，待审批和已办计数同步'],['点击“查看”','按前端表单展示需求信息、需求说明、发布方与联系方式及审批记录'],['点击“审批”，或详情底部的“审批”','打开审批表单；可点击“填写审批意见”定位'],['选择结果并填写意见，点击“确认审批”','原记录移入已办审批，保存处理结果与意见'],['刷新后查看已办审批','保留已保存的结果；已办记录仅可查看']]}]
+  });
+
   /* ============================== 注入 ============================== */
   function inject() {
-    var file = decodeURIComponent(location.pathname.split('/').pop() || '');
+    var file = window.ApprovalCenter ? (window.ApprovalCenter.view === 'resources' ? '后台-资源申请审批.html' : '后台-审批中心.html') : decodeURIComponent(location.pathname.split('/').pop() || '');
     var doc = DOCS[file];
     if (!doc && file === '') doc = DOCS['index.html'];
     if (!doc) doc = DOCS['__default__'];
@@ -4055,8 +4163,22 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
     function open(mask) { mask.classList.add('on'); }
     function close(mask) { mask.classList.remove('on'); resetTabs(mask.querySelector('.mtdev-bd')); }
 
-    group.querySelector('.mtdev-btn.field').onclick = function () { open(maskF); };
-    group.querySelector('.mtdev-btn.guide').onclick = function () { open(maskG); };
+    function refreshApprovalDocs() {
+      if (!window.ApprovalCenter) return;
+      var currentFile = window.ApprovalCenter.view === 'resources' ? '后台-资源申请审批.html' : '后台-审批中心.html';
+      var currentDoc = DOCS[currentFile];
+      [[maskF,'mtdevFieldBody',currentDoc.field,'mtdevF','字段说明'],[maskG,'mtdevGuideBody',currentDoc.guide,'mtdevG','交互演示指引']].forEach(function(item) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = drawerHTML('temporaryMask',item[1],item[4],currentDoc.name,item[2],item[3]);
+        var body = item[0].querySelector('.mtdev-bd');
+        body.innerHTML = '<div class="mtdev-intro">'+currentDoc.intro+'</div>'+tmp.querySelector('.mtdev-bd').innerHTML+(item[3]==='mtdevF'?foot:'');
+        item[0].querySelector('.mtdev-hd>b').textContent = item[4]+' — '+currentDoc.name;
+        item[0].querySelector('.mtdev-hd>.p').textContent = currentDoc.name;
+        bindTabs(body);
+      });
+    }
+    group.querySelector('.mtdev-btn.field').onclick = function () { refreshApprovalDocs();open(maskF); };
+    group.querySelector('.mtdev-btn.guide').onclick = function () { refreshApprovalDocs();open(maskG); };
     maskF.querySelector('.mtdev-x').onclick = function () { close(maskF); };
     maskG.querySelector('.mtdev-x').onclick = function () { close(maskG); };
     maskF.onclick = function (e) { if (e.target === maskF) close(maskF); };

@@ -253,6 +253,7 @@ textarea.inp{height:76px;padding:9px 12px 22px;resize:none;line-height:1.7;}
 .d-meta b{font-weight:400;color:var(--text-secondary);}
 .pill{display:inline-flex;align-items:center;height:24px;padding:0 11px;font-size:12.5px;border-radius:999px;white-space:nowrap;}
 .pill.ok{color:var(--ok);background:var(--ok-bg);}
+.pill.wait{color:var(--warn);background:var(--warn-bg);border:1px solid var(--warn-bd);}
 .pill.n{color:var(--text-secondary);background:#f0f3f6;border:1px solid #dfe5eb;}
 .tag-cell{display:inline-flex;align-items:center;height:22px;padding:0 8px;font-size:12px;border-radius:var(--radius-sm);color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-bd);white-space:nowrap;}
 
@@ -692,8 +693,8 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
             <select id="f-dir"><option>请选择</option><option>分析评估</option><option>调查摸底</option><option>监测预警</option><option>方案咨询</option><option>技术研发</option><option>其他需求</option></select></span>
           <span class="f-field"><label for="f-svc">所需服务</label>
             <select id="f-svc"><option>请选择</option><option>图像解译</option><option>统计分析</option><option>现场调查</option><option>数据采集</option><option>数据整理</option><option>方案编制</option><option>模型开发</option></select></span>
-          <span class="f-field"><label for="f-st">发布状态</label>
-            <select id="f-st"><option>全部</option><option>发布中</option><option>未发布</option><option>已下架</option></select></span>
+          <span class="f-field"><label for="f-st">状态</label>
+            <select id="f-st"><option>全部</option><option>未发布</option><option>待审核</option><option>发布中</option><option>已结束</option></select></span>
           <span class="f-field f-grid">
             <label for="f-time">更新时间</label>
             <span class="drange" onclick="toast('选择更新时间区间（原型演示）')" role="button" tabindex="0">
@@ -714,7 +715,7 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
             <thead>
               <tr>
                 <th>需求信息</th><th>需求方向</th><th>所需服务</th><th>发布单位</th>
-                <th>发布状态</th><th>更新时间</th><th>操作</th>
+                <th>状态</th><th>更新时间</th><th>操作</th>
               </tr>
             </thead>
             <tbody id="tbody"></tbody>
@@ -748,24 +749,24 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
 </footer>
 
 
-<!-- ===== 下架确认 ===== -->
+<!-- ===== 结束确认 ===== -->
 <div class="modal-mask" id="m-off">
-  <div class="modal mw-620 modal-ask" role="dialog" aria-label="下架需求">
+  <div class="modal mw-620 modal-ask" role="dialog" aria-label="结束需求">
     <button type="button" class="x-abs" onclick="closeM('m-off')" aria-label="关闭"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="modal-bd">
       <div class="ask-hd">
         <span class="m-ic circle warn"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 6.6v6.6" stroke="#fff" stroke-width="2.2"/><circle cx="12" cy="17.2" r="1.5" fill="#fff" stroke="none"/></svg></span>
-        <p class="m-tt">确认下架&ldquo;<b id="offName">种植结构优化与管理建议</b>&rdquo;？</p>
+        <p class="m-tt">确认结束&ldquo;<b id="offName">种植结构优化与管理建议</b>&rdquo;？</p>
       </div>
       <div class="ask-bd">
-        <p class="m-lead">下架后该需求将不再在需求大厅展示，也不再接收新的咨询与对接。</p>
-        <p class="m-sub">已产生的联系方式查看与获取记录保留，可随时重新发布。</p>
+        <p class="m-lead">结束后该需求将不再在需求中心展示。</p>
+        <p class="m-sub">已产生的联系方式查看与获取记录保留。</p>
       </div>
     </div>
     <div class="modal-ft">
       <div class="right">
         <button type="button" class="btn" onclick="closeM('m-off')">取消</button>
-        <button type="button" class="btn primary" id="offOkI" onclick="okOff()">确认下架</button>
+        <button type="button" class="btn primary" id="offOkI" onclick="okOff()">确认结束</button>
       </div>
     </div>
   </div>
@@ -860,12 +861,13 @@ function renderPager(){
   document.getElementById('pgBtns').innerHTML=h;
 }
 
-var DATA=[{"name": "已有监测图件的分析与报告编制", "no": "REQ-2026-001", "dir": "分析评估", "svc": ["图像解译", "统计分析"], "org": "农业管理单位", "st": "pub", "d": "2026-09-17"}, {"name": "种植现状现场调查与报告编制", "no": "REQ-2026-002", "dir": "调查摸底", "svc": ["现场调查", "数据采集"], "org": "农业管理单位", "st": "draft", "d": "2026-09-16"}, {"name": "作物长势持续监测与风险提示", "no": "REQ-2026-003", "dir": "监测预警", "svc": ["数据采集", "统计分析"], "org": "农业生产企业", "st": "off", "d": "2026-09-15"}, {"name": "受灾农田损失调查与评估", "no": "REQ-2026-004", "dir": "分析评估", "svc": ["现场调查", "统计分析"], "org": "农业服务机构", "st": "pub", "d": "2026-09-15"}, {"name": "种植结构优化与管理建议", "no": "REQ-2026-005", "dir": "方案咨询", "svc": ["数据整理", "统计分析", "方案编制"], "org": "农业合作社", "st": "pub", "d": "2026-09-14"}, {"name": "作物估产方法研究与验证", "no": "REQ-2026-006", "dir": "技术研发", "svc": ["统计分析", "模型开发"], "org": "科研团队", "st": "draft", "d": "2026-09-14"}, {"name": "农田基础资料整理", "no": "REQ-2026-007", "dir": "其他需求", "svc": ["数据整理", "统计分析", "图像解译"], "org": "农业管理单位", "st": "pub", "d": "2026-09-13"}, {"name": "病害识别方法研究", "no": "REQ-2026-008", "dir": "技术研发", "svc": ["图像解译", "模型开发"], "org": "科研团队", "st": "off", "d": "2026-09-12"}, {"name": "灌溉管理方案咨询", "no": "REQ-2026-009", "dir": "方案咨询", "svc": ["现场调查", "方案编制"], "org": "农业生产企业", "st": "draft", "d": "2026-09-11"}, {"name": "农业数据采集服务", "no": "REQ-2026-010", "dir": "其他需求", "svc": ["数据采集", "数据整理"], "org": "农业服务机构", "st": "pub", "d": "2026-09-10"}];
+var DATA=[{"name": "已有监测图件的分析与报告编制", "no": "REQ-2026-001", "dir": "分析评估", "svc": ["图像解译", "统计分析"], "org": "农业管理单位", "st": "pub", "d": "2026-09-17"}, {"name": "种植现状现场调查与报告编制", "no": "REQ-2026-002", "dir": "调查摸底", "svc": ["现场调查", "数据采集"], "org": "农业管理单位", "st": "draft", "d": "2026-09-16"}, {"name": "作物长势持续监测与风险提示", "no": "REQ-2026-003", "dir": "监测预警", "svc": ["数据采集", "统计分析"], "org": "农业生产企业", "st": "off", "d": "2026-09-15"}, {"name": "受灾农田损失调查与评估", "no": "REQ-2026-004", "dir": "分析评估", "svc": ["现场调查", "统计分析"], "org": "农业服务机构", "st": "pub", "d": "2026-09-15"}, {"name": "种植结构优化与管理建议", "no": "REQ-2026-005", "dir": "方案咨询", "svc": ["数据整理", "统计分析", "方案编制"], "org": "农业合作社", "st": "pub", "d": "2026-09-14"}, {"name": "作物估产方法研究与验证", "no": "REQ-2026-006", "dir": "技术研发", "svc": ["统计分析", "模型开发"], "org": "科研团队", "st": "wait", "d": "2026-09-14"}, {"name": "农田基础资料整理", "no": "REQ-2026-007", "dir": "其他需求", "svc": ["数据整理", "统计分析", "图像解译"], "org": "农业管理单位", "st": "pub", "d": "2026-09-13"}, {"name": "病害识别方法研究", "no": "REQ-2026-008", "dir": "技术研发", "svc": ["图像解译", "模型开发"], "org": "科研团队", "st": "off", "d": "2026-09-12"}, {"name": "灌溉管理方案咨询", "no": "REQ-2026-009", "dir": "方案咨询", "svc": ["现场调查", "方案编制"], "org": "农业生产企业", "st": "draft", "d": "2026-09-11"}, {"name": "农业数据采集服务", "no": "REQ-2026-010", "dir": "其他需求", "svc": ["数据采集", "数据整理"], "org": "农业服务机构", "st": "pub", "d": "2026-09-10"}];
 var TOTAL=23, PS=10;
 var DETAIL='后台-需求管理-详情.html', EDIT='后台-需求管理-编辑.html';
-var ST={pub:['ok','发布中'],draft:['off','未发布'],off:['n','已下架']};
+var ST={draft:['off','未发布'],wait:['wait','待审核'],pub:['ok','发布中'],off:['n','已结束']};
 
-function stPill(s){var d=ST[s];return '<span class="pill '+d[0]+'">'+d[1]+'</span>';}
+function needState(s){return ({'未发布':'draft','待审核':'wait','发布中':'pub','已结束':'off','已下架':'off'})[s]||s;}
+function stPill(s){var d=ST[needState(s)]||ST.draft;return '<span class="pill '+d[0]+'">'+d[1]+'</span>';}
 function svcCell(list){
   var h='<span class="sc-cell">', show=Math.min(list.length,2);
   for(var i=0;i<show;i++){h+='<span class="tag-cell">'+list[i]+'</span>';}
@@ -873,9 +875,10 @@ function svcCell(list){
   return h+'</span>';
 }
 function ops(r){
-  var toggler=(r.st==='pub')
-    ? '<a class="lnk" href="javascript:void(0)" onclick="openOff(\''+r.i+'\')">下架</a>'
-    : '<a class="lnk" href="javascript:void(0)" onclick="doPub(\''+r.i+'\')">发布</a>';
+  var state=needState(r.st);
+  var toggler=(state==='pub')
+    ? '<a class="lnk" href="javascript:void(0)" onclick="openOff(\''+r.i+'\')">结束</a>'
+    : state==='draft' ? '<a class="lnk" href="javascript:void(0)" onclick="doPub(\''+r.i+'\')">发布</a>' : '';
   return '<span class="ops">'
     +'<a class="lnk" href="'+DETAIL+'">查看</a>'
     +'<a class="lnk" href="'+EDIT+'">编辑</a>'
@@ -898,19 +901,22 @@ function renderRows(){
   }).join('');
 }
 function doPub(i){
-  DATA[i].st='pub';renderRows();
+  if(!DATA[i]||needState(DATA[i].st)!=='draft')return;
+  DATA[i].st='pub';renderRows();if(window.PX)PX.filter();
   toast('已发布，需求大厅即时展示（原型演示）');
 }
 function openOff(i){
+  if(!DATA[i]||needState(DATA[i].st)!=='pub')return;
   document.getElementById('offName').textContent=DATA[i].name;
   document.getElementById('offOkI').setAttribute('data-i',i);
   openM('m-off');
 }
 function okOff(){
   var i=parseInt(document.getElementById('offOkI').getAttribute('data-i'),10);
+  if(!DATA[i]||needState(DATA[i].st)!=='pub')return;
   var n=DATA[i].name;
   DATA[i].st='off';renderRows();
-  closeM('m-off');toast('已下架「'+n+'」（原型演示）');
+  closeM('m-off');toast('已结束「'+n+'」（原型演示）');
 }
 function openDel(i){
   document.getElementById('delName').textContent=DATA[i].name;
@@ -1030,7 +1036,7 @@ if(fam){let [kind,list,nameId]=fam,key='agri-records:'+kind,stash=PX.get(key,[])
   PX.save=(publish=false)=>{let name=value(nameId).trim();if(!name){toast('请填写'+kind+'名称');document.getElementById(nameId)?.focus();return false}if(kind==='案例'&&!value('c-model')){toast('请选择关联模型');return false}let rows=PX.get(key,stash);let id=rid||'new-'+Date.now(),r=rows.find(x=>x._id===id);if(!r){r={...(rows[0]||{}),_id:id,_fields:[]};rows.unshift(r)}r.name=name;r.title=name;r.n=name;r._fields=recordFields();r.d='2026-09-24';r.at='2026-09-24';r.st=publish?'pub':r.st||'draft';if(kind==='需求'){r.no=value('r-no')||'REQ-2026-'+String(Date.now()).slice(-4);r.org=value('r-org')||'平台管理方';r.dir=value('r-dir')||document.querySelector('.tagsel')?.textContent.trim()||r.dir||'其他需求';r.svc=r.svc||['数据整理'];r.brief=value('r-brief');}if(kind==='案例'){r.m=value('c-model');r.model=value('c-model');r.mdl=value('c-model');r.ord=+value('c-ord');r.st=publish?'on':r.st||'off';}if(kind==='公告'){r.sum=value('fSum');r.t=name;}PX.put(key,rows);PX.audit(publish?'保存并发布':'保存',name);baseSave();toast('已保存，可返回列表查看');return true};
   if(typeof window.savePub==='function')window.savePub=()=>PX.save(true);
  }
- if(/详情\.html$/.test(f)&&rid){let r=stash.find(x=>x._id===rid);if(r){let main=document.querySelector('main');let h=main.querySelector('h1');if(h)h.textContent=r.name||r.title||r.n;let card=document.createElement('section');card.className='px-card';card.innerHTML='<div class="px-card-head"><h2>'+e(r.name||r.title||r.n)+'</h2><a class="px-btn" href="'+f.replace('详情','编辑')+'?item='+encodeURIComponent(r._id)+'">编辑</a></div><div style="padding:22px"><dl class="px-kv">'+Object.entries(r).filter(([k,v])=>['name','no','org','dir','st','d','m','sum','ord','pt','ut'].includes(k)&&typeof v!=='object').map(([k,v])=>'<dt>'+e(({name:'名称',title:'标题',n:'名称',no:'编号',org:'发布单位',dir:'方向',st:'状态',d:'更新时间',model:'关联模型',mdl:'关联模型',m:'关联模型',pt:'发布时间',ut:'更新时间',sum:'摘要',ord:'显示顺序',at:'发布时间',t:'标题'})[k]||k)+'</dt><dd>'+e(k==='st'?({on:'展示',off:'已下架',pub:'已发布',draft:'未发布'})[v]||v:v)+'</dd>').join('')+'</dl>'+((r._fields||[]).filter(x=>x.editable).map(x=>'<article style="line-height:1.8;margin-top:20px">'+x.value+'</article>').join(''))+'</div>';main.querySelectorAll(':scope>section,:scope>.two-col,:scope>.d-body').forEach(x=>x.remove());main.append(card);}}
+ if(/详情\.html$/.test(f)&&rid){let r=stash.find(x=>x._id===rid);if(r){let main=document.querySelector('main');let h=main.querySelector('h1');if(h)h.textContent=r.name||r.title||r.n;let card=document.createElement('section');card.className='px-card';card.innerHTML='<div class="px-card-head"><h2>'+e(r.name||r.title||r.n)+'</h2><a class="px-btn" href="'+f.replace('详情','编辑')+'?item='+encodeURIComponent(r._id)+'">编辑</a></div><div style="padding:22px"><dl class="px-kv">'+Object.entries(r).filter(([k,v])=>['name','no','org','dir','st','d','m','sum','ord','pt','ut'].includes(k)&&typeof v!=='object').map(([k,v])=>'<dt>'+e(({name:'名称',title:'标题',n:'名称',no:'编号',org:'发布单位',dir:'方向',st:'状态',d:'更新时间',model:'关联模型',mdl:'关联模型',m:'关联模型',pt:'发布时间',ut:'更新时间',sum:'摘要',ord:'显示顺序',at:'发布时间',t:'标题'})[k]||k)+'</dt><dd>'+e(k==='st'?(kind==='需求'?(ST[needState(v)]||ST.draft)[1]:({on:'展示',off:'已下架',pub:'已发布',draft:'未发布'})[v]||v):v)+'</dd>').join('')+'</dl>'+((r._fields||[]).filter(x=>x.editable).map(x=>'<article style="line-height:1.8;margin-top:20px">'+x.value+'</article>').join(''))+'</div>';main.querySelectorAll(':scope>section,:scope>.two-col,:scope>.d-body').forEach(x=>x.remove());main.append(card);}}
 }
 // Replace legacy static topic operations with row-specific records and persistence.
 if(f==='后台-课题管理.html'){
@@ -1091,7 +1097,7 @@ if(!['后台-模型管理.html','后台-审批中心.html','index.html'].include
 window.addEventListener('click',ev=>{let btn=ev.target.closest('button');if(!btn||btn.textContent.trim()!=='重置'||btn.closest('#pxMask'))return;if(!document.querySelector('#tbody'))return;ev.preventDefault();ev.stopImmediatePropagation();let body=document.querySelector('#tbody'),table=body.closest('table');document.querySelectorAll('main input,main select').forEach(x=>{if(!(x.compareDocumentPosition(table)&Node.DOCUMENT_POSITION_PRECEDING)&&!x.classList.contains('px-size')){if(x.tagName==='SELECT')x.selectedIndex=0;else x.value=''}});PX.filter()},true);
 // Persist direct row mutations; no deleted-resource module is used.
 const kind=f==='后台-案例管理.html'?'案例':f==='后台-需求管理.html'?'需求':f==='后台-门户管理-通知公告.html'?'公告':null;
-if(kind){const save=()=>{PX.put('agri-records:'+kind,DATA);renderRows();PX.paginate()};if(kind==='公告')window.doPub=i=>{DATA[i].st='pub';DATA[i].pt='2026-09-24 10:00';DATA[i].ut='2026-09-24 10:00';save();toast('公告已发布')};window.okOff=()=>{let b=document.getElementById('offOk')||document.getElementById('offOkI');let i=+b?.dataset.i;if(DATA[i])DATA[i].st='off';closeM('m-off');save()};window.okDel=()=>{let b=document.getElementById('delOk')||document.getElementById('delOkI');let i=+b?.dataset.i;if(DATA[i])DATA.splice(i,1);closeM('m-del');save()};if(typeof toggleSt==='function'){let old=toggleSt;window.toggleSt=i=>{old(i);save()}}}
+if(kind){const save=()=>{PX.put('agri-records:'+kind,DATA);renderRows();PX.paginate()};if(kind==='公告')window.doPub=i=>{DATA[i].st='pub';DATA[i].pt='2026-09-24 10:00';DATA[i].ut='2026-09-24 10:00';save();toast('公告已发布')};window.okOff=()=>{let b=document.getElementById('offOk')||document.getElementById('offOkI');let i=+b?.dataset.i;if(DATA[i]&&(kind!=='需求'||needState(DATA[i].st)==='pub'))DATA[i].st='off';closeM('m-off');save();if(kind==='需求'){PX.filter();toast('需求已结束（原型演示）')}};window.okDel=()=>{let b=document.getElementById('delOk')||document.getElementById('delOkI');let i=+b?.dataset.i;if(DATA[i])DATA.splice(i,1);closeM('m-del');save()};if(typeof toggleSt==='function'){let old=toggleSt;window.toggleSt=i=>{old(i);save()}}}
 // Existing dialog buttons in the topic guide save the edited values.
 if(f==='后台-课题指南管理.html')window.addEventListener('click',ev=>{let b=ev.target.closest('button');if(b&&b.closest('#drawer')&&/保存/.test(b.textContent)){ev.preventDefault();ev.stopImmediatePropagation();PX.save()}},true);
 // Bind working home-content cards and preview dialogs to their selected content.
