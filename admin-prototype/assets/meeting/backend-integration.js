@@ -74,7 +74,7 @@ M.viewOutcome=id=>{
  const code=r.projectCode||r.metadata?.projectCode,p=M.projects().find(x=>x.code===code),body=Q('#mtDialog .mt-body');
  if(body&&p)body.insertAdjacentHTML('afterbegin','<p>关联课题：<a class="mt-link" href="后台-课题管理.html?project='+encodeURIComponent(code)+'">'+E(p.name)+'</a></p>');
  if(r.status==='已通过'&&(r.acceptedAssetId||r.assetId)){
-  const id=r.acceptedAssetId||r.assetId,url=r.kind==='model'?'后台-模型管理.html?record='+encodeURIComponent(id):'后台-数据集详情编辑-已完善.html?asset='+encodeURIComponent(id);
+  const id=r.acceptedAssetId||r.assetId,url=r.kind==='model'?'后台-模型管理.html?record='+encodeURIComponent(id):'后台-数据集管理.html?asset='+encodeURIComponent(id);
   Q('#mtDialog footer')?.insertAdjacentHTML('beforeend','<a class="mt-btn primary" href="'+url+'">查看入库资源</a>');
  }
 };

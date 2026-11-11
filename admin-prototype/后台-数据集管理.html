@@ -1236,49 +1236,43 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
 .direction-options label:hover{background:var(--brand-soft)}
 .direction-options input{width:16px;height:16px;margin:0;accent-color:var(--brand);flex-shrink:0}
 @media(max-width:700px){#regionPicker{width:calc(100vw - 20px);max-height:94dvh}.rp-head{padding:16px}.rp-search{padding:12px 16px}.rp-columns{margin:0 16px;grid-template-columns:repeat(4,205px);overflow-x:auto}.rp-options{height:240px}.rp-selection{padding:12px 16px}.rp-search-results{margin:0 16px}}
-</style></head>
+</style><link rel="stylesheet" href="assets/prototype-nav.css">
+</head>
 <body>
 
-<header class="site-header">
+<header class="site-header prototype-header" data-system="admin">
   <div class="container header-inner">
-    <a class="brand" href="javascript:void(0)" onclick="toast('门户首页')" aria-label="北大荒智慧农业协同创新平台">
-      <svg width="34" height="34" viewbox="0 0 34 34" fill="none" aria-hidden="true">
-        <path d="M17 31V17" stroke="#0E5B4A" stroke-width="2.2" stroke-linecap="round"></path>
-        <path d="M16.6 17.4C16.6 10.2 11.8 4.4 5.2 4.4c0 7.2 4.8 13 11.4 13Z" fill="#1B7A52"></path>
-        <path d="M17.4 21c0-6.4 4.4-11.6 9.9-11.6C27.3 15.8 23 21 17.4 21Z" fill="#48A05E"></path>
-        <path d="M15.9 25.6c0-4.9-3.2-8.8-7.4-8.8 0 4.9 3.2 8.8 7.4 8.8Z" fill="#8CBE3F"></path>
+    <a class="brand" href="index.html" aria-label="北大荒智慧农业协同创新平台">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+        <path d="M17 31V17" stroke="#0E5B4A" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M16.6 17.4C16.6 10.2 11.8 4.4 5.2 4.4c0 7.2 4.8 13 11.4 13Z" fill="#1B7A52"/>
+        <path d="M17.4 21c0-6.4 4.4-11.6 9.9-11.6C27.3 15.8 23 21 17.4 21Z" fill="#48A05E"/>
+        <path d="M15.9 25.6c0-4.9-3.2-8.8-7.4-8.8 0 4.9 3.2 8.8 7.4 8.8Z" fill="#8CBE3F"/>
       </svg>
       <span>北大荒智慧农业协同创新平台</span>
     </a>
     <span class="brand-tag">管理后台</span>
-    <nav class="main-nav" aria-label="管理后台一级导航">
-  <a href="index.html">工作台总览</a>
-  <a href="%E5%90%8E%E5%8F%B0-%E8%AF%BE%E9%A2%98%E5%B7%A5%E4%BD%9C%E5%8F%B0.html">课题管理</a>
-  <a href="%E5%90%8E%E5%8F%B0-%E5%AE%A1%E6%89%B9%E4%B8%AD%E5%BF%83.html">审批中心</a>
-  <a class="active" href="后台-模型管理.html">运营管理</a>
-  <a href="%E5%90%8E%E5%8F%B0-%E8%83%BD%E5%8A%9B%E5%85%B1%E4%BA%AB.html">平台能力</a>
-  <a href="%E5%90%8E%E5%8F%B0-%E7%AE%A1%E7%90%86%E8%AE%BE%E7%BD%AE.html">管理设置</a>
-</nav>
-    <div class="header-actions">
-      <button type="button" class="msg-btn" onclick="toast('消息中心')" aria-label="消息通知">
-        <svg width="17" height="17" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-2 8-2 8h16s-2-1-2-8"></path><path d="M13.7 20a2 2 0 0 1-3.4 0"></path></svg>
+    <nav class="main-nav" aria-label="主导航"><a data-px-own="1" href="index.html">工作台总览</a><a data-px-own="1" href="后台-课题工作台.html">课题管理</a><a data-px-own="1" href="后台-审批中心.html">审批中心</a><a data-px-own="1" href="后台-模型管理.html" class="active" aria-current="page">运营管理</a><a data-px-own="1" href="后台-时空数据管理.html">平台能力</a><a data-px-own="1" href="后台-管理设置.html">合作与组织</a></nav>
+    <div class="header-actions"><button type="button" class="menu-toggle" id="prototypeMenuToggle" aria-controls="prototypeMobileMenu" aria-expanded="false" aria-label="打开菜单">☰</button>
+      <a class="msg-btn" href="后台-消息中心.html" aria-label="消息通知">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-2 8-2 8h16s-2-1-2-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
         <i class="msg-dot"></i>
-      </button>
+      </a>
       <div class="u-box">
-        <span class="u-avatar">张</span>
-        <span class="u-name" onclick="toggleUserMenu()" role="button" tabindex="0">张明
-          <svg width="12" height="12" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
-        </span>
+        <button type="button" class="u-avatar" data-prototype-user aria-label="张明，打开用户菜单" aria-expanded="false" aria-controls="userMenu">张</button>
+        <button type="button" class="u-name" data-prototype-user aria-expanded="false" aria-controls="userMenu">张明
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
         <div class="u-menu" id="userMenu">
-          <div class="u-mi" onclick="toast('个人资料')">个人资料</div>
-          <div class="u-mi" onclick="toast('账号安全')">账号安全</div>
+          <a class="u-mi" href="后台-个人资料.html">个人资料</a>
+          <a class="u-mi" href="后台-账号安全.html">账号安全</a>
           <div class="u-sep"></div>
-          <div class="u-mi out" onclick="toast('已退出登录（原型演示）')">退出登录</div>
+          <a class="u-mi out" data-px-own="1" href="后台-登录.html">退出登录</a>
         </div>
       </div>
     </div>
   </div>
-</header>
+<nav id="prototypeMobileMenu" class="mobile-menu prototype-mobile" hidden aria-label="移动端主导航"></nav></header>
 
 <div class="container">
   <div class="admin-app">
@@ -1745,11 +1739,29 @@ function makeSeed(r,i){
 }
 let DS;
 try{const saved=JSON.parse(localStorage.getItem(STORE));DS=Array.isArray(saved)?saved:seedRows.map(makeSeed);}catch{DS=seedRows.map(makeSeed);}
+// Bring accepted records and legacy catalog additions into the merged editor once.
+const DATASET_IMPORT_KEY='agri-datasets-imported-20261110';
+let importedDatasetIds=[];
+try{
+ importedDatasetIds=JSON.parse(localStorage.getItem(DATASET_IMPORT_KEY)||'[]');
+ const legacy=JSON.parse(localStorage.getItem('agri-datasets')||'[]'),assets=JSON.parse(localStorage.getItem('bdh-asset-metadata-1010')||'{}'),outcomes=JSON.parse(localStorage.getItem('bdh-outcome-review-1010')||'[]');
+ let changed=false;
+ for(const r of Array.isArray(legacy)?legacy:[]){
+  if(!r.id||DS.some(x=>x.id===r.id)||importedDatasetIds.includes(r.id))continue;
+  const outcome=outcomes.find(x=>x.id===r.outcomeId),metadata={...assets[r.id],...outcome?.metadata};
+  const m={name:r.name||'',summary:r.desc||'',provider:r.org||'',owner:'',crop:[],year:'',region:'',topic:'',annotation:'',cover:'',coverageCodes:[],coverageAll:false,researchDirections:[],containsGeographicData:false,datasetContent:clone(EMPTY_CONTENT),...metadata};
+  m.crop=Array.isArray(m.crop)?m.crop:String(m.crop||'').split(/[、,，]/).filter(Boolean);
+  const files=(outcome?.files||r.files||[]).map((f,i)=>typeof f==='string'?{name:f,key:f,size:''}:{...f,key:f.key||f.name||String(i)});
+  DS.push({...r,name:m.name,desc:m.summary,variant:r.variant||'complete',pub:r.pub==='on'?'on':r.pub==='down'?'down':'off',metadata:m,files,original:outcome?{'提交人':outcome.applicant,'提交时间':outcome.time,'原始说明':outcome.name}:{}});
+  importedDatasetIds.push(r.id);changed=true;
+ }
+ if(changed){localStorage.setItem(STORE,JSON.stringify(DS));localStorage.setItem(DATASET_IMPORT_KEY,JSON.stringify(importedDatasetIds));}
+}catch(error){console.warn('历史数据记录未能读取',error.message);}
 window.DS=DS;
 let page=1,pageSize=12,filter={},currentId=null,currentMode='view',modalRow=null,createFiles=[],uploadsBusy=0,currentCoverBusy=false;
 const $=id=>document.getElementById(id);
 function toast(msg){const n=$('toast');n.textContent=msg;n.classList.add('show');clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove('show'),2800);}
-function persist(){try{localStorage.setItem(STORE,JSON.stringify(DS));window.DS=DS;return true;}catch{toast('保存失败：浏览器存储空间不足，请缩小封面或预览材料后重试');return false;}}
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(DS));window.DS=DS;localStorage.setItem('agri-datasets',JSON.stringify(DS.map(r=>({...r,link:'后台-数据集管理.html',form:r.metadata.modality||r.form||'',org:r.metadata.provider||r.org||''}))));return true;}catch{toast('保存失败：浏览器存储空间不足，请缩小封面或预览材料后重试');return false;}}
 function rowOf(id){return DS.find(r=>r.id===id);}
 function openM(id){$(id).classList.add('open');}
 function closeM(id){$(id).classList.remove('open');}
@@ -1938,5 +1950,12 @@ document.body.insertAdjacentHTML('beforeend','<div class="modal-mask" id="m-cont
 $('m-content-preview').addEventListener('click',ev=>{if(ev.target.id==='m-content-preview')closeM('m-content-preview');});
 // The remaining navigation entries belong to pages outside these four source files.
 route();
-</script></body>
+</script><script src="assets/prototype-nav.js"></script>
+<script>
+(function(){
+ const p=new URLSearchParams(location.search),id=p.get('asset')||p.get('record');
+ if(id&&!location.hash.startsWith('#/dataset/')){const r=DS.find(x=>x.id===id);if(r){const mode=p.get('mode')==='edit'?'edit':'view';history.replaceState(null,'',location.pathname+location.search+'#/dataset/'+encodeURIComponent(id)+'/'+mode+(p.get('tab')==='preview'?'/preview':''));route();}else toast('未找到该数据集，请从列表选择。');}
+})();
+</script>
+</body>
 </html>

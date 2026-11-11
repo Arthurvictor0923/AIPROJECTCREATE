@@ -114,6 +114,18 @@
 .mapping-editor-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:18px 0 12px}.mapping-editor-heading strong{font-size:14px;font-weight:600}.mapping-editor-heading .count{margin-left:7px}.mapping-empty{padding:30px 20px;text-align:center;border:1px dashed #cddbd4;background:#fafcfb;border-radius:6px;color:var(--muted);font-size:13px;line-height:1.8}.platform-role-mapping td:first-child{width:30%;min-width:170px;padding-top:16px}.platform-role-mapping td:nth-child(2){min-width:270px}.platform-role-mapping td:last-child{width:66px;vertical-align:top;padding-top:22px;padding-left:12px;padding-right:18px}.platform-role-mapping .table-wrap{max-height:480px}.platform-role-mapping table{min-width:565px}.platform-role-mapping select option:disabled{color:#a1aaa7}.platform-role-mapping .role-policy-preview{grid-template-columns:1fr 1fr}.role-binding-modal .platform-role-mapping .table-wrap{max-height:330px}
 @media(max-width:650px){.platform-role-mapping td:first-child{min-width:150px}.platform-role-mapping td:nth-child(2){min-width:210px}.platform-role-mapping .role-policy-preview{grid-template-columns:1fr}.mapping-editor-heading{gap:10px}.mapping-empty{padding:24px 16px}}
 </style>
+<style id="unified-personnel-styles">
+.personnel-list table{table-layout:fixed;min-width:980px}.personnel-list th,.personnel-list td{padding-left:12px;padding-right:12px}.personnel-list th:first-child,.personnel-list td:first-child{width:44px;padding-left:20px;padding-right:8px}.personnel-list th:nth-child(2){width:150px}.personnel-list th:nth-child(3){width:100px}.personnel-list th:nth-child(5){width:172px}.personnel-list th:nth-child(6){width:110px}.personnel-list th:last-child{width:226px}.personnel-list td:last-child{padding-right:20px}.personnel-list .cell-org{overflow-wrap:anywhere;line-height:1.75}.personnel-list .role-cell{min-width:0}.personnel-list .personnel-ops{min-width:0;max-width:none;gap:6px 14px}.personnel-list .personnel-ops .link-btn{white-space:nowrap}.personnel-list .person .name{white-space:nowrap}.personnel-list .person .subline{overflow-wrap:anywhere}.batch-select-name .badge{margin-left:5px;font-weight:400}
+#main-filter[data-key="people"] #filter-kind{min-width:130px}#main-filter[data-key="people"] #filter-org{max-width:240px}#main-filter[data-key="people"] #filter-head{max-width:210px}
+</style>
+<style id="person-role-binding-styles">
+.personnel-ops .person-org-primary{height:28px;padding:0 10px;font-size:12px;border-radius:4px}
+.person-role-context{padding:14px 16px;border:1px solid var(--border);border-radius:6px;background:#fafcfb;margin-bottom:18px}
+.person-role-context .info-label{flex:0 0 64px;margin:0;font-size:12px}.person-role-org,.person-role-context .platform-person-role{display:flex;align-items:center;gap:12px;font-size:13px;margin:0}.person-role-org>span:nth-child(2){flex:1;min-width:0;overflow-wrap:anywhere}.person-role-org .btn{flex-shrink:0}.person-role-context .platform-person-role{margin-top:10px}
+.person-role-mode{display:flex;align-items:center;gap:16px;margin-bottom:18px}.person-role-toggle{display:inline-flex;width:340px;max-width:100%;padding:3px;gap:3px;background:#f1f5f3;border:1px solid var(--border);border-radius:6px}.person-role-choice{position:relative;flex:1;min-width:0;cursor:pointer}.person-role-choice input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}.person-role-choice span{display:flex;align-items:center;justify-content:center;min-height:34px;padding:5px 14px;border-radius:4px;color:var(--secondary);font-size:13px;font-weight:500;white-space:nowrap;transition:background .15s,color .15s}.person-role-choice input:checked+span{background:var(--brand);color:#fff}.person-role-choice input:not(:checked):hover+span{background:#e5efea;color:var(--brand)}.person-role-choice input:focus-visible+span{outline:2px solid #359a91;outline-offset:2px}
+#person-role-select-wrap[hidden]{display:none}#person-role-select-wrap{margin-bottom:18px}.role-effective-row{display:flex;gap:16px;align-items:baseline;margin-bottom:12px;font-size:13px}.role-effective-row>span{color:var(--muted);flex-shrink:0}.role-effective-row strong{font-weight:500}.role-inheritance-preview{border:1px solid var(--border);border-radius:5px;overflow:hidden}.role-inheritance-preview .table-wrap{max-height:210px;overflow:auto}.role-inheritance-preview table{min-width:440px}.role-inheritance-preview th{position:sticky;top:0}.role-inheritance-preview td{padding-top:10px;padding-bottom:10px;font-size:12px}
+@media(max-width:520px){.person-role-org{flex-wrap:wrap}.person-role-context .info-label{flex-basis:60px}.person-role-org .btn{margin-left:72px}.person-role-context{padding:12px}.person-role-mode{gap:10px}.role-effective-row{gap:10px}}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -162,7 +174,7 @@
       <div class="side-title">合作与组织</div>
       <a href="#cooperation" class="snav cur" data-nav="cooperation" aria-current="page"><span data-icon="consult"></span>合作咨询</a>
       <a href="#institutions" class="snav" data-nav="institutions"><span data-icon="org"></span>机构管理</a>
-      <a href="#members" class="snav" data-nav="members"><span data-icon="members"></span>科研人员管理</a>
+      <a href="#members" class="snav" data-nav="members"><span data-icon="members"></span>人员管理</a>
       <a href="#teams" class="snav" data-nav="teams"><span data-icon="team"></span>团队管理</a>
       <a href="#roles" class="snav" data-nav="roles"><span data-icon="role"></span>角色管理</a>
     </aside>
@@ -250,6 +262,11 @@ const SEED={
     {id:'m14',name:'林晓',account:'linxiao',headId:null,orgId:null},
     {id:'m15',name:'许诺',account:'xunuo',headId:null,orgId:null}
   ],
+  enterprises:[
+    {id:'e1',name:'陈宇',account:'chenyu',orgId:'o2',platformRoleIds:['central-enterprise']},
+    {id:'e2',name:'王凯',account:'wangkai',orgId:'o2',platformRoleIds:['central-enterprise']},
+    {id:'e3',name:'李娜',account:'lina',orgId:'o2',platformRoleIds:['central-enterprise']}
+  ],
   teams:[
     {id:'t1',name:'作物长势监测组',headId:'h1',memberIds:['m1','m2'],guestIds:['h2'],intro:'开展主要作物长势监测、遥感特征分析与模型验证。'},
     {id:'t2',name:'农业遥感算法组',headId:'h1',memberIds:['m1','m3'],guestIds:[],intro:'开展农业遥感影像处理与地块识别算法研究。'},
@@ -273,19 +290,25 @@ const SEED={
 let db=clone(SEED);
 try{const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'null');if(saved&&saved.version===1&&saved.orgs&&saved.heads&&saved.members&&saved.teams&&saved.spaces)db=saved;}catch(e){}
 function normalizePeopleOrganizations(){
+  if(!Array.isArray(db.enterprises))db.enterprises=clone(SEED.enterprises);
+  db.enterprises.forEach(p=>{delete p.headId;if(!Object.prototype.hasOwnProperty.call(p,'orgId'))p.orgId=null;});
   db.members.forEach(m=>{
     if(!Object.prototype.hasOwnProperty.call(m,'orgId'))m.orgId=db.heads.find(h=>h.id===m.headId)?.orgId||null;
   });
 }
 normalizePeopleOrganizations();
-const personnelSelection={heads:new Set(),members:new Set()};
-const personnelPageIds={heads:[],members:[]};
-let filters={institutions:{q:'',page:1,size:10},members:{q:'',org:'',head:'',relation:'',page:1,size:10},teams:{q:'',org:'',head:'',page:1,size:10}};
-let personnelTab='heads',personSubmit=null;
-filters.heads={q:'',org:'',page:1,size:10};
+const personnelSelection={people:new Set(),heads:new Set(),members:new Set(),enterprises:new Set()};
+const personnelPageIds={people:[]};
+let filters={institutions:{q:'',page:1,size:10},people:{q:'',kind:'',org:'',head:'',relation:'',page:1,size:10},teams:{q:'',org:'',head:'',page:1,size:10}};
+let personSubmit=null;
 let detailTabs={},returnRoutes={},route='',modalState=null,lastFocus=null,uid=Date.now();
 const main=document.getElementById('main'),mask=document.getElementById('modal-mask'),dialog=document.getElementById('modal');
 const org=id=>db.orgs.find(x=>x.id===id),head=id=>db.heads.find(x=>x.id===id),member=id=>db.members.find(x=>x.id===id),team=id=>db.teams.find(x=>x.id===id);
+const enterprise=id=>db.enterprises.find(x=>x.id===id);
+const getPerson=id=>head(id)||member(id)||enterprise(id);
+const personKind=id=>head(id)?'heads':member(id)?'members':enterprise(id)?'enterprises':null;
+const allPeople=()=>[...db.heads,...db.members,...db.enterprises].sort((a,b)=>a.name.localeCompare(b.name,'zh-CN'));
+const peopleFor=key=>key==='people'?allPeople():(db[key]||[]);
 const orgOfHead=id=>{const h=head(id);return h?org(h.orgId):null;};
 const orgOfMember=m=>m?org(m.orgId):null;
 const teamsOfMember=id=>db.teams.filter(t=>t.memberIds.includes(id));
@@ -315,15 +338,16 @@ function pager(key,total){const f=filters[key],pages=Math.max(1,Math.ceil(total/
 function searchForm(key,placeholder,extra){const f=filters[key];return '<form class="card filter-card" id="main-filter" data-key="'+key+'"><div class="filter-row">'+(extra||'')+'<div class="search-field"><input class="input" name="q" value="'+esc(f.q)+'" placeholder="'+esc(placeholder)+'" aria-label="'+esc(placeholder)+'"><button type="submit" class="btn primary">'+icon('search')+'查询</button><button type="button" class="btn" data-action="reset-filter" data-id="'+key+'">重置</button></div></div></form>';}
 function orgFilter(key){return '<div class="filter-field"><label for="filter-org">机构</label><select class="select" id="filter-org" name="org" data-filter-change="org">'+options(db.orgs,filters[key].org,'全部机构')+'</select></div>';}
 function ownerFilter(key){
-  const heads=db.heads.filter(h=>(h.orgId||(key==='members'?membersOfHead(h.id).length:ownTeams(h.id).length))&&(key==='members'||!filters[key].org||h.orgId===filters[key].org));
+  const heads=db.heads.filter(h=>(h.orgId||(key==='people'?membersOfHead(h.id).length:ownTeams(h.id).length))&&(key==='people'||!filters[key].org||h.orgId===filters[key].org));
   const items=heads.map(h=>({id:h.id,label:h.name+' · '+(org(h.orgId)?.short||org(h.orgId)?.name||'未绑定机构')}));
   return '<div class="filter-field"><label for="filter-head">负责人</label><select class="select" id="filter-head" name="head" data-filter-change="head">'+options(items,filters[key].head,'全部负责人')+'</select></div>';
 }
 function teamChips(ts){return ts.length?'<div class="tags">'+ts.map(t=>'<button class="tag link-btn" data-action="team-detail" data-id="'+t.id+'">'+esc(t.name)+'</button>').join('')+'</div>':'<span class="muted">—</span>';}
-// Shared role policies. The same four actions apply to both personnel identities.
+// Permission roles are shared across personnel categories.
 const ROLE_MODULES=[{key:'data',name:'数据中心',action:'使用数据'},{key:'model',name:'模型中心',action:'使用模型'},{key:'space',name:'科研开发空间',action:'创建科研空间'},{key:'demand',name:'需求中心',action:'创建需求'}];
 const ROLE_MODES={deny:'禁止使用',review:'需审批',direct:'免审批'};
-const PERSON_KINDS={heads:'科研负责人',members:'普通成员'};
+const PERSON_KINDS={heads:'科研负责人',members:'普通成员',enterprises:'企业成员'};
+function personKindBadge(p){const kind=personKind(p.id);return badge(PERSON_KINDS[kind],kind==='heads'?'blue':kind==='members'?'gray':'');}
 const roleSeeds=[
  {id:'role-head-standard',name:'科研负责人 · 常规审批',description:'四项业务按申请审批流程办理。',permissions:{data:'review',model:'review',space:'review',demand:'review'}},
  {id:'role-head-direct',name:'科研负责人 · 免审批',description:'四项业务免审批，仍需填写必要信息并通过业务校验。',permissions:{data:'direct',model:'direct',space:'direct',demand:'direct'}},
@@ -332,19 +356,19 @@ const roleSeeds=[
 ];
 // Offline sample only. Integration supplies window.managementRoleProvider.load(),
 // returning {roles:[{id,name}], userRoleIds?:{[userId]:roleId[]}} from the middle platform.
-// Role IDs, rather than names or personnel-tab positions, key every mapping.
-const DEMO_PLATFORM_ROLES=[{id:'central-head',name:'科研负责人'},{id:'central-member',name:'普通成员'},{id:'central-enterprise',name:'企业用户'}];
+// Role IDs key every institution mapping independently of personnel categories.
+const DEMO_PLATFORM_ROLES=[{id:'central-head',name:'科研负责人'},{id:'central-member',name:'普通成员'},{id:'central-enterprise',name:'企业成员'}];
 let platformRoleLoading=false,platformRoleLoadError='';
 function platformRoles(){return Array.isArray(db.platformRoles)?db.platformRoles:[];}
 function platformRoleNames(p){const ids=p?.platformRoleIds||[];return ids.map(id=>platformRoles().find(r=>r.id===id)?.name||'清单中未找到的角色').join('、')||'暂无中台角色';}
 function inheritedRole(p){
  const active=new Set(platformRoles().map(r=>r.id)),ids=(p?.platformRoleIds||[]).filter(id=>active.has(id)),o=org(p?.orgId);
- if(!o)return {role:null,id:null,source:'跟随机构',reason:'尚未关联机构，暂无默认角色。'};
- if(!ids.length)return {role:null,id:null,source:'跟随机构',reason:'未获取到有效的中台角色，暂无默认角色。'};
+ if(!o)return {role:null,id:null,source:'机构默认',reason:'尚未关联机构，暂无默认角色。'};
+ if(!ids.length)return {role:null,id:null,source:'机构默认',reason:'未获取到有效的中台角色，暂无默认角色。'};
  const bindings=ids.map(id=>o.roleBindings?.[id]||null),unique=[...new Set(bindings.filter(Boolean))];
- if(unique.length>1)return {role:null,id:null,source:'跟随机构 · 需单独绑定',reason:'账号对应的中台角色尚未形成唯一默认角色，请单独绑定权限角色。'};
+ if(unique.length>1)return {role:null,id:null,source:'机构默认',reason:'账号对应的中台角色尚未形成唯一默认角色，请单独绑定权限角色。'};
  const id=unique[0]||null,r=roleById(id);
- return {role:r,id,source:'跟随机构 · '+ids.map(id=>platformRoles().find(r=>r.id===id).name).join('、'),reason:r?'':'机构尚未为该中台角色配置有效的默认权限角色。'};
+ return {role:r,id,source:'机构默认',reason:r?'':'机构尚未为该中台角色配置有效的默认权限角色。'};
 }
 function storedInstitutionMappingRows(o){return Object.entries(o?.roleBindings||{}).filter(([,value])=>value).map(([sourceId,roleId])=>({key:'mapping-'+(++uid),sourceId,roleId}));}
 function readInstitutionMappingRows(){return [...document.querySelectorAll('#institution-role-fields [data-mapping-row]')].map(row=>({key:row.dataset.mappingRow,sourceId:row.querySelector('[data-platform-role-source]').value,roleId:row.querySelector('[data-platform-role-binding]').value}));}
@@ -410,7 +434,7 @@ async function refreshPlatformRoleCatalog(notify=true){
   if(assignments)for(const roleIds of Object.values(assignments))if(!Array.isArray(roleIds)||roleIds.some(id=>typeof id!=='string'))throw new Error('invalid user role ids');
   latestOrgData();const before=clone(db);
   db.platformRoles=roles;db.platformRoleSource=provider?.load?'provider':'demo';
-  if(assignments)[...db.heads,...db.members].forEach(p=>{if(Object.prototype.hasOwnProperty.call(assignments,p.id))p.platformRoleIds=[...new Set(assignments[p.id])];});
+  if(assignments)allPeople().forEach(p=>{if(Object.prototype.hasOwnProperty.call(assignments,p.id))p.platformRoleIds=[...new Set(assignments[p.id])];});
   try{if(JSON.stringify(before)!==JSON.stringify(db))localStorage.setItem(STORE_KEY,JSON.stringify(db));}catch(error){db=before;throw error;}
   if(notify)toast((provider?.load?'角色清单已更新':'已刷新示例角色清单')+'，共 '+roles.length+' 个角色');
  }catch(error){platformRoleLoadError='load-failed';if(notify)toast('暂时无法获取中台角色清单，请重试');}
@@ -429,7 +453,8 @@ function normalizeRoles(){
   if(!o.roleBindings)o.roleBindings={};
   if(legacy){for(const [oldId,newId] of [['heads','central-head'],['members','central-member']])if(Object.prototype.hasOwnProperty.call(o.roleBindings,oldId)){if(!Object.prototype.hasOwnProperty.call(o.roleBindings,newId))o.roleBindings[newId]=o.roleBindings[oldId];delete o.roleBindings[oldId];}}
  });
- for(const [people,demoId] of [[db.heads,'central-head'],[db.members,'central-member']])people.forEach(p=>{if(!Array.isArray(p.platformRoleIds))p.platformRoleIds=legacy?[demoId]:[];});
+ for(const [people,demoId] of [[db.heads,'central-head'],[db.members,'central-member'],[db.enterprises,'central-enterprise']])people.forEach(p=>{if(!Array.isArray(p.platformRoleIds))p.platformRoleIds=legacy?[demoId]:[];});
+ if(db.platformRoleSource==='demo')db.platformRoles.forEach(r=>{if(r.id==='central-enterprise'&&r.name==='企业用户')r.name='企业成员';});
  db.orgs.forEach(o=>{o.roleBindings=Object.fromEntries(Object.entries(o.roleBindings||{}).filter(([,value])=>value));});
  db.roleSchemaVersion=4;
 }
@@ -444,10 +469,12 @@ function effectiveRole(p,kind){
  return inheritedRole(p);
 }
 function roleName(id,kind){const r=roleById(id);return r?link(r.name,'view-role',r.id,'role-name'):badge(id?'角色不可用':'未绑定','gray');}
-function personRoleCell(p,kind){const result=effectiveRole(p,kind);return '<div class="role-cell">'+(result.role?link(result.role.name,'view-role',result.role.id,'role-name'):badge(result.id?'角色不可用':'未绑定角色','gray'))+'<div class="subline">'+result.source+'</div></div>';}
+function needsInstitution(p){return !org(p.orgId)&&!effectiveRole(p,personKind(p.id)).role;}
+function personRoleCell(p,kind){const result=effectiveRole(p,kind);return '<div class="role-cell">'+(result.role?link(result.role.name,'view-role',result.role.id,'role-name'):badge(result.id?'角色不可用':'未绑定角色','gray'))+(result.role||org(p.orgId)?'<div class="subline">'+esc(result.source)+'</div>':'')+'</div>';}
 function roleChoices(value,first){return (first||'')+(value&&!value.startsWith('__')&&!roleById(value)?'<option value="'+esc(value)+'" selected disabled>原绑定角色已失效，请重新选择</option>':'')+db.roles.map(r=>'<option value="'+esc(r.id)+'"'+(value===r.id?' selected':'')+'>'+esc(r.name)+'</option>').join('');}
-function personRoleChoices(p,kind){return roleChoices(p.roleId,'<option value="__inherit"'+(!p.roleId?' selected':'')+'>跟随机构默认角色</option>');}
-function roleReferenceCounts(id){return {orgs:db.orgs.filter(o=>platformRoles().some(r=>o.roleBindings?.[r.id]===id)),people:[...db.heads,...db.members].filter(p=>p.roleId===id)};}
+function personRoleChoices(p){return roleChoices(p.roleId,'<option value=""'+(!p.roleId?' selected':'')+'>请选择角色</option>');}
+function selectedPersonRole(){return document.getElementById('person-role-override')?.checked?(document.getElementById('person-role')?.value||'__choose'):'__inherit';}
+function roleReferenceCounts(id){return {orgs:db.orgs.filter(o=>platformRoles().some(r=>o.roleBindings?.[r.id]===id)),people:allPeople().filter(p=>p.roleId===id)};}
 function policyPreview(r){return '<div class="role-policy-preview">'+ROLE_MODULES.map(m=>'<div><span>'+m.name+'</span>'+modeBadge(rolePolicy(r,m.key))+'</div>').join('')+'</div>';}
 function persistRoleMutation(mutate){
  const before=clone(db);
@@ -491,60 +518,75 @@ function deleteRole(id){
  },'role-delete');
 }
 function institutionRoleFields(o,batch=false){return '<div id="institution-role-fields">'+institutionMappingContents(o,batch)+'</div>';}
-function personRoleFields(p,kind){return '<p class="field-hint platform-person-role">中台角色：'+esc(platformRoleNames(p))+'</p>'+field('绑定角色','<select class="select" id="person-role" aria-label="绑定角色" data-role-preview>'+personRoleChoices(p,kind)+'</select><p class="field-hint">个人绑定角色优先；选择跟随机构后，按账号的中台角色继承机构默认权限角色。</p>')+'<div id="person-role-preview"></div>';}
-function personRoleSummary(p,kind){const result=effectiveRole(p,kind);return '<section class="card detail-section"><div class="card-hd"><h2>绑定角色</h2>'+btn('绑定角色','bind-person-role',p.id,'small')+'</div><div class="role-summary-body"><p class="field-hint platform-person-role">中台角色：'+esc(platformRoleNames(p))+'</p><div class="role-summary-heading">'+personRoleCell(p,kind)+'</div>'+policyPreview(result.role)+(!result.role?'<p class="field-hint">'+esc(result.reason)+'四项业务暂不可用。</p>':'')+'</div></section>';}
+function personRoleFields(p,kind,batch=false){
+ const direct=batch||!!p.roleId;
+ const context=batch?'':'<div class="person-role-context"><div class="person-role-org"><span class="info-label">所属机构</span><span>'+orgName(org(p.orgId))+'</span>'+(needsInstitution(p)&&!route.endsWith('/edit')?btn('绑定机构','bind-role-organization',p.id,'small primary'):'')+'</div><p class="platform-person-role"><span class="info-label">中台角色</span><span>'+esc(platformRoleNames(p))+'</span></p></div>';
+ const mode='<div class="person-role-mode"><div class="person-role-toggle" role="radiogroup" aria-label="角色绑定方式"><label class="person-role-choice"><input type="radio" name="person-role-mode" id="person-role-inherit" value="inherit"'+(!direct?' checked':'')+'><span>机构默认</span></label><label class="person-role-choice"><input type="radio" name="person-role-mode" id="person-role-override" value="direct"'+(direct?' checked':'')+'><span>单独绑定角色</span></label></div></div>';
+ const selector='<div id="person-role-select-wrap"'+(direct?'':' hidden')+'>'+field('权限角色','<select class="select" id="person-role" aria-label="权限角色" data-role-preview'+(direct?'':' disabled')+'>'+personRoleChoices(batch?{}:p)+'</select>',true)+'</div>';
+ return '<div class="person-role-settings">'+context+mode+selector+'<div id="person-role-preview"></div></div>';
+}
+function personRoleSummary(p,kind){
+ const result=effectiveRole(p,kind),actions=(needsInstitution(p)?btn('绑定机构','link-person-org',p.id,'small primary'):'')+btn('绑定角色','bind-person-role',p.id,'small');
+ return '<section class="card detail-section"><div class="card-hd"><h2>权限角色</h2><div class="ops">'+actions+'</div></div><div class="role-summary-body"><p class="field-hint platform-person-role">中台角色：'+esc(platformRoleNames(p))+'</p><div class="role-summary-heading">'+personRoleCell(p,kind)+'</div>'+(result.role?policyPreview(result.role):'')+'</div></section>';
+}
 function institutionRoleSummary(o){
  const rows=Object.entries(o.roleBindings||{}).filter(([,value])=>value).map(([id,value])=>{const source=platformRoles().find(r=>r.id===id);return '<tr><td>'+(source?esc(source.name):badge('中台角色已失效','role-denied'))+'</td><td>'+roleName(value)+'</td><td>'+policyPreview(source?roleById(value):null)+'</td></tr>';});
  return '<section class="card detail-section"><div class="card-hd"><h2>默认角色映射<span class="count">共 '+rows.length+' 项</span></h2>'+btn('绑定角色','bind-org-role',o.id,'small')+'</div><div class="role-organization-form">'+platformRoleToolbar()+(rows.length?'<div class="platform-mapping-summary">'+table(['中台角色','默认权限角色','功能权限'],rows)+'</div>':'<div class="soft-panel">本机构尚未配置默认角色映射。</div>')+'</div></section>';
 }
 function roleBinding(){return modalState?.kind==='role-binding'?modalState.binding:null;}
-function bindingCandidates(b){const list=b.kind==='org'?db.orgs:db[b.personKind],q=b.query.toLowerCase().trim();return list.filter(x=>!q||(x.name+' '+(x.account||'')+' '+(org(x.orgId)?.name||'')).toLowerCase().includes(q));}
+function bindingCandidates(b){const list=b.kind==='org'?db.orgs:peopleFor(b.personKind),q=b.query.toLowerCase().trim();return list.filter(x=>(!b.roleFilter||personKind(x.id)===b.roleFilter)&&(!q||(x.name+' '+(x.account||'')+' '+(org(x.orgId)?.name||'')).toLowerCase().includes(q)));}
 function bindingTargetShell(){return '<div class="batch-selector role-target-selector"><section class="batch-selector-panel"><div class="batch-selector-heading"><h3>可选对象</h3><span class="small muted" id="role-candidate-count"></span></div><div class="batch-selector-filters"><input class="input" id="role-target-search" aria-label="搜索绑定对象" placeholder="搜索名称或账号"></div><div class="batch-selector-tools"><label><input type="checkbox" class="person-check" id="role-target-all">全选筛选结果</label></div><div class="batch-selector-list" id="role-target-candidates"></div></section><section class="batch-selector-panel"><div class="batch-selector-heading"><h3>已选对象 <span class="count" id="role-target-count"></span></h3>'+link('清空','role-target-clear','all')+'</div><div class="batch-selector-list" id="role-target-selected"></div></section></div>';}
 function drawBindingTargets(){
- const b=roleBinding();if(!b?.batch)return;const list=b.kind==='org'?db.orgs:db[b.personKind],candidates=bindingCandidates(b);
+ const b=roleBinding();if(!b?.batch)return;const list=b.kind==='org'?db.orgs:peopleFor(b.personKind),candidates=bindingCandidates(b);
  const detail=x=>b.kind==='org'?'已配置 '+institutionMappingCount(x)+' 项映射：'+Object.keys(x.roleBindings||{}).map(id=>platformRoles().find(r=>r.id===id)?.name||'已失效角色').join('、'):(org(x.orgId)?.name||'未关联机构')+' · '+(effectiveRole(x,b.personKind).role?.name||'未绑定角色');
- const contents=x=>'<div class="batch-select-person"><div class="batch-select-name">'+esc(x.name)+(x.account?'<small>'+esc(x.account)+'</small>':'')+'</div><div class="batch-select-org">'+esc(detail(x))+'</div></div>';
+ const contents=x=>'<div class="batch-select-person"><div class="batch-select-name">'+esc(x.name)+(b.kind==='person'?' '+personKindBadge(x):'')+(x.account?'<small>'+esc(x.account)+'</small>':'')+'</div><div class="batch-select-org">'+esc(detail(x))+'</div></div>';
  document.getElementById('role-target-candidates').innerHTML=candidates.map(x=>'<label class="batch-select-row '+(b.selected.has(x.id)?'selected':'')+'"><input type="checkbox" class="person-check" data-role-target="'+esc(x.id)+'" aria-label="选择 '+esc(x.name)+'"'+(b.selected.has(x.id)?' checked':'')+'>'+contents(x)+'</label>').join('')||empty('没有符合条件的对象');
  document.getElementById('role-target-selected').innerHTML=list.filter(x=>b.selected.has(x.id)).map(x=>'<div class="batch-select-row batch-selected-row">'+contents(x)+link('移除','role-target-remove',x.id)+'</div>').join('')||empty('请从左侧选择绑定对象');
  document.getElementById('role-target-count').textContent=b.selected.size+' 个';document.getElementById('role-candidate-count').textContent=candidates.length+' 个';
  const all=document.getElementById('role-target-all'),count=candidates.filter(x=>b.selected.has(x.id)).length;all.checked=!!candidates.length&&count===candidates.length;all.indeterminate=count>0&&count<candidates.length;all.disabled=!candidates.length;
- updateBindingControls();
+ refreshRolePreviews();
 }
 function updateBindingControls(){
  const b=roleBinding();if(!b)return;const submit=dialog.querySelector('[data-action="modal-submit"]');
- const hasInput=b.kind==='org'?(!b.batch||readInstitutionMappingRows().length>0):document.getElementById('person-role')?.value!=='__choose';
+ const hasInput=b.kind==='org'?(!b.batch||readInstitutionMappingRows().length>0):(selectedPersonRole()==='__inherit'||!!roleById(selectedPersonRole()));
  if(submit)submit.disabled=!b.selected.size||!hasInput||(b.kind==='org'&&(platformRoleLoading||!!platformRoleLoadError));
  const count=document.getElementById('role-binding-footer');if(count)count.textContent='将更新 '+b.selected.size+(b.kind==='org'?' 个机构':' 人');
 }
 function refreshRolePreviews(){
  const b=roleBinding();
  document.querySelectorAll('[data-platform-role-binding]').forEach(el=>{const out=el.closest('tr').querySelector('.platform-mapping-preview');if(out)out.innerHTML=el.value==='__keep'?'<span class="muted small">保留所选机构的当前映射</span>':el.value?policyPreview(roleById(el.value)):'<span class="muted small">该中台角色暂无机构默认权限</span>';});
- const select=document.getElementById('person-role'),target=document.getElementById('person-role-preview');
- if(select&&target){const id=b?[...b.selected][0]:route.split('/')[1],p=head(id)||member(id);
-  const info=select.closest('.role-detail-fields')?.querySelector('.platform-person-role')||dialog.querySelector('.platform-person-role');if(info&&p)info.textContent='中台角色：'+platformRoleNames(p);
-  if(select.value==='__choose')target.innerHTML='';
-  else if(select.value==='__inherit'&&b?.batch)target.innerHTML='<p class="field-hint">按每人的中台角色读取其所属机构的默认映射；个人单独绑定将被清除。</p>';
-  else{const result=select.value==='__inherit'?inheritedRole(p):{role:roleById(select.value)},r=result.role;target.innerHTML=(r?'<div class="field-hint role-preview-title">生效角色：'+esc(r.name)+'</div>':'<p class="field-hint">'+esc(result.reason||'未绑定有效角色。')+'</p>')+policyPreview(r);}
+ const select=document.getElementById('person-role'),target=document.getElementById('person-role-preview'),override=document.getElementById('person-role-override');
+ if(select&&target&&override){
+  const id=b?[...b.selected][0]:route.split('/')[1],p=getPerson(id),value=selectedPersonRole();
+  document.getElementById('person-role-select-wrap').hidden=!override.checked;select.disabled=!override.checked;
+  document.getElementById('person-role-inherit').checked=!override.checked;
+  const info=select.closest('.person-role-settings')?.querySelector('.platform-person-role');if(info&&p)info.innerHTML='<span class="info-label">中台角色</span><span>'+esc(platformRoleNames(p))+'</span>';
+  if(value==='__choose')target.innerHTML='';
+  else if(value==='__inherit'&&b?.batch){
+   const rows=peopleFor(b.personKind).filter(p=>b.selected.has(p.id)).map(p=>{const r=inheritedRole(p).role;return '<tr><td>'+esc(p.name)+'</td><td>'+orgName(org(p.orgId))+'</td><td>'+(r?esc(r.name):badge('未绑定角色','gray'))+'</td></tr>';});
+   target.innerHTML=rows.length?'<div class="role-inheritance-preview">'+table(['人员','所属机构','生效角色'],rows)+'</div>':'';
+  }else{
+   const result=value==='__inherit'?inheritedRole(p):{role:roleById(value)},r=result.role;
+   target.innerHTML='<div class="role-effective-row"><span>生效角色</span><strong>'+(r?esc(r.name):badge('未绑定角色','gray'))+'</strong></div>'+(r?policyPreview(r):'');
+  }
  }
  updateBindingControls();
 }
 function openRoleBinding(kind,ids,personKind,batch=false){
- latestOrgData();const list=kind==='org'?db.orgs:db[personKind],selected=new Set(ids.filter(id=>list.some(x=>x.id===id)));
+ latestOrgData();const list=kind==='org'?db.orgs:peopleFor(personKind),selected=new Set(ids.filter(id=>list.some(x=>x.id===id)));
  if(!batch&&selected.size!==1)return toast('绑定对象已不存在');
  const subject=list.find(x=>selected.has(x.id));
- let fields=kind==='org'?institutionRoleFields(subject,batch):personRoleFields(subject||{},personKind);
- if(batch&&kind==='person')fields=fields.replace('<select class="select" id="person-role" aria-label="绑定角色" data-role-preview>','<select class="select" id="person-role" aria-label="绑定角色" data-role-preview><option value="__choose" selected>请选择要绑定的角色</option>');
- const context=batch?'<p class="field-hint role-guidance">'+(kind==='org'?'按需添加需要统一设置的映射，所选机构的其他映射保持不变。':'仅设置'+PERSON_KINDS[personKind]+'的角色，可在下方调整已选人员。')+'</p>':'<div class="role-binding-subject"><strong>'+esc(subject.name)+'</strong><span class="muted small">'+(kind==='org'?'机构默认角色':PERSON_KINDS[personKind]+' · '+esc(subject.account))+'</span></div>';
+ const fields=kind==='org'?institutionRoleFields(subject,batch):personRoleFields(subject||{},personKind,batch);
+ const context=batch?'<p class="field-hint role-guidance">'+(kind==='org'?'按需添加需要统一设置的映射，所选机构的其他映射保持不变。':'统一设置所选人员的权限角色，可在下方调整已选人员。')+'</p>':'<div class="role-binding-subject"><strong>'+esc(subject.name)+'</strong><span class="muted small">'+(kind==='org'?'机构默认角色':PERSON_KINDS[personKind]+' · '+esc(subject.account))+'</span></div>';
  const body=context+fields+(batch?bindingTargetShell():'');
  showModal((batch?'批量':'')+'绑定角色',body,'<span class="left" id="role-binding-footer"></span>'+saveFooter('保存绑定'),batch?'role-binding-modal':'role-modal',saveRoleBinding,'role-binding');
- modalState.binding={kind,personKind,batch,selected,query:'',base:new Map(list.map(x=>[x.id,JSON.stringify(kind==='org'?x.roleBindings:x.roleId||null)]))};
- if(batch&&kind==='person')document.getElementById('person-role').value='__choose';
+ modalState.binding={kind,personKind,batch,selected,query:'',roleFilter:personKind==='people'?filters.people.kind:'',base:new Map(list.map(x=>[x.id,JSON.stringify(kind==='org'?x.roleBindings:x.roleId||null)]))};
  drawBindingTargets();refreshRolePreviews();
 }
 function saveRoleBinding(){
  const b=roleBinding();if(!b||!b.selected.size)return formError('请选择绑定对象');
- const values=b.kind==='org'?readInstitutionRoleSelections():{role:document.getElementById('person-role').value};
- latestOrgData();const list=b.kind==='org'?db.orgs:db[b.personKind],targets=[...b.selected].map(id=>list.find(x=>x.id===id));
+ const values=b.kind==='org'?readInstitutionRoleSelections():{role:selectedPersonRole()};
+ latestOrgData();const list=b.kind==='org'?db.orgs:peopleFor(b.personKind),targets=[...b.selected].map(id=>list.find(x=>x.id===id));
  if(targets.some(x=>!x))return formError('部分绑定对象已不存在，请重新打开后选择');
  if(targets.some(x=>JSON.stringify(b.kind==='org'?x.roleBindings:x.roleId||null)!==b.base.get(x.id)))return formError('所选对象的角色绑定已变化，请重新打开后设置');
  if(b.kind==='org'){
@@ -552,7 +594,7 @@ function saveRoleBinding(){
   if(b.batch&&!Object.keys(values).length)return formError('请至少添加一项默认角色映射');
  }else if(values.role!=='__inherit'&&!roleById(values.role))return formError('请选择有效角色');
  if(!persistRoleMutation(()=>targets.forEach(x=>{if(b.kind==='org')x.roleBindings=b.batch?{...x.roleBindings,...values}:{...values};else x.roleId=values.role==='__inherit'?null:values.role;})))return;
- if(b.kind==='org')institutionSelection.clear();else personnelSelection[b.personKind].clear();
+ if(b.kind==='org')institutionSelection.clear();else{personnelSelection[b.personKind]?.clear();personnelSelection.people.clear();}
  closeModal();render();toast('已更新 '+targets.length+(b.kind==='org'?' 个机构的默认角色映射':' 人的角色绑定'));
 }
 function updateInstitutionSelection(){
@@ -566,13 +608,13 @@ function updateInstitutionSelection(){
 window.addEventListener('storage',e=>{if(e.key===STORE_KEY&&!mask.classList.contains('open')&&!route.endsWith('/edit')&&!route.endsWith('/new')){latestOrgData();render();}});
 
 function personnelCheckbox(p,key){return '<td class="person-check-cell"><input type="checkbox" class="person-check" data-person-check="'+esc(p.id)+'" data-person-kind="'+key+'" aria-label="选择 '+esc(p.name)+'"'+(personnelSelection[key].has(p.id)?' checked':'')+'></td>';}
-function personOrgAction(p){return p.orgId?link('解绑机构','unlink-person-org',p.id,'danger'):link('绑定机构','link-person-org',p.id);}
+function personOrgAction(p){return p.orgId?link('解绑机构','unlink-person-org',p.id,'danger'):needsInstitution(p)?btn('绑定机构','link-person-org',p.id,'small primary person-org-primary'):link('绑定机构','link-person-org',p.id);}
 function personnelTable(name,key,all,headers,rows){
   const selected=personnelSelection[key];
-  [...selected].forEach(id=>{if(!db[key].some(p=>p.id===id))selected.delete(id);});
+  [...selected].forEach(id=>{if(!peopleFor(key).some(p=>p.id===id))selected.delete(id);});
   const controls='<div class="person-batch-actions"><span class="selection-count" data-selection-count="'+key+'">已选 <strong>'+selected.size+'</strong> 人</span><button type="button" class="link-btn" data-action="clear-person-selection" data-id="'+key+'"'+(!selected.size?' hidden':'')+'>取消选择</button><button type="button" class="btn small primary" data-action="batch-link-org" data-id="'+key+'">批量关联机构</button><button type="button" class="btn small danger" data-action="batch-unlink-org" data-id="'+key+'">批量解绑机构</button><button type="button" class="btn small" data-action="batch-person-role" data-id="'+key+'">批量绑定角色</button></div>';
-  const selectAll='<input type="checkbox" class="person-check" data-person-all="'+key+'" aria-label="全选本页'+(key==='heads'?'科研负责人':'普通成员')+'">';
-  return '<section class="card personnel-table"><div class="card-hd"><h2>'+name+'<span class="count">共 '+all.length+' 条</span></h2>'+controls+'</div>'+(rows.length?table([selectAll,...headers],rows):empty('没有找到符合条件的'+(key==='heads'?'负责人':'成员')))+pager(key,all.length)+'</section>';
+  const selectAll='<input type="checkbox" class="person-check" data-person-all="'+key+'" aria-label="全选本页'+(PERSON_KINDS[key]||'人员')+'">';
+  return '<section class="card personnel-table personnel-list"><div class="card-hd"><h2>'+name+'<span class="count">共 '+all.length+' 条</span></h2>'+controls+'</div>'+(rows.length?table([selectAll,...headers],rows):empty('没有找到符合条件的'+(PERSON_KINDS[key]||'人员')))+pager(key,all.length)+'</section>';
 }
 function updatePersonnelSelection(key){
   const selected=personnelSelection[key],ids=personnelPageIds[key],count=ids.filter(id=>selected.has(id)).length;
@@ -584,20 +626,20 @@ function updatePersonnelSelection(key){
 }
 function setPersonOrganization(p,key,orgId){
   p.orgId=orgId;
-  if(key==='heads')ownTeams(p.id).forEach(t=>{if(Object.prototype.hasOwnProperty.call(t,'orgId'))t.orgId=orgId;});
+  if(personKind(p.id)==='heads')ownTeams(p.id).forEach(t=>{if(Object.prototype.hasOwnProperty.call(t,'orgId'))t.orgId=orgId;});
 }
 function batchLinkOrg(key){if(personnelSelection[key])openBatchOrganization(key,'link');}
 function batchOrganizationState(){return modalState?.kind==='batch-org-editor'?modalState.batch:null;}
 function batchOrganizationCandidates(state){
   const q=state.query.trim().toLowerCase();
-  return db[state.key].filter(p=>(state.mode==='link'||p.orgId)&&(!q||(p.name+' '+p.account).toLowerCase().includes(q))&&(!state.orgFilter||(state.orgFilter==='__unbound'?!p.orgId:p.orgId===state.orgFilter)));
+  return peopleFor(state.key).filter(p=>(state.mode==='link'||p.orgId)&&(!state.roleFilter||personKind(p.id)===state.roleFilter)&&(!q||(p.name+' '+p.account).toLowerCase().includes(q))&&(!state.orgFilter||(state.orgFilter==='__unbound'?!p.orgId:p.orgId===state.orgFilter)));
 }
 function openBatchOrganization(key,mode){
   if(!personnelSelection[key])return;
   latestOrgData();
-  const initial=db[key].filter(p=>personnelSelection[key].has(p.id)),eligible=initial.filter(p=>mode==='link'||p.orgId);
-  const state={key,mode,selected:new Set(eligible.map(p=>p.id)),original:new Map(eligible.map(p=>[p.id,p.orgId||null])),query:filters[key].q||'',orgFilter:filters[key].org||''};
-  const label=key==='heads'?'科研负责人':'普通成员',skipped=initial.length-eligible.length;
+  const initial=peopleFor(key).filter(p=>personnelSelection[key].has(p.id)),eligible=initial.filter(p=>mode==='link'||p.orgId);
+  const state={key,mode,selected:new Set(eligible.map(p=>p.id)),original:new Map(eligible.map(p=>[p.id,p.orgId||null])),query:filters[key].q||'',orgFilter:filters[key].org||'',roleFilter:filters[key].kind||''};
+  const label=PERSON_KINDS[key]||'人员',skipped=initial.length-eligible.length;
   const target=mode==='link'?'<div class="batch-org-target"><label for="batch-org">关联至<span class="req">*</span></label><select class="select" id="batch-org" aria-label="关联机构">'+options(db.orgs,'','请选择目标机构')+'</select></div>':'<p class="batch-summary">请选择需要解绑机构的'+label+'，确认后清空其所属机构。</p>';
   const filterOptions=options([{id:'__unbound',name:'未绑定机构'},...db.orgs].filter(o=>mode==='link'||o.id!=='__unbound'),state.orgFilter,'全部机构');
   const selector='<div class="batch-selector"><section class="batch-selector-panel"><div class="batch-selector-heading"><h3>选择'+label+'</h3></div><div class="batch-selector-filters"><input class="input" id="batch-person-search" aria-label="搜索批量操作人员" placeholder="搜索姓名或账号" value="'+esc(state.query)+'"><select class="select" id="batch-person-org" aria-label="按当前所属机构筛选">'+filterOptions+'</select></div><div class="batch-selector-tools"><label><input type="checkbox" class="person-check" id="batch-select-results">全选筛选结果</label><span id="batch-result-count"></span></div><div class="batch-selector-list" id="batch-candidate-list"></div></section><section class="batch-selector-panel"><div class="batch-selector-heading"><h3>已选人员<span class="count" id="batch-selected-count"></span></h3><button type="button" class="link-btn" data-action="batch-clear-people">清空</button></div><div class="batch-selector-list" id="batch-selected-list"></div></section></div>';
@@ -618,9 +660,9 @@ function updateBatchOrganizationControls(){
 function drawBatchOrganization(){
   const state=batchOrganizationState();if(!state)return;
   const focusedPerson=document.activeElement?.dataset.batchPerson;
-  const candidates=batchOrganizationCandidates(state),selected=db[state.key].filter(p=>state.selected.has(p.id));
-  const personText=p=>'<div class="batch-select-person"><div class="batch-select-name">'+esc(p.name)+'<small>'+esc(p.account)+'</small></div><div class="batch-select-org">'+(org(p.orgId)?esc(org(p.orgId).name):'未绑定机构')+'</div></div>';
-  document.getElementById('batch-candidate-list').innerHTML=candidates.length?candidates.map(p=>'<label class="batch-select-row'+(state.selected.has(p.id)?' selected':'')+'"><input type="checkbox" class="person-check" data-batch-person="'+esc(p.id)+'" aria-label="选择 '+esc(p.name)+'"'+(state.selected.has(p.id)?' checked':'')+'>'+personText(p)+'</label>').join(''):empty(state.mode==='unlink'&&!db[state.key].some(p=>p.orgId)?'暂无已关联机构的人员':'没有符合筛选条件的人员');
+  const candidates=batchOrganizationCandidates(state),selected=peopleFor(state.key).filter(p=>state.selected.has(p.id));
+  const personText=p=>'<div class="batch-select-person"><div class="batch-select-name">'+esc(p.name)+' '+personKindBadge(p)+'<small>'+esc(p.account)+'</small></div><div class="batch-select-org">'+(org(p.orgId)?esc(org(p.orgId).name):'未绑定机构')+'</div></div>';
+  document.getElementById('batch-candidate-list').innerHTML=candidates.length?candidates.map(p=>'<label class="batch-select-row'+(state.selected.has(p.id)?' selected':'')+'"><input type="checkbox" class="person-check" data-batch-person="'+esc(p.id)+'" aria-label="选择 '+esc(p.name)+'"'+(state.selected.has(p.id)?' checked':'')+'>'+personText(p)+'</label>').join(''):empty(state.mode==='unlink'&&!peopleFor(state.key).some(p=>p.orgId)?'暂无已关联机构的人员':'没有符合筛选条件的人员');
   document.getElementById('batch-selected-list').innerHTML=selected.length?selected.map(p=>'<div class="batch-select-row batch-selected-row">'+personText(p)+'<button type="button" class="link-btn" data-action="batch-remove-person" data-id="'+esc(p.id)+'" aria-label="移除 '+esc(p.name)+'">移除</button></div>').join(''):empty('请从左侧选择人员');
   document.getElementById('batch-result-count').textContent='共 '+candidates.length+' 人';
   const all=document.getElementById('batch-select-results'),count=candidates.filter(p=>state.selected.has(p.id)).length;
@@ -630,7 +672,7 @@ function drawBatchOrganization(){
 }
 function selectBatchOrganizationPerson(id,checked){
   const state=batchOrganizationState();if(!state)return;
-  const p=db[state.key].find(p=>p.id===id);if(!p||(state.mode==='unlink'&&!p.orgId))return;
+  const p=peopleFor(state.key).find(p=>p.id===id);if(!p||(state.mode==='unlink'&&!p.orgId))return;
   if(checked){state.selected.add(id);state.original.set(id,p.orgId||null);}else{state.selected.delete(id);state.original.delete(id);}
 }
 function saveBatchOrganization(){
@@ -640,15 +682,15 @@ function saveBatchOrganization(){
   if(state.mode==='link'&&!orgId)return formError('请选择目标机构');
   latestOrgData();
   if(state.mode==='link'&&!org(orgId))return formError('所选机构已变化，请重新打开批量操作');
-  const people=ids.map(id=>db[state.key].find(p=>p.id===id));
+  const people=ids.map(id=>peopleFor(state.key).find(p=>p.id===id));
   if(people.some(p=>!p||(p.orgId||null)!==state.original.get(p.id)))return formError('所选人员的机构关联已变化，请重新打开批量操作');
   people.forEach(p=>setPersonOrganization(p,state.key,orgId));
   const stored=save();personnelSelection[state.key].clear();closeModal();render();
   if(stored)toast(state.mode==='link'?'已为 '+people.length+' 位人员关联机构':'已解绑 '+people.length+' 位人员的机构关联');
 }
-function linkPeopleOrg(key,ids){
+function linkPeopleOrg(key,ids,onSaved){
   latestOrgData();
-  const people=db[key].filter(p=>ids.includes(p.id));
+  const people=peopleFor(key).filter(p=>ids.includes(p.id));
   if(!people.length){render();toast('人员信息已变化，请重新选择');return;}
   const original=new Map(people.map(p=>[p.id,p.orgId||null]));
   const rows=people.map(p=>'<tr><td>'+person(p,null,key==='heads')+'</td><td class="cell-org">'+orgName(org(p.orgId))+'</td></tr>');
@@ -658,23 +700,29 @@ function linkPeopleOrg(key,ids){
     if(!orgId)return formError('请选择需要关联的机构');
     latestOrgData();
     if(!org(orgId))return formError('所选机构已变化，请关闭后重新选择');
-    const current=people.map(p=>db[key].find(x=>x.id===p.id));
+    const current=people.map(p=>peopleFor(key).find(x=>x.id===p.id));
     if(current.some(p=>!p||((p.orgId||null)!==original.get(p.id))))return formError('所选人员的机构关联已变化，请关闭后重新选择');
     current.forEach(p=>setPersonOrganization(p,key,orgId));
     const stored=save();closeModal();render();
     if(stored)toast(current[0].name+' 已绑定机构');
+    if(onSaved)onSaved();
   },'link-person-org');
+}
+function bindRoleOrganization(id){
+ const b=roleBinding();if(!b||b.kind!=='person'||b.batch||!b.selected.has(id))return;
+ const direct=document.getElementById('person-role-override').checked,role=document.getElementById('person-role').value,kind=b.personKind;
+ linkPeopleOrg(kind,[id],()=>{openRoleBinding('person',[id],kind);const override=document.getElementById('person-role-override'),select=document.getElementById('person-role');if(override&&select){override.checked=direct;select.value=role;refreshRolePreviews();}});
 }
 function unlinkPeopleOrg(key,ids){
   latestOrgData();
-  const selected=db[key].filter(p=>ids.includes(p.id)),people=selected.filter(p=>p.orgId);
+  const selected=peopleFor(key).filter(p=>ids.includes(p.id)),people=selected.filter(p=>p.orgId);
   if(!people.length){render();toast('所选人员尚未关联机构');return;}
   const original=new Map(people.map(p=>[p.id,p.orgId]));
   const rows=people.map(p=>'<tr><td>'+person(p,null,key==='heads')+'</td><td class="cell-org">'+orgName(org(p.orgId))+'</td></tr>');
-  const body='<p class="batch-summary">确认解绑以下人员的机构关联？</p><div class="batch-people">'+table(['姓名 / 账号','当前所属机构'],rows)+'</div><p class="field-hint" style="margin-top:12px">解绑后将清空所属机构，人员的负责人归属及团队关系保留。</p>';
+  const body='<p class="batch-summary">确认解绑以下人员的机构关联？</p><div class="batch-people">'+table(['姓名 / 账号','当前所属机构'],rows)+'</div><p class="field-hint" style="margin-top:12px">解绑后将清空所属机构。'+(people.some(p=>personKind(p.id)!=='enterprises')?'已有的负责人归属及团队关系保留。':'')+'</p>';
   showModal('解绑机构',body,btn('取消','close-modal')+btn('确认解绑','modal-submit',null,'danger'),'',()=>{
     latestOrgData();
-    const current=people.map(p=>db[key].find(x=>x.id===p.id));
+    const current=people.map(p=>peopleFor(key).find(x=>x.id===p.id));
     if(current.some(p=>!p||p.orgId!==original.get(p.id)))return formError('人员的机构关联已变化，请关闭后重新选择');
     current.forEach(p=>setPersonOrganization(p,key,null));
     const stored=save();closeModal();render();
@@ -691,34 +739,35 @@ function renderInstitutions(){
  main.innerHTML=title('机构管理',btn(icon('plus')+'新增机构','new-org',null,'primary'))+searchForm('institutions','搜索机构名称或科研负责人')+'<section class="card institution-table personnel-table"><div class="card-hd"><h2>机构列表<span class="count">共 '+all.length+' 条</span></h2>'+controls+'</div>'+(rows.length?table(['<input type="checkbox" class="person-check" id="institution-select-all" aria-label="全选本页机构">','机构名称','科研负责人','默认角色映射','操作'],rows):empty('没有找到符合条件的机构'))+pager('institutions',all.length)+'</section>';
  updateInstitutionSelection();
 }
-function renderMembers(){
-  const f=filters.members,q=f.q.trim().toLowerCase(),all=db.members.filter(m=>(!q||(m.name+' '+m.account).toLowerCase().includes(q))&&(!f.org||orgOfMember(m)?.id===f.org)&&(!f.head||m.headId===f.head)&&(!f.relation||(f.relation==='linked'?!!m.headId:!m.headId)));
-  const page=pageSlice('members',all);personnelPageIds.members=page.map(m=>m.id);
-  const rows=page.map(m=>'<tr>'+personnelCheckbox(m,'members')+'<td>'+person(m,'member-detail',false)+'</td><td class="cell-org">'+orgName(orgOfMember(m))+'</td><td>'+personRoleCell(m,'members')+'</td><td>'+(m.headId?link(head(m.headId).name,'head-detail',m.headId):badge('未关联负责人','gray'))+'</td><td>'+teamChips(teamsOfMember(m.id))+'</td><td><div class="ops personnel-ops">'+link('查看','member-detail',m.id)+link('编辑','edit-person',m.id)+link('绑定角色','bind-person-role',m.id)+personOrgAction(m)+(m.headId?link('调整归属','move-member',m.id)+link('解绑负责人','unlink-member',m.id,'danger'):'')+'</div></td></tr>');
-  const extra=orgFilter('members')+ownerFilter('members')+'<div class="filter-field"><label for="filter-relation">归属情况</label><select class="select" id="filter-relation" name="relation" data-filter-change="relation">'+options([{id:'linked',name:'已关联'},{id:'unlinked',name:'未关联'}],f.relation,'全部')+'</select></div>';
-  main.innerHTML=title('科研人员管理')+personTabs()+searchForm('members','搜索成员姓名或账号',extra)+personnelTable('普通成员','members',all,['姓名 / 账号','所属机构','绑定角色','归属负责人','参与团队','操作'],rows);
-  updatePersonnelSelection('members');
-}
-function personTabs(){return '<div class="card" style="margin-bottom:16px"><div class="tabs">'+['heads','members'].map((k,i)=>'<button class="tab '+(personnelTab===k?'on':'')+'" data-action="person-tab" data-id="'+k+'">'+(i?'普通成员':'科研负责人')+'</button>').join('')+'</div></div>';}
-function renderHeads(){
- const f=filters.heads,q=f.q.trim().toLowerCase(),all=db.heads.filter(h=>(!q||(h.name+' '+h.account).toLowerCase().includes(q))&&(!f.org||h.orgId===f.org));
- const page=pageSlice('heads',all);personnelPageIds.heads=page.map(h=>h.id);
- const rows=page.map(h=>'<tr>'+personnelCheckbox(h,'heads')+'<td>'+person(h,'head-detail',true)+'</td><td>'+orgName(org(h.orgId))+'</td><td>'+personRoleCell(h,'heads')+'</td><td>'+membersOfHead(h.id).length+'</td><td>'+ownTeams(h.id).length+'</td><td><div class="ops personnel-ops">'+link('查看','head-detail',h.id)+link('编辑','edit-person',h.id)+link('绑定角色','bind-person-role',h.id)+personOrgAction(h)+(h.orgId?link('关联成员','assign-to-head',h.id):'')+((h.orgId||membersOfHead(h.id).length)?link('管理成员','head-members',h.id):'')+'</div></td></tr>');
- main.innerHTML=title('科研人员管理',btn(icon('plus')+'关联成员','assign-members',null,'primary'))+personTabs()+searchForm('heads','搜索负责人姓名或账号',orgFilter('heads'))+personnelTable('科研负责人','heads',all,['姓名 / 账号','所属机构','绑定角色','名下成员数','负责团队数','操作'],rows);
- updatePersonnelSelection('heads');
+function renderPersonnel(){
+ const f=filters.people,q=f.q.trim().toLowerCase();
+ const all=allPeople().filter(p=>(!q||(p.name+' '+p.account).toLowerCase().includes(q))&&(!f.kind||personKind(p.id)===f.kind)&&(!f.org||p.orgId===f.org)&&(!f.head||p.headId===f.head)&&(!f.relation||(personKind(p.id)==='members'&&(f.relation==='linked'?!!p.headId:!p.headId))));
+ const page=pageSlice('people',all);personnelPageIds.people=page.map(p=>p.id);
+ const rows=page.map(p=>{
+  const kind=personKind(p.id);
+  const owner=kind==='members'?(head(p.headId)?link(head(p.headId).name,'head-detail',p.headId):badge('未关联','gray')):'<span class="muted">—</span>';
+  const relations=kind==='heads'?((p.orgId||membersOfHead(p.id).length)?link('管理成员','head-members',p.id):''):kind==='members'&&p.headId?link('调整归属','move-member',p.id)+link('解绑负责人','unlink-member',p.id,'danger'):'';
+  const priority=needsInstitution(p);
+  const actions=(priority?personOrgAction(p):'')+link('查看','person-detail',p.id)+link('编辑','edit-person',p.id)+link('绑定角色','bind-person-role',p.id)+(!priority?personOrgAction(p):'')+relations;
+  return '<tr data-person-row="'+esc(p.id)+'" data-person-role="'+kind+'">'+personnelCheckbox(p,'people')+'<td>'+person(p,'person-detail',kind==='heads')+'</td><td>'+personKindBadge(p)+'</td><td class="cell-org">'+orgName(org(p.orgId))+'</td><td>'+personRoleCell(p,kind)+'</td><td>'+owner+'</td><td><div class="ops personnel-ops">'+actions+'</div></td></tr>';
+ });
+ const roleFilter='<div class="filter-field"><label for="filter-kind">角色</label><select class="select" id="filter-kind" name="kind" data-filter-change="kind">'+options(Object.entries(PERSON_KINDS).map(([id,name])=>({id,name})),f.kind,'全部角色')+'</select></div>';
+ const relationFilters=f.kind==='members'?ownerFilter('people')+'<div class="filter-field"><label for="filter-relation">归属情况</label><select class="select" id="filter-relation" name="relation" data-filter-change="relation">'+options([{id:'linked',name:'已关联'},{id:'unlinked',name:'未关联'}],f.relation,'全部')+'</select></div>':'';
+ main.innerHTML=title('人员管理')+searchForm('people','搜索姓名或账号',roleFilter+orgFilter('people')+relationFilters)+personnelTable('人员列表','people',all,['姓名 / 账号','角色','所属机构','权限角色','归属负责人','操作'],rows);
+ updatePersonnelSelection('people');
 }
 function renderPerson(id,editing){
- const h=head(id),m=member(id),p=h||m;if(!p){go('members');return;}
- const profile=p.profile||{},keys=[['title','职称'],['specialty','专业领域'],['direction','研究方向']];
+ const h=head(id),m=member(id),p=getPerson(id),kind=personKind(id);if(!p){go('members');return;}
+ const profile=p.profile||{},keys=kind==='enterprises'?[]:[['title','职称'],['specialty','专业领域'],['direction','研究方向']];
  const fields=(editing?field('姓名','<input class="input" id="person-name" aria-label="姓名" maxlength="50" value="'+esc(p.name)+'" placeholder="请输入姓名">',true):infoItem('姓名',esc(p.name)))+keys.map(([key,label])=>editing?field(label,'<input class="input" id="profile-'+key+'" maxlength="100" value="'+esc(profile[key]||'')+'" placeholder="请输入'+label+'">'):infoItem(label,esc(profile[key]||'—'))).join('');
  let related='';
  if(h){
   const ms=membersOfHead(id),rows=ms.map(x=>'<tr><td>'+person(x,'member-detail',false)+'</td><td>'+teamChips(teamsOfMember(x.id))+'</td><td>'+link('查看','member-detail',x.id)+'</td></tr>');
   related='<section class="card detail-section"><div class="card-hd"><h2>名下普通成员<span class="count">'+ms.length+' 人</span></h2></div>'+(rows.length?table(['姓名 / 账号','参与团队','操作'],rows):empty('暂无名下成员'))+'</section><section class="card detail-intro"><div class="section-label">负责的团队</div>'+teamSimpleRows(ownTeams(id),'负责人')+'<div class="section-label">受邀参与的团队</div>'+teamSimpleRows(joinedTeams(id),'成员')+'</section>';
- }else related='<section class="card detail-intro"><div class="section-label">参与团队</div>'+teamSimpleRows(teamsOfMember(id),'成员')+'</section>';
- main.innerHTML='<button class="back" data-action="person-tab" data-id="'+(h?'heads':'members')+'">'+icon('back')+'返回科研人员列表</button>'+title(editing?'编辑基础资料':h?'科研负责人详情':'普通成员详情',editing?'<div class="ops">'+btn('取消',h?'head-detail':'member-detail',id)+btn('保存','save-person',null,'primary')+'</div>':'')+'<div class="form-error" id="form-error"></div><section class="card detail-intro"><div class="intro-top"><span class="person-avatar blue">'+esc(p.name.slice(-1))+'</span><div class="intro-body"><h2>'+esc(p.name)+'</h2><p>'+esc(p.account)+' · '+(h?'科研负责人':'普通成员')+'</p><div class="facts"><span class="fact"><span class="k">所属机构</span>'+orgName(h?org(h.orgId):orgOfMember(m))+'</span>'+(!h?'<span class="fact"><span class="k">归属负责人</span>'+esc(head(m.headId)?.name||'—')+'</span>':'')+'</div></div></div></section><section class="card detail-section"><div class="card-hd"><h2>基础资料</h2></div><div class="info-grid" style="padding:0 24px 24px">'+fields+'</div></section>'+(editing?'<section class="card detail-section"><div class="card-hd"><h2>绑定角色</h2></div><div class="role-detail-fields">'+personRoleFields(p,h?'heads':'members')+'</div></section>':personRoleSummary(p,h?'heads':'members'))+related;
+ }else if(m)related='<section class="card detail-intro"><div class="section-label">参与团队</div>'+teamSimpleRows(teamsOfMember(id),'成员')+'</section>';
+ main.innerHTML='<button class="back" data-action="back" data-id="members">'+icon('back')+'返回人员列表</button>'+title(editing?'编辑基础资料':PERSON_KINDS[kind]+'详情',editing?'<div class="ops">'+btn('取消','person-detail',id)+btn('保存','save-person',null,'primary')+'</div>':'')+'<div class="form-error" id="form-error"></div><section class="card detail-intro"><div class="intro-top"><span class="person-avatar blue">'+esc(p.name.slice(-1))+'</span><div class="intro-body"><h2>'+esc(p.name)+'</h2><p>'+esc(p.account)+' · '+PERSON_KINDS[kind]+'</p><div class="facts"><span class="fact"><span class="k">所属机构</span>'+orgName(org(p.orgId))+'</span>'+(m?'<span class="fact"><span class="k">归属负责人</span>'+esc(head(m.headId)?.name||'—')+'</span>':'')+'</div></div></div></section><section class="card detail-section"><div class="card-hd"><h2>基础资料</h2></div><div class="info-grid" style="padding:0 24px 24px">'+fields+'</div></section>'+(editing?'<section class="card detail-section"><div class="card-hd"><h2>权限角色</h2></div><div class="role-detail-fields">'+personRoleFields(p,kind)+'</div></section>':personRoleSummary(p,kind))+related;
  if(editing)refreshRolePreviews();
- personSubmit=editing?()=>{const name=document.getElementById('person-name').value.trim();if(!name)return formError('请输入姓名');const boundRole=document.getElementById('person-role').value;const values={};keys.forEach(([k])=>values[k]=document.getElementById('profile-'+k).value.trim());latestOrgData();const current=head(id)||member(id);if(!current)return formError('人员信息已变化，请返回列表刷新');if(boundRole!=='__inherit'&&!roleById(boundRole))return formError('请选择有效角色');if(!persistRoleMutation(()=>{current.name=name;current.profile={...current.profile,...values};current.roleId=boundRole==='__inherit'?null:boundRole;}))return;go('members/'+id);toast('基础资料与角色绑定已更新');}:null;
+ personSubmit=editing?()=>{const name=document.getElementById('person-name').value.trim();if(!name)return formError('请输入姓名');const boundRole=selectedPersonRole();const values={};keys.forEach(([k])=>values[k]=document.getElementById('profile-'+k).value.trim());latestOrgData();const current=getPerson(id);if(!current)return formError('人员信息已变化，请返回列表刷新');if(boundRole!=='__inherit'&&!roleById(boundRole))return formError('请选择有效角色');if(!persistRoleMutation(()=>{current.name=name;current.profile={...current.profile,...values};current.roleId=boundRole==='__inherit'?null:boundRole;}))return;go('members/'+id);toast('基础资料与角色绑定已更新');}:null;
 }
 function teamRows(ts){return ts.map(t=>'<tr><td>'+link(t.name,'team-detail',t.id,'name')+'</td><td class="cell-org">'+orgName(orgOfHead(t.headId))+'</td><td>'+link(head(t.headId).name,'head-detail',t.headId)+'</td><td>'+(1+t.memberIds.length+t.guestIds.length)+'</td><td>'+teamSpaces(t.id).length+'</td><td><div class="ops">'+link('查看','team-detail',t.id)+link('编辑','edit-team',t.id)+link('删除','delete-team',t.id,'danger')+'</div></td></tr>');}
 function renderTeams(){
@@ -759,7 +808,7 @@ function renderTeam(id,editing=false){
  const t=creating?{id:'new',name:'',intro:'',headId:'',memberIds:[],guestIds:[]}:team(id);
  if(!t){go('teams');return;}const h=head(t.headId),o=orgOfHead(t.headId),ss=creating?[]:teamSpaces(id);
  teamDraft=editing?{id,creating,headId:t.headId,orgId:o?.id||null,memberIds:[...t.memberIds],guestIds:[...t.guestIds],original:JSON.stringify(t)}:null;
- const back=editing?'teams':returnRoutes['teams/'+id]||'teams',backName=back.startsWith('institutions/')?'返回机构详情':back.startsWith('members')?'返回科研人员管理':'返回团队列表';
+ const back=editing?'teams':returnRoutes['teams/'+id]||'teams',backName=back.startsWith('institutions/')?'返回机构详情':back.startsWith('members')?'返回人员管理':'返回团队列表';
  const basic=editing?field('团队名称','<input class="input team-edit-name" id="team-name" aria-label="团队名称" maxlength="100" placeholder="请输入团队名称" value="'+esc(t.name)+'">',true,'team-field')+field('团队简介','<textarea class="team-edit-intro" id="team-intro" aria-label="团队简介" maxlength="500" placeholder="请输入团队简介">'+esc(t.intro||'')+'</textarea>',false,'team-field'):'<h2>'+esc(t.name)+'</h2><p style="white-space:pre-wrap">'+esc(t.intro||'暂无团队简介')+'</p>';
  const ownership=creating?'<div class="form-grid" style="margin-top:18px">'+field('团队负责人','<select class="select" id="team-head" aria-label="团队负责人">'+headOptions('',null,null,'请选择科研负责人')+'</select>',true)+field('归属机构','<div class="readonly" id="team-derived-org">选择负责人后自动带出</div>')+'</div>':'<div class="facts"><span class="fact"><span class="k">归属机构</span><b>'+orgName(o)+'</b></span><span class="fact"><span class="k">团队负责人</span>'+(editing?esc(h.name):link(h.name,'head-detail',h.id))+'</span><span class="fact"><span class="k">成员</span><b data-team-count></b></span></div>';
  const spaceRows=ss.map(x=>'<tr><td>'+link(x.name,'space-detail',x.id,'name')+'</td><td>'+badge(x.type,x.type==='需求'?'blue':'')+'</td><td>'+esc(x.workName)+'</td><td>'+link('查看','space-detail',x.id)+'</td></tr>');
@@ -946,7 +995,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.site-header .u-box'
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('userMenu').classList.contains('open')){setHeaderUserMenu(false);document.querySelector('[data-header-menu]').focus();}});
 function render(){
   const p=route.split('/'),root=p[0];document.querySelectorAll('[data-nav]').forEach(a=>{const active=a.dataset.nav===root;a.classList.toggle('cur',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-  if(root==='roles')renderRoles();else if(root==='cooperation')renderCooperation();else if(root==='institutions'&&p[1])renderOrg(p[1],p[2]==='edit');else if(root==='members'&&p[1])renderPerson(p[1],p[2]==='edit');else if(root==='members'){if(personnelTab==='heads')renderHeads();else renderMembers();}else if(root==='teams'&&p[1])renderTeam(p[1],p[2]==='edit');else if(root==='teams')renderTeams();else renderInstitutions();
+  if(root==='roles')renderRoles();else if(root==='cooperation')renderCooperation();else if(root==='institutions'&&p[1])renderOrg(p[1],p[2]==='edit');else if(root==='members'&&p[1])renderPerson(p[1],p[2]==='edit');else if(root==='members')renderPersonnel();else if(root==='teams'&&p[1])renderTeam(p[1],p[2]==='edit');else if(root==='teams')renderTeams();else renderInstitutions();
 }
 function go(r){closeModal();if(location.hash.slice(1)===r){route=r;render();}else location.hash=r;}
 function readRoute(){let next=location.hash.slice(1);if(!/^(cooperation|institutions|members|teams|roles)(\/[A-Za-z0-9_-]+)?(\/edit)?$/.test(next))next='cooperation';route=next;render();}
@@ -969,7 +1018,7 @@ function editOrg(id,readonly=false){
   const hs=id?db.heads.filter(h=>h.orgId===id):[];
   const name=readonly?'':'<input id="org-name" aria-label="机构名称" class="input" maxlength="100" value="'+esc(o?.name||'')+'" placeholder="请输入机构名称">';
   const intro=readonly?'':'<textarea id="org-intro" aria-label="机构简介" maxlength="500" placeholder="请输入机构简介">'+esc(o?.intro||'')+'</textarea>';
-  const basic=readonly?'<h2>'+esc(o.name)+'</h2><p style="white-space:pre-wrap">'+esc(o.intro||'暂无机构简介')+'</p><div class="facts"><span class="fact"><span class="k">科研负责人</span><b>'+hs.length+' 人</b></span><span class="fact"><span class="k">普通成员</span><b>'+db.members.filter(m=>m.orgId===id).length+' 人</b></span></div>':field('机构名称',name,true)+field('机构简介',intro);
+  const basic=readonly?'<h2>'+esc(o.name)+'</h2><p style="white-space:pre-wrap">'+esc(o.intro||'暂无机构简介')+'</p><div class="facts"><span class="fact"><span class="k">科研负责人</span><b>'+hs.length+' 人</b></span><span class="fact"><span class="k">普通成员</span><b>'+db.members.filter(m=>m.orgId===id).length+' 人</b></span><span class="fact"><span class="k">企业成员</span><b>'+db.enterprises.filter(p=>p.orgId===id).length+' 人</b></span></div>':field('机构名称',name,true)+field('机构简介',intro);
   const rows=hs.map(h=>'<tr><td>'+esc(h.name)+'</td><td>'+esc(h.account)+'</td><td>'+link('查看','head-detail',h.id)+'</td></tr>');
   const people=readonly?'<section class="card"><div class="card-hd"><h2>科研负责人<span class="count">共 '+hs.length+' 人</span></h2></div>'+(rows.length?table(['姓名','账号','操作'],rows):empty('暂无科研负责人'))+'</section>':'';
   main.innerHTML='<button class="back" data-action="back" data-id="institutions">'+icon('back')+'返回机构列表</button>'+title(readonly?'机构详情':o?'编辑机构':'新增机构',readonly?'':'<div class="ops">'+btn('取消','back','institutions')+btn('保存','save-org-page',null,'primary')+'</div>')+'<div class="form-error" id="form-error" role="alert"></div><section class="card detail-intro"><div class="intro-top"><div class="org-symbol">'+icon('org')+'</div><div class="intro-body">'+basic+'</div></div></section>'+(readonly?institutionRoleSummary(o):'<section class="card detail-section"><div class="card-hd"><h2>默认角色映射</h2></div><div class="role-organization-form">'+institutionRoleFields(o)+'</div></section>')+people;
@@ -990,35 +1039,7 @@ function editOrg(id,readonly=false){
   };
 }
 function pickerShell(){return '<div class="picker"><div class="picker-search"><input class="input" id="picker-search" aria-label="搜索候选账号" placeholder="搜索姓名或账号"><span class="muted small">已有账号</span></div><div class="picker-list" id="picker-list"></div><div class="picker-foot" id="picker-count"></div></div>';}
-function refreshPicker(){
-  if(modalState?.kind!=='assign-members')return;
-  const q=(document.getElementById('picker-search')?.value||'').trim().toLowerCase();
-  const show=db.members.filter(x=>(x.name+' '+x.account).toLowerCase().includes(q)).sort((a,b)=>Number(!!a.headId)-Number(!!b.headId));
-  document.getElementById('picker-list').innerHTML=show.length?show.map(x=>{
-    const occupied=!!x.headId,selected=modalState.selected.has(x.id);
-    const status=x.headId?'已归属 '+(head(x.headId)?.name||'—'):'尚未关联负责人';
-    return '<label class="pick-row '+(occupied?'disabled':'')+'"><input type="checkbox" data-pick="'+x.id+'" aria-label="选择 '+esc(x.name)+'"'+(occupied?' disabled':'')+(selected?' checked':'')+'><div class="pick-main"><div class="pick-title">'+esc(x.name)+'<span>'+esc(x.account)+'</span></div><div class="pick-sub">所属机构：'+(orgOfMember(x)?esc(orgOfMember(x).name):'未关联')+'</div></div><span class="pick-end">'+esc(status)+'</span></label>';
-  }).join(''):empty('没有找到符合条件的账号');
-  updatePickCount();
-}
 function updatePickCount(){const el=document.getElementById('picker-count');if(el&&modalState)el.textContent='已选择 '+modalState.selected.size+' 人';}
-function assignMembers(headId,memberId){
-  latestOrgData();
-  if(headId&&(!head(headId)||!orgOfHead(headId))){toast('请先为该科研负责人关联机构');return;}
-  const initial=headId&&head(headId)?.orgId?headId:'';
-  const ownerField=initial?'<input type="hidden" id="assign-head" value="'+esc(initial)+'"><div class="readonly">'+esc(head(initial).name)+' · '+esc(head(initial).account)+'</div>':'<select id="assign-head" aria-label="科研负责人" class="select">'+headOptions('',null,null,'请选择科研负责人')+'</select>';
-  const body=field('科研负责人',ownerField,true)+field('负责人所属机构','<div class="readonly" id="derived-org">'+(initial?orgName(orgOfHead(initial)):'选择负责人后自动带出')+'</div>')+field('普通成员',pickerShell(),true);
-  showModal('关联成员',body,saveFooter('确认关联'),'',()=>{
-    const hId=initial||document.getElementById('assign-head').value,selected=[...modalState.selected];
-    latestOrgData();
-    if(!hId||!head(hId)?.orgId)return formError('请选择已关联机构的科研负责人');
-    if(!selected.length)return formError('请选择需要关联的普通成员');
-    if(selected.some(id=>!member(id)||member(id).headId))return formError('所选成员已有负责人归属，请通过“调整归属”处理');
-    selected.forEach(id=>member(id).headId=hId);
-    finish('已将 '+selected.length+' 位成员关联至 '+head(hId).name);
-  },'assign-members');
-  modalState.selected=new Set(memberId&&!member(memberId)?.headId?[memberId]:[]);refreshPicker();
-}
 function headMemberEditorState(){return modalState?.kind==='head-members-editor'?modalState.membersEditor:null;}
 function headMemberChanges(state){return {added:[...state.selected].filter(id=>!state.original.has(id)),removed:[...state.original].filter(id=>!state.selected.has(id))};}
 function headMemberCandidates(state){
@@ -1142,7 +1163,7 @@ function applyFilter(form,changed){
   f.q=String(values.get('q')||'');
   if(key==='roles'){f.page=1;render();return;}
   if(key==='institutions')institutionSelection.clear();
-  if(key!=='institutions'){f.org=String(values.get('org')||'');f.head=changed==='org'?'':String(values.get('head')||'');if(key==='members')f.relation=String(values.get('relation')||'');}
+  if(key!=='institutions'){f.org=String(values.get('org')||'');f.head=changed==='org'?'':String(values.get('head')||'');if(key==='people'){f.kind=String(values.get('kind')||'');f.relation=String(values.get('relation')||'');if(f.kind!=='members'||changed==='kind'){f.head='';f.relation='';}}}
   if(personnelSelection[key])personnelSelection[key].clear();
   f.page=1;render();
 }
@@ -1160,7 +1181,8 @@ document.addEventListener('click',function(e){
     case 'delete-role':deleteRole(id);break;
     case 'bind-org-role':openRoleBinding('org',[id],null);break;
     case 'batch-org-role':openRoleBinding('org',[...institutionSelection],null,true);break;
-    case 'bind-person-role':openRoleBinding('person',[id],head(id)?'heads':'members');break;
+    case 'bind-role-organization':bindRoleOrganization(id);break;
+    case 'bind-person-role':openRoleBinding('person',[id],personKind(id));break;
     case 'batch-person-role':openRoleBinding('person',[...personnelSelection[id]],id,true);break;
     case 'clear-institution-selection':institutionSelection.clear();updateInstitutionSelection();break;
     case 'role-target-remove':{const b=roleBinding();if(b){b.selected.delete(id);drawBindingTargets();}break;}
@@ -1183,22 +1205,19 @@ document.addEventListener('click',function(e){
     case 'add-team-members':addTeamMembers();break;
     case 'remove-team-member':if(teamDraft&&id!==teamDraft.headId){teamDraft.memberIds=teamDraft.memberIds.filter(x=>x!==id);teamDraft.guestIds=teamDraft.guestIds.filter(x=>x!==id);drawTeamMembers(teamDraft,true);}break;
     case 'delete-team':deleteTeam(id);break;
+    case 'person-detail':
     case 'head-detail':go('members/'+id);break;
     case 'member-detail':go('members/'+id);break;
     case 'edit-person':go('members/'+id+'/edit');break;
     case 'save-person':if(personSubmit)personSubmit();break;
-    case 'person-tab':personnelTab=id;go('members');break;
     case 'space-detail':spaceDetail(id);break;
     case 'batch-link-org':batchLinkOrg(id);break;
     case 'batch-unlink-org':if(personnelSelection[id])openBatchOrganization(id,'unlink');break;
     case 'batch-remove-person':selectBatchOrganizationPerson(id,false);drawBatchOrganization();break;
     case 'batch-clear-people':{const state=batchOrganizationState();if(state){state.selected.clear();state.original.clear();drawBatchOrganization();}break;}
-    case 'link-person-org':if(head(id)||member(id))linkPeopleOrg(head(id)?'heads':'members',[id]);break;
-    case 'unlink-person-org':if(head(id)||member(id))unlinkPeopleOrg(head(id)?'heads':'members',[id]);break;
+    case 'link-person-org':if(getPerson(id))linkPeopleOrg(personKind(id),[id]);break;
+    case 'unlink-person-org':if(getPerson(id))unlinkPeopleOrg(personKind(id),[id]);break;
     case 'clear-person-selection':personnelSelection[id]?.clear();updatePersonnelSelection(id);break;
-    case 'assign-members':assignMembers();break;
-    case 'assign-to-head':assignMembers(id);break;
-    case 'assign-single':assignMembers(null,id);break;
     case 'move-member':moveMember(id,false);break;
     case 'unlink-member':moveMember(id,true);break;
     case 'head-members':manageHeadMembers(id);break;
@@ -1207,7 +1226,7 @@ document.addEventListener('click',function(e){
     case 'back':go(id);break;
     case 'close-modal':closeModal();break;
     case 'modal-submit':if(modalState?.onSubmit)modalState.onSubmit();break;
-    case 'reset-filter':if(id==='roles'){filters.roles={q:'',page:1,size:filters.roles.size};render();break;}if(id==='institutions')institutionSelection.clear();if(personnelSelection[id])personnelSelection[id].clear();filters[id]=id==='cooperation'?{q:'',kind:'',start:'',end:'',status:'',page:1,size:filters[id].size}:{q:'',org:'',head:'',relation:'',page:1,size:filters[id].size};render();break;
+    case 'reset-filter':if(id==='roles'){filters.roles={q:'',page:1,size:filters.roles.size};render();break;}if(id==='institutions')institutionSelection.clear();if(personnelSelection[id])personnelSelection[id].clear();filters[id]=id==='cooperation'?{q:'',kind:'',start:'',end:'',status:'',page:1,size:filters[id].size}:{q:'',kind:'',org:'',head:'',relation:'',page:1,size:filters[id].size};render();break;
     case 'page':filters[id].page=Number(el.dataset.page)||1;render();break;
     case 'jump':{
       const input=document.querySelector('[data-jump="'+id+'"]'),n=Number(input.value),max=Number(input.max);
@@ -1217,11 +1236,11 @@ document.addEventListener('click',function(e){
   }
 });
 document.addEventListener('submit',e=>{if(e.target.id==='main-filter'){e.preventDefault();applyFilter(e.target);}});
-document.addEventListener('input',e=>{if(e.target.id==='role-target-search'){const b=roleBinding();if(b){b.query=e.target.value;drawBindingTargets();}}if(['team-name','team-intro'].includes(e.target.id))main.querySelector('#form-error')?.classList.remove('show');if(e.target.id==='head-member-search'){const state=headMemberEditorState();if(state){state.query=e.target.value;drawHeadMembers();}}if(e.target.id==='batch-person-search'){const state=batchOrganizationState();if(state){state.query=e.target.value;drawBatchOrganization();}}if(e.target.id==='picker-search'){if(modalState?.kind==='team-candidates')refreshTeamCandidates();else refreshPicker();}});
+document.addEventListener('input',e=>{if(e.target.id==='role-target-search'){const b=roleBinding();if(b){b.query=e.target.value;drawBindingTargets();}}if(['team-name','team-intro'].includes(e.target.id))main.querySelector('#form-error')?.classList.remove('show');if(e.target.id==='head-member-search'){const state=headMemberEditorState();if(state){state.query=e.target.value;drawHeadMembers();}}if(e.target.id==='batch-person-search'){const state=batchOrganizationState();if(state){state.query=e.target.value;drawBatchOrganization();}}if(e.target.id==='picker-search'&&modalState?.kind==='team-candidates')refreshTeamCandidates();});
 document.addEventListener('change',function(e){
   const el=e.target;
   if(el.hasAttribute('data-platform-role-source')){updateMappingSourceChoices();}
-  else if(el.hasAttribute('data-role-preview')){refreshRolePreviews();}
+  else if(el.hasAttribute('data-role-preview')||el.id==='person-role-override'||el.id==='person-role-inherit'){refreshRolePreviews();}
   else if(el.dataset.roleTarget){const b=roleBinding();if(b){el.checked?b.selected.add(el.dataset.roleTarget):b.selected.delete(el.dataset.roleTarget);drawBindingTargets();}}
   else if(el.id==='role-target-all'){const b=roleBinding();if(b){bindingCandidates(b).forEach(x=>el.checked?b.selected.add(x.id):b.selected.delete(x.id));drawBindingTargets();}}
   else if(el.dataset.institutionCheck){el.checked?institutionSelection.add(el.dataset.institutionCheck):institutionSelection.delete(el.dataset.institutionCheck);updateInstitutionSelection();}
@@ -1240,7 +1259,7 @@ document.addEventListener('change',function(e){
   else if(el.dataset.filterChange)applyFilter(el.closest('form'),el.dataset.filterChange);
   else if(el.dataset.pick&&modalState){el.checked?modalState.selected.add(el.dataset.pick):modalState.selected.delete(el.dataset.pick);updatePickCount();}
   else if(el.id==='team-head')changeNewTeamHead(el.value);
-  else if(el.id==='assign-head'||el.id==='move-head'){const o=orgOfHead(el.value);document.getElementById('derived-org').innerHTML=o?orgName(o):'选择负责人后自动带出';}
+  else if(el.id==='move-head'){const o=orgOfHead(el.value);document.getElementById('derived-org').innerHTML=o?orgName(o):'选择负责人后自动带出';}
 });
 document.addEventListener('keydown',function(e){
   if(consultHandleDialog.open)return;

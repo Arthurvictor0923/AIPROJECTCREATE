@@ -602,13 +602,14 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
 <style>/* 补全原型公共交互样式 */
 .px-mask{position:fixed;inset:0;background:rgba(12,35,39,.42);z-index:9998;display:flex;align-items:center;justify-content:center;padding:28px}.px-dialog{width:780px;max-width:95vw;max-height:90vh;background:#fff;border-radius:12px;box-shadow:0 24px 80px #1235;display:flex;flex-direction:column;color:#203c49;text-align:left}.px-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid #e3ece8;font-size:18px;font-weight:650}.px-dialog>header button{border:0;background:none;font-size:26px;color:#69807b;cursor:pointer}.px-body{padding:24px 26px;overflow:auto}.px-dialog footer{padding:16px 26px;border-top:1px solid #e3ece8;display:flex;justify-content:flex-end;gap:10px}.px-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}.px-field{display:flex;flex-direction:column;gap:8px;font-size:13px}.px-field.wide{grid-column:1/-1}.px-field input,.px-field select,.px-field textarea,.px-input{border:1px solid #d7e4df;border-radius:6px;background:white;padding:10px 12px;font:inherit;color:#27443f;min-width:0}.px-field textarea{min-height:100px;resize:vertical}.px-help{font-size:12px;color:#72867f;line-height:1.7;margin:12px 0}.px-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #cfded7;border-radius:6px;padding:8px 15px;background:#fff;color:#215547;font-size:13px;cursor:pointer;gap:6px;text-decoration:none}.px-btn.primary{background:#146c52;border-color:#146c52;color:white}.px-btn.danger{color:#b94f46}.px-btn:disabled{opacity:.5;cursor:not-allowed}.px-chip{display:inline-block;background:#edf7f1;color:#257151;border-radius:4px;padding:4px 9px;font-size:12px}.px-table{border-collapse:collapse;width:100%;font-size:13px}.px-table th{background:#f4f8f6;color:#70837b;font-weight:500}.px-table th,.px-table td{padding:14px 15px;border-bottom:1px solid #e9efec;text-align:left}.px-table td small{display:block;margin-top:5px;color:#8a9a94}.px-table button{margin-right:7px}.px-empty{padding:48px;text-align:center;color:#80928b}.px-card{background:#fff;border:1px solid #e0eae5;border-radius:10px;margin-bottom:20px;overflow:hidden}.px-card-head{padding:18px 22px;border-bottom:1px solid #e5ece8;display:flex;align-items:center;justify-content:space-between}.px-card-head h2{font-size:16px;margin:0}.px-filter{display:flex;gap:12px;align-items:center;padding:20px;flex-wrap:wrap}.px-filter input{width:260px}.px-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.px-tabs .on{background:#e4f3ec;color:#106448;border-color:#8bb7a0}.px-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.px-metric{padding:22px;background:#fff;border:1px solid #e0eae5;border-radius:9px;color:#71877e}.px-metric b{display:block;font-size:27px;color:#214b40;margin-top:14px}.px-log{background:#16302a;color:#cee7d9;white-space:pre-wrap;padding:18px;border-radius:7px;font:13px/1.8 monospace;overflow-wrap:anywhere}.px-pager{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:16px 20px;color:#74857f;font-size:13px}.px-checks{display:flex;gap:12px;flex-wrap:wrap}.px-checks label{display:flex;align-items:center;gap:7px;border:1px solid #dce7e1;border-radius:6px;padding:9px 13px;cursor:pointer}.px-upload{padding:14px;background:#f5faf7;border:1px dashed #a8cdb8;border-radius:7px;margin-top:10px}.px-preview{max-width:100%;max-height:420px;border-radius:8px}.px-kv{display:grid;grid-template-columns:130px 1fr;gap:15px;font-size:14px;line-height:1.6}.px-kv dt{color:#7a8d83}.px-kv dd{margin:0;overflow-wrap:anywhere}.px-fullscreen{position:fixed!important;inset:15px!important;z-index:9990!important;background:#fff!important;overflow:auto!important;padding:24px!important}.px-pagehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.px-pagehead h1{font-size:23px;margin:0}.px-scroller{overflow:auto}.px-error{color:#bb4034;font-size:13px;margin-top:12px}.px-layout{display:grid;grid-template-columns:220px 1fr;gap:18px}.px-filetree{background:#f4f8f5;padding:16px;border-radius:8px}.px-filetree button{display:block;margin:7px 0;width:100%;text-align:left}.px-timeline{border-left:2px solid #bad7c8;padding-left:18px;margin-left:8px}.px-timeline p{margin:0 0 18px}.px-timeline small{display:block;color:#7b9185}.px-size{padding:6px;border:1px solid #dae7df;border-radius:5px;color:#36564a;background:white}@media(max-width:800px){.px-grid,.px-layout{grid-template-columns:1fr}.px-metrics{grid-template-columns:repeat(2,1fr)}}
 [hidden]{display:none!important}
-</style></head>
+</style><link rel="stylesheet" href="assets/prototype-nav.css">
+</head>
 
 <body>
 
-<header class="site-header">
+<header class="site-header prototype-header" data-system="admin">
   <div class="container header-inner">
-    <a class="brand" href="javascript:void(0)" onclick="toast('门户首页')" aria-label="北大荒智慧农业协同创新平台">
+    <a class="brand" href="index.html" aria-label="北大荒智慧农业协同创新平台">
       <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
         <path d="M17 31V17" stroke="#0E5B4A" stroke-width="2.2" stroke-linecap="round"/>
         <path d="M16.6 17.4C16.6 10.2 11.8 4.4 5.2 4.4c0 7.2 4.8 13 11.4 13Z" fill="#1B7A52"/>
@@ -618,36 +619,27 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
       <span>北大荒智慧农业协同创新平台</span>
     </a>
     <span class="brand-tag">管理后台</span>
-    <nav class="main-nav" aria-label="管理后台一级导航">
-      <a href="index.html">工作台总览</a>
-      <a href="后台-课题工作台.html">课题管理</a>
-      <a href="后台-审批中心.html">审批中心</a>
-      <a class="active" href="javascript:void(0)" aria-current="page">运营管理</a>
-      <a href="后台-时空数据管理.html">时空数据管理</a>
-      <a href="后台-地图引擎.html">地图引擎</a>
-      <a href="后台-能力共享.html">能力共享</a>
-      <a href="后台-管理设置.html">管理设置</a>
-    </nav>
-    <div class="header-actions">
-      <button type="button" class="msg-btn" onclick="toast('消息中心')" aria-label="消息通知">
+    <nav class="main-nav" aria-label="主导航"><a data-px-own="1" href="index.html">工作台总览</a><a data-px-own="1" href="后台-课题工作台.html">课题管理</a><a data-px-own="1" href="后台-审批中心.html">审批中心</a><a data-px-own="1" href="后台-模型管理.html" class="active" aria-current="page">运营管理</a><a data-px-own="1" href="后台-时空数据管理.html">平台能力</a><a data-px-own="1" href="后台-管理设置.html">合作与组织</a></nav>
+    <div class="header-actions"><button type="button" class="menu-toggle" id="prototypeMenuToggle" aria-controls="prototypeMobileMenu" aria-expanded="false" aria-label="打开菜单">☰</button>
+      <a class="msg-btn" href="后台-消息中心.html" aria-label="消息通知">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-2 8-2 8h16s-2-1-2-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
         <i class="msg-dot"></i>
-      </button>
+      </a>
       <div class="u-box">
-        <span class="u-avatar">张</span>
-        <span class="u-name" onclick="toggleUserMenu()" role="button" tabindex="0">张明
+        <button type="button" class="u-avatar" data-prototype-user aria-label="张明，打开用户菜单" aria-expanded="false" aria-controls="userMenu">张</button>
+        <button type="button" class="u-name" data-prototype-user aria-expanded="false" aria-controls="userMenu">张明
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </span>
+        </button>
         <div class="u-menu" id="userMenu">
-          <div class="u-mi" onclick="toast('个人资料')">个人资料</div>
-          <div class="u-mi" onclick="toast('账号安全')">账号安全</div>
+          <a class="u-mi" href="后台-个人资料.html">个人资料</a>
+          <a class="u-mi" href="后台-账号安全.html">账号安全</a>
           <div class="u-sep"></div>
-          <div class="u-mi out" onclick="toast('已退出登录（原型演示）')">退出登录</div>
+          <a class="u-mi out" data-px-own="1" href="后台-登录.html">退出登录</a>
         </div>
       </div>
     </div>
   </div>
-</header>
+<nav id="prototypeMobileMenu" class="mobile-menu prototype-mobile" hidden aria-label="移动端主导航"></nav></header>
 
 <div class="container">
   <div class="admin-app">
@@ -1158,5 +1150,6 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
 <script src="assets/meeting/backend-seeds.js"></script>
 <script src="assets/meeting/backend-state.js"></script><script src="assets/meeting/meeting-features.js"></script><script src="assets/meeting/meeting-filters.js"></script><script src="assets/meeting/meeting-space.js"></script><!-- meeting-1010:end --><script src="assets/meeting/backend-integration.js"></script>
 <!-- devdoc-1012:start --><script src="assets/meeting/meeting-devdoc.js"></script><!-- devdoc-1012:end -->
+<script src="assets/prototype-nav.js"></script>
 </body>
 </html>
