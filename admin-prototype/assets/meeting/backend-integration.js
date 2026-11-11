@@ -235,8 +235,8 @@ if(family&&P){
 }
 
 // Dataset detail metadata and previews have one stable asset ID.
-if(/^后台-数据集详情编辑/.test(F)){
- const id=qs.get('asset')||({'后台-数据集详情编辑-已完善.html':'DS20260923018','后台-数据集详情编辑-待完善.html':'DS20260923020','后台-数据集详情编辑-数据预览.html':'DS20260923019'})[F],r=dsList().find(r=>r.id===id),main=Q('main');
+if(F==='后台-数据集管理.html'&&qs.get('asset')){
+ const id=qs.get('asset')||({'dataset-edit-complete':'DS20260923018','dataset-edit-todo':'DS20260923020','dataset-preview':'DS20260923019'})[F],r=dsList().find(r=>r.id===id),main=Q('main');
  if(r){
   M.editorAsset=id;const controls=M.editorControls||{},meta=M.assets()[id]||{};
   const materials=r.files||M.records().find(x=>x.id===r.outcomeId)?.files;
@@ -249,7 +249,7 @@ if(/^后台-数据集详情编辑/.test(F)){
    const v=M.collectMetadata();if(!v.name){M.toast('请填写数据名称');return false;}
    const rows=dsList(),item=rows.find(x=>x.id===id);if(!item){M.toast('数据集已删除，请返回列表');return false;}
    const intro=Q('#mt-backend-intro')?.textContent.trim();
-   Object.assign(item,{name:v.name,desc:v.summary,version:v.version,org:v.provider,form:v.modality||item.form,count:v.scale||item.count,todo:!intro||!v.version,link:'后台-数据集详情编辑-已完善.html'});
+   Object.assign(item,{name:v.name,desc:v.summary,version:v.version,org:v.provider,form:v.modality||item.form,count:v.scale||item.count,todo:!intro||!v.version,link:'dataset-edit-complete'});
    if(!M.write('agri-datasets',rows)||!M.write('agri-dataset-form:'+id,capture(main)))return false;M.registerAsset(id,'dataset',v);saveUploads();M.toast('数据集已保存');return true;
   };
   window.saveDraft=window.saveUpd=P.save;
@@ -260,7 +260,7 @@ if(/^后台-数据集详情编辑/.test(F)){
 }
 if(F==='后台-数据查询.html'){
  const r=dsList().find(r=>r.id===qs.get('asset'));
- if(r){const h=Q('main h1');if(h)h.textContent=r.name+' · 数据查询';QA('main a[href*="数据集"]').forEach(a=>a.href=(r.link||'后台-数据集详情编辑-已完善.html')+'?asset='+encodeURIComponent(r.id));}
+ if(r){const h=Q('main h1');if(h)h.textContent=r.name+' · 数据查询';QA('main a[href*="数据集"]').forEach(a=>a.href=(r.link?后台-数据集管理.html:'后台-数据集管理.html')+'?asset='+encodeURIComponent(r.id));}
  if(qs.get('mode')==='image'){const n=Q('#mode');if(n)n.selectedIndex=1;draw();}
  const original=window.draw;window.draw=()=>{const farm=val('farm'),day=val('day'),total=samples.filter(x=>(farm==='全部农场'||x.farm===farm)&&(!day||x.date===day)).length;page=Math.max(1,Math.min(page,Math.ceil(total/size)||1));original();};
  window.reset=()=>{set('farm','全部农场');set('day','');page=1;draw();};
@@ -273,11 +273,11 @@ if(F==='后台-数据集管理.html'){
  window.createDone=()=>{
   const name=get('数据名称')?.value.trim();if(!name){M.toast('请填写数据名称');return;}
   const files=[...Q('#upList').querySelectorAll('.up-name')].map(n=>({name:n.textContent.trim()}));if(!files.length){M.toast('请选择数据文件');return;}
-  const id='DS'+Date.now(),r={id,name,desc:val('createIntro'),pub:'off',todo:true,src:'manual',thumb:'',form:get('数据形态')?.value||get('数据类型')?.value||'',type:get('数据类型')?.value||'',org:get('提供方')?.value||'',count:files.length+' 个文件',files,link:'后台-数据集详情编辑-待完善.html'};
+  const id='DS'+Date.now(),r={id,name,desc:val('createIntro'),pub:'off',todo:true,src:'manual',thumb:'',form:get('数据形态')?.value||get('数据类型')?.value||'',type:get('数据类型')?.value||'',org:get('提供方')?.value||'',count:files.length+' 个文件',files,link:'dataset-edit-todo'};
   const rows=dsList();rows.unshift(r);if(!M.write('agri-datasets',rows))return;
-  M.registerAsset(id,'dataset',{name,summary:r.desc,provider:r.org,modality:r.form,region:get('区域')?.value||'',year:get('数据年份')?.value||'',owner:get('权属归属')?.value||'',scale:r.count});go(r.link,{asset:id});
+  M.registerAsset(id,'dataset',{name,summary:r.desc,provider:r.org,modality:r.form,region:get('区域')?.value||'',year:get('数据年份')?.value||'',owner:get('权属归属')?.value||'',scale:r.count});go('后台-数据集管理.html',{asset:id});
  };
- const render=window.renderGrid;window.renderGrid=()=>{render();QA('#dsGrid .ds-card').forEach(n=>{const r=dsList().find(r=>r.id===n.dataset.id);if(!r)return;n.querySelectorAll('a[href*="详情编辑"]').forEach(a=>a.href=(r.link||'后台-数据集详情编辑-已完善.html')+'?asset='+encodeURIComponent(r.id));});};renderGrid();
+ const render=window.renderGrid;window.renderGrid=()=>{render();QA('#dsGrid .ds-card').forEach(n=>{const r=dsList().find(r=>r.id===n.dataset.id);if(!r)return;n.querySelectorAll('a[href*="详情编辑"]').forEach(a=>a.href=(r.link?后台-数据集管理.html:'后台-数据集管理.html')+'?asset='+encodeURIComponent(r.id));});};renderGrid();
 }
 
 // Home content saves are scoped to a card/slot, so one edit never replaces another.

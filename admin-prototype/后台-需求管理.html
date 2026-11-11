@@ -971,7 +971,7 @@ if(msg==='账号安全')return PX.go('后台-账号安全');
 if(/退出登录/.test(msg))return PX.confirm('退出登录','确认退出当前演示账号？',()=>PX.go('后台-登录'));
 if(/空间列表/.test(msg))return PX.go('后台-科研空间管理');
 if(/空间运行详情/.test(msg))return PX.go('后台-科研空间详情');
-if(/查看数据集详情/.test(msg))return PX.go('后台-数据集详情编辑-已完善');
+if(/查看数据集详情/.test(msg))return PX.go('后台-数据集管理');
 if(/查看成果详情/.test(msg))return PX.detail('成果提交记录',{'成果名称':el.closest('tr')?.cells[0]?.innerText,'类型':el.closest('tr')?.cells[1]?.innerText,'提交人':el.closest('tr')?.cells[2]?.innerText,'提交时间':el.closest('tr')?.cells[3]?.innerText,'提交方式':'选择文件上传','文件':'model.pkl、README.md','说明':'用于水稻估产研究的阶段成果'});
 if(/进入数据预览/.test(msg))return PX.go('后台-数据查询');
 if(/上传|更换 README|更换封面|选择.*图片|更换图片|选择附件/.test(msg))return PX.upload(el,/封面|图片/.test(msg)?'image':/README/.test(msg)?'readme':'files');
@@ -1057,13 +1057,13 @@ if(f==='后台-模型管理.html'){
  let stored=PX.get(PX.key+':rows',null);if(stored)stored.forEach(s=>{let r=ROWS.find(x=>x.key===s.key);if(r)r.up=s.up});let removed=PX.get(PX.key+':deleted',[]);ROWS=ROWS.filter(r=>!removed.includes(r.key));renderTable();
  const ps=document.querySelector('.pgsel');if(ps&&ps.tagName!=='SELECT'){ps.removeAttribute('onclick');ps.innerHTML='<select class="px-size"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option></select>';ps.querySelector('select').onchange=e=>{PX.paginate(1,+e.target.value)}}
 }
-if(f.startsWith('后台-模型详情编辑')||f.startsWith('后台-数据集详情编辑')){
+if(f.startsWith('后台-详情编辑-已并入主页面')||f.startsWith('后台-详情编辑-已并入主页面')){
  if(typeof window.saveDraft==='function')window.saveDraft=()=>PX.save();if(typeof window.saveUpd==='function')window.saveUpd=()=>PX.save();
  let tree=[];tree.forEach((t,i)=>{t.onclick=()=>{document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('on'));t.classList.add('on');let panel=document.querySelector('.files-body,.file-list');if(panel)panel.innerHTML='<div class="px-upload">'+e(t.textContent)+'<p>当前分类的文件可在原始文件清单查看。</p></div>'}});
 }
 if(f==='后台-科研空间详情.html'){
  let section=document.querySelector('.mtabs')?.closest('.card'),body=section?.querySelector('tbody'),initial=body?.innerHTML;
- window.switchMtab=a=>{document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('cur',x===a));if(body)body.innerHTML=a.textContent.includes('数据')?initial:'<tr><td>水稻估产模型</td><td>v2.3</td><td><span class="tag-cell">已挂载</span></td><td><a class="lnk" href="后台-模型详情编辑-已完善.html">查看详情</a></td></tr>'};
+ window.switchMtab=a=>{document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('cur',x===a));if(body)body.innerHTML=a.textContent.includes('数据')?initial:'<tr><td>水稻估产模型</td><td>v2.3</td><td><span class="tag-cell">已挂载</span></td><td><a class="lnk" href="后台-模型管理.html">查看详情</a></td></tr>'};
  document.querySelectorAll('.fname').forEach(x=>{x.style.cursor='pointer';x.onclick=()=>PX.detail(x.innerText,{'文件名称':x.innerText,'所属空间':'水稻估产研究','最后更新':x.closest('tr').cells[3]?.innerText,'文件状态':'已保存','路径':'/workspace/'+x.innerText})});
 }
 if(f==='后台-科研空间管理.html'||f==='后台-科研空间详情.html'){
@@ -1114,7 +1114,7 @@ if(f==='后台-数据集管理.html'){
  window.createDone=()=>{let dialog=document.getElementById('m-create'),fields=Array.from(dialog.querySelectorAll('input,select,textarea')),name=fields.find(x=>x.closest('.fld')?.querySelector('label')?.textContent.includes('数据名称'))||fields.find(x=>x.placeholder.includes('名称'));if(!name?.value.trim()){toast('请填写数据名称');return}let r={...DS[0],id:'DS'+Date.now(),name:name.value,desc:document.getElementById('createIntro').value,pub:'none',todo:true,src:'manual'};if(!PB[r.pub])r.pub=Object.keys(PB).find(x=>x!=='on'&&x!=='off')||'off';DS.unshift(r);PX.put('agri-datasets',DS);closeM('m-create');renderGrid();toast('数据集已保存，可从列表编辑详情')};
  renderGrid();
 }
-if(f.startsWith('后台-模型详情编辑')){
+if(f.startsWith('后台-详情编辑-已并入主页面')){
  const tab=document.querySelector('.tabs'),card=tab?.closest('.card');if(card){let blocks=Array.from(card.children).filter(x=>x!==tab),panel=document.createElement('div');panel.className='blk';panel.hidden=true;panel.innerHTML='<h4>使用方式</h4><div class="px-grid"><label class="px-field">运行方式<select id="px-runmode"><option>在线运行 / 申请使用</option><option>申请使用</option></select></label><label class="px-field">使用条件<select id="px-access"><option>授权使用</option><option>限制使用</option></select></label><label class="px-field wide">使用说明<textarea id="px-usage">通过平台申请使用本模型，授权后在科研开发空间内运行。输入数据与输出结果保留在平台内。</textarea></label></div>';card.append(panel);window.switchTab=el=>{tab.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===el));let external=el.textContent.includes('对外提供');blocks.forEach(x=>x.hidden=external);panel.hidden=!external};}
 }
 })();

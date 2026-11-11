@@ -541,7 +541,7 @@ if(msg==='账号安全')return PX.go('后台-账号安全');
 if(/退出登录/.test(msg))return PX.confirm('退出登录','确认退出当前演示账号？',()=>PX.go('后台-登录'));
 if(/空间列表/.test(msg))return PX.go('后台-科研空间管理');
 if(/空间运行详情/.test(msg))return PX.go('后台-科研空间详情');
-if(/查看数据集详情/.test(msg))return PX.go('后台-数据集详情编辑-已完善');
+if(/查看数据集详情/.test(msg))return PX.go('后台-数据集管理');
 if(/查看成果详情/.test(msg))return PX.detail('成果提交记录',{'成果名称':el.closest('tr')?.cells[0]?.innerText,'类型':el.closest('tr')?.cells[1]?.innerText,'提交人':el.closest('tr')?.cells[2]?.innerText,'提交时间':el.closest('tr')?.cells[3]?.innerText,'提交方式':'选择文件上传','文件':'model.pkl、README.md','说明':'用于水稻估产研究的阶段成果'});
 if(/进入数据预览/.test(msg))return PX.go('后台-数据查询');
 if(/上传|更换 README|更换封面|选择.*图片|更换图片|选择附件/.test(msg))return PX.upload(el,/封面|图片/.test(msg)?'image':/README/.test(msg)?'readme':'files');

@@ -599,7 +599,7 @@ if(msg==='账号安全')return PX.go('后台-账号安全');
 if(/退出登录/.test(msg))return PX.confirm('退出登录','确认退出当前演示账号？',()=>PX.go('后台-登录'));
 if(/空间列表/.test(msg))return PX.go('后台-科研空间管理');
 if(/空间运行详情/.test(msg))return PX.go('后台-科研空间详情');
-if(/查看数据集详情/.test(msg))return PX.go('后台-数据集详情编辑-已完善');
+if(/查看数据集详情/.test(msg))return PX.go('后台-数据集管理');
 if(/查看成果详情/.test(msg))return PX.detail('成果提交记录',{'成果名称':el.closest('tr')?.cells[0]?.innerText,'类型':el.closest('tr')?.cells[1]?.innerText,'提交人':el.closest('tr')?.cells[2]?.innerText,'提交时间':el.closest('tr')?.cells[3]?.innerText,'提交方式':'选择文件上传','文件':'model.pkl、README.md','说明':'用于水稻估产研究的阶段成果'});
 if(/进入数据预览/.test(msg))return PX.go('后台-数据查询');
 if(/上传|更换 README|更换封面|选择.*图片|更换图片|选择附件/.test(msg))return PX.upload(el,/封面|图片/.test(msg)?'image':/README/.test(msg)?'readme':'files');
@@ -685,13 +685,13 @@ if(f==='后台-模型管理.html'){
  let stored=PX.get(PX.key+':rows',null);if(stored)stored.forEach(s=>{let r=ROWS.find(x=>x.key===s.key);if(r)r.up=s.up});let removed=PX.get(PX.key+':deleted',[]);ROWS=ROWS.filter(r=>!removed.includes(r.key));renderTable();
  const ps=document.querySelector('.pgsel');if(ps&&ps.tagName!=='SELECT'){ps.removeAttribute('onclick');ps.innerHTML='<select class="px-size"><option value="10">10条/页</option><option value="20">20条/页</option><option value="50">50条/页</option></select>';ps.querySelector('select').onchange=e=>{PX.paginate(1,+e.target.value)}}
 }
-if(f.startsWith('后台-模型详情编辑')||f.startsWith('后台-数据集详情编辑')){
+if(f.startsWith('后台-详情编辑-已并入主页面')||f.startsWith('后台-详情编辑-已并入主页面')){
  if(typeof window.saveDraft==='function')window.saveDraft=()=>PX.save();if(typeof window.saveUpd==='function')window.saveUpd=()=>PX.save();
  let tree=[];tree.forEach((t,i)=>{t.onclick=()=>{document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('on'));t.classList.add('on');let panel=document.querySelector('.files-body,.file-list');if(panel)panel.innerHTML='<div class="px-upload">'+e(t.textContent)+'<p>当前分类的文件可在原始文件清单查看。</p></div>'}});
 }
 if(f==='后台-科研空间详情.html'){
  let section=document.querySelector('.mtabs')?.closest('.card'),body=section?.querySelector('tbody'),initial=body?.innerHTML;
- window.switchMtab=a=>{document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('cur',x===a));if(body)body.innerHTML=a.textContent.includes('数据')?initial:'<tr><td>水稻估产模型</td><td>v2.3</td><td><span class="tag-cell">已挂载</span></td><td><a class="lnk" href="后台-模型详情编辑-已完善.html">查看详情</a></td></tr>'};
+ window.switchMtab=a=>{document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('cur',x===a));if(body)body.innerHTML=a.textContent.includes('数据')?initial:'<tr><td>水稻估产模型</td><td>v2.3</td><td><span class="tag-cell">已挂载</span></td><td><a class="lnk" href="后台-模型管理.html">查看详情</a></td></tr>'};
  document.querySelectorAll('.fname').forEach(x=>{x.style.cursor='pointer';x.onclick=()=>PX.detail(x.innerText,{'文件名称':x.innerText,'所属空间':'水稻估产研究','最后更新':x.closest('tr').cells[3]?.innerText,'文件状态':'已保存','路径':'/workspace/'+x.innerText})});
 }
 if(f==='后台-科研空间管理.html'||f==='后台-科研空间详情.html'){
@@ -742,7 +742,7 @@ if(f==='后台-数据集管理.html'){
  window.createDone=()=>{let dialog=document.getElementById('m-create'),fields=Array.from(dialog.querySelectorAll('input,select,textarea')),name=fields.find(x=>x.closest('.fld')?.querySelector('label')?.textContent.includes('数据名称'))||fields.find(x=>x.placeholder.includes('名称'));if(!name?.value.trim()){toast('请填写数据名称');return}let r={...DS[0],id:'DS'+Date.now(),name:name.value,desc:document.getElementById('createIntro').value,pub:'none',todo:true,src:'manual'};if(!PB[r.pub])r.pub=Object.keys(PB).find(x=>x!=='on'&&x!=='off')||'off';DS.unshift(r);PX.put('agri-datasets',DS);closeM('m-create');renderGrid();toast('数据集已保存，可从列表编辑详情')};
  renderGrid();
 }
-if(f.startsWith('后台-模型详情编辑')){
+if(f.startsWith('后台-详情编辑-已并入主页面')){
  const tab=document.querySelector('.tabs'),card=tab?.closest('.card');if(card){let blocks=Array.from(card.children).filter(x=>x!==tab),panel=document.createElement('div');panel.className='blk';panel.hidden=true;panel.innerHTML='<h4>使用方式</h4><div class="px-grid"><label class="px-field">运行方式<select id="px-runmode"><option>在线运行 / 申请使用</option><option>申请使用</option></select></label><label class="px-field">使用条件<select id="px-access"><option>授权使用</option><option>限制使用</option></select></label><label class="px-field wide">使用说明<textarea id="px-usage">通过平台申请使用本模型，授权后在科研开发空间内运行。输入数据与输出结果保留在平台内。</textarea></label></div>';card.append(panel);window.switchTab=el=>{tab.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===el));let external=el.textContent.includes('对外提供');blocks.forEach(x=>x.hidden=external);panel.hidden=!external};}
 }
 })();
@@ -782,20 +782,20 @@ if(typeof window.doQuery==='function')window.doQuery=()=>PX.filter();
 window.MeetingSeeds={datasets:[
  {id:'DS20260923018',name:'建三江水稻生长观测数据集',pub:'on',src:'res',thumb:'无人机影像',
   desc:'覆盖水稻关键生育期，包含株高、叶面积与长势观测数据。',form:'时序数据',count:'12.6 万条',
-  link:'后台-数据集详情编辑-已完善.html'},
+  link:'dataset-edit-complete'},
  {id:'DS20260923019',name:'黑龙江农田遥感影像数据集',pub:'on',src:'space',thumb:'卫星影像',
   desc:'黑龙江主要农区多时相遥感影像，支持作物识别与长势监测。',form:'遥感栅格',count:'256 景',
-  link:'后台-数据集详情编辑-数据预览.html'},
+  link:'dataset-preview'},
  {id:'DS20260923020',name:'rice_pest_labels.zip',pub:'off',src:'res',thumb:'',todo:1,
-  desc:'',form:'ZIP 文件',count:'',link:'后台-数据集详情编辑-待完善.html'},
+  desc:'',form:'ZIP 文件',count:'',link:'dataset-edit-todo'},
  {id:'DS20260923021',name:'北大荒耕地地块矢量数据集',pub:'on',src:'space',thumb:'矢量地块',
   desc:'汇集农场耕地边界与地块属性，支持地块查询及空间分析。',form:'矢量数据',count:'3.2 万个地块',
-  link:'后台-数据集详情编辑-已完善.html'},
+  link:'dataset-edit-complete'},
  {id:'DS20260923022',name:'农田土壤墒情观测数据集',pub:'down',src:'manual',thumb:'地面观测',
   desc:'农田监测点土壤水分与温度观测记录，支持墒情分析。',form:'时序数据',count:'8.6 万条',
-  link:'后台-数据集详情编辑-已完善.html'},
+  link:'dataset-edit-complete'},
  {id:'DS20260923023',name:'玉米田间调查成果',pub:'off',src:'res',thumb:'',todo:1,
-  desc:'',form:'ZIP 文件',count:'',link:'后台-数据集详情编辑-待完善.html'}
+  desc:'',form:'ZIP 文件',count:'',link:'dataset-edit-todo'}
 ],projects:[
  {code:'BH2026-021',name:'黑土地碳汇监测与评估',guide:'2026年度黑土地保护专项指南',who:'张明',org:'作物科学研究所',type:'重点',from:'2026-09-18',to:'2026-09-25',st:'拟立项'},
  {code:'BH2026-022',name:'农业遥感长势监测',guide:'2026年度智慧农业开放课题指南',who:'李娜',org:'农业信息研究中心',type:'面上',from:'2026-09-18',to:'2026-09-25',st:'拟立项'},
@@ -825,7 +825,7 @@ M.commitOutcome=async e=>{e.preventDefault();const f=e.target,values=Object.from
 M.viewOutcome=id=>{const r=M.records().find(x=>x.id===id);if(!r)return;M.dialog(r.name,`<p>${M.badge(r.status)}　${M.e(r.id)}　${M.e(r.time)}</p><div class="mt-grid">${M.schemas[r.kind].map(([k,l])=>`<div><small class="mt-note">${l}</small><p>${M.e(r.metadata?.[k]||'—')}</p></div>`).join('')}</div><h3 class="mt-section">介绍内容</h3><article>${M.safeHTML(r.metadata?.intro||'')}</article><h3 class="mt-section">成果材料</h3><div>${r.files.map((x,i)=>`<p>${M.e(x.name)} ${x.blobId?M.link('下载材料',`Meeting.downloadMaterial('${r.id}',${i})`):''}</p>`).join('')}</div><h3 class="mt-section">审批记录</h3>${(r.history||[]).map(x=>`<div class="mt-timeline"><strong>${M.e(x.action)}</strong> · ${M.e(x.by)} · ${M.e(x.time)}<p>${M.e(x.note)}</p></div>`).join('')}`,(M.admin&&r.status==='待审批'?M.btn('返回审批',`Meeting.review('${r.id}')`):M.btn('关闭','Meeting.close()'))+(!M.admin&&r.kind==='model'?M.btn('调试',`Meeting.debug('${r.id}')`):'')+(!M.admin&&r.status==='已驳回'?M.btn('修改后重新提交',`Meeting.submit('${r.kind}','${r.assetId||''}','${r.id}')`,true):''))};
 M.debug=id=>{if(M.spaceContext&&typeof editable==='function'&&!editable()){M.toast('研究已结束，成果仅可查看');return}const r=M.records().find(x=>x.id===id);M.dialog('成果调试',`<p>${M.e(r?.name||M.spaceContext?.name||'科研成果')}</p><p class="mt-note">原型调试演示，不执行真实镜像或远程接口。</p><form id="mt-debug-form">${M.field('debuginput','调试输入','{}','textarea')}<label class="mt-field" style="margin-top:16px">样例文件（选填）<input id="mt-debug-file" type="file" multiple></label><h3 class="mt-section">运行输出</h3><pre id="mt-debug-result" class="mt-debug">尚未执行</pre></form>`,M.btn('关闭','Meeting.close()')+'<button form="mt-debug-form" class="mt-btn primary" type="submit">运行调试（演示）</button>');document.getElementById('mt-debug-form').onsubmit=e=>{e.preventDefault();const text=document.getElementById('mt-debuginput').value.trim();document.getElementById('mt-debug-result').textContent='[演示] 已读取调试输入'+(document.getElementById('mt-debug-file').files.length?'及样例文件':'')+'\n[演示] 输入长度：'+text.length+' 字符\n[演示] 本轮流程完成；真实运行结果由开发环境执行后返回。';if(r){const list=M.records();list.find(x=>x.id===id).debugTime=M.date();M.write(M.key,list)}}};
 M.outcomeTable=(rows,review=false)=>`<div class="mt-table-wrap"><table class="mt-table"><thead><tr><th>成果名称</th><th>类型 / 版本</th><th>提交人 / 时间</th><th>审批状态</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${M.e(r.name)}</strong><small>${M.e(r.spaceName||'')}</small></td><td>${r.kind==='model'?'成果模型':'成果数据'}<small>${M.e(r.metadata.version)}</small></td><td>${M.e(r.applicant)}<small>${M.e(r.time)}</small></td><td>${M.badge(r.status)}</td><td><div class="mt-actions">${M.link('查看',`Meeting.viewOutcome('${r.id}')`)}${review&&r.status==='待审批'?M.link('审批验收',`Meeting.review('${r.id}')`):''}${!review&&r.kind==='model'?M.link('调试',`Meeting.debug('${r.id}')`):''}${!review&&r.status==='已驳回'?M.link('修改提交',`Meeting.submit('${r.kind}','${r.assetId||''}','${r.id}')`):''}</div></td></tr>`).join('')||'<tr><td colspan="5" class="mt-empty">暂无成果提交记录</td></tr>'}</tbody></table></div>`;
-M.review=id=>{const r=M.records().find(x=>x.id===id);if(!r||r.status!=='待审批')return;M.dialog('成果审批验收',`<p><strong>${M.e(r.name)}</strong> · ${M.e(r.metadata.version)} · ${M.e(r.applicant)}</p>${M.link('查看完整成果材料',`Meeting.viewOutcome('${id}')`)}<form id="mt-review-form" style="margin-top:18px">${M.field('decision','审批结果','','select',['通过','驳回','拒绝'])}${M.field('opinion','审批意见','','textarea')}<p class="mt-error" id="mt-review-error"></p></form>`,M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="mt-review-form">确认审批</button>');document.getElementById('mt-review-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),list=M.records(),r=list.find(x=>x.id===id);if(r.status!=='待审批'){M.toast('该成果已处理');return}const decision=f.get('decision'),opinion=f.get('opinion').trim();if(!opinion)return;r.status={通过:'已通过',驳回:'已驳回',拒绝:'已拒绝'}[decision];r.history.push({action:decision,by:'张明',time:M.date(),note:opinion});if(decision==='通过'){const id=r.acceptedAssetId||r.assetId||'new-outcome-'+r.id;r.acceptedAssetId=id;M.registerAsset(id,r.kind,{...r.metadata,...(!r.assetId?{up:'none'}:{})});if(!r.assetId&&r.kind==='model'){const s=M.read('bdh-model-service-v3',{});s.newRows??=[];if(!s.newRows.some(x=>x.key===id))s.newRows.push({key:id,no:M.nextModelNo(),name:r.name,ver:r.metadata.version,files:r.files.map(x=>x.name),materialType:r.materialType||'image',access:'platform',src:'res',who:r.applicant,d:M.date().slice(0,10),t:M.date().slice(11),done:!!r.metadata.intro,up:'none',detailPage:'后台-模型详情编辑-后台新建.html',outcomeId:r.id});M.write('bdh-model-service-v3',s)}else if(!r.assetId){const ds=M.read('agri-datasets',MeetingSeeds.datasets);if(!ds.some(x=>x.id===id))ds.unshift({id,name:r.name,desc:r.metadata.summary||'',pub:'off',todo:!r.metadata.intro,src:'res',thumb:'',type:r.metadata.modality,form:r.metadata.modality,count:r.metadata.scale,org:r.metadata.provider,version:r.metadata.version,link:'后台-数据集详情编辑-已完善.html',outcomeId:r.id});M.write('agri-datasets',ds)}}if(M.write(M.key,list)){M.close();M.refreshReview?.();M.toast('审批结果已保存')}}};
+M.review=id=>{const r=M.records().find(x=>x.id===id);if(!r||r.status!=='待审批')return;M.dialog('成果审批验收',`<p><strong>${M.e(r.name)}</strong> · ${M.e(r.metadata.version)} · ${M.e(r.applicant)}</p>${M.link('查看完整成果材料',`Meeting.viewOutcome('${id}')`)}<form id="mt-review-form" style="margin-top:18px">${M.field('decision','审批结果','','select',['通过','驳回','拒绝'])}${M.field('opinion','审批意见','','textarea')}<p class="mt-error" id="mt-review-error"></p></form>`,M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="mt-review-form">确认审批</button>');document.getElementById('mt-review-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),list=M.records(),r=list.find(x=>x.id===id);if(r.status!=='待审批'){M.toast('该成果已处理');return}const decision=f.get('decision'),opinion=f.get('opinion').trim();if(!opinion)return;r.status={通过:'已通过',驳回:'已驳回',拒绝:'已拒绝'}[decision];r.history.push({action:decision,by:'张明',time:M.date(),note:opinion});if(decision==='通过'){const id=r.acceptedAssetId||r.assetId||'new-outcome-'+r.id;r.acceptedAssetId=id;M.registerAsset(id,r.kind,{...r.metadata,...(!r.assetId?{up:'none'}:{})});if(!r.assetId&&r.kind==='model'){const s=M.read('bdh-model-service-v3',{});s.newRows??=[];if(!s.newRows.some(x=>x.key===id))s.newRows.push({key:id,no:M.nextModelNo(),name:r.name,ver:r.metadata.version,files:r.files.map(x=>x.name),materialType:r.materialType||'image',access:'platform',src:'res',who:r.applicant,d:M.date().slice(0,10),t:M.date().slice(11),done:!!r.metadata.intro,up:'none',detailPage:'model-edit-new',outcomeId:r.id});M.write('bdh-model-service-v3',s)}else if(!r.assetId){const ds=M.read('agri-datasets',MeetingSeeds.datasets);if(!ds.some(x=>x.id===id))ds.unshift({id,name:r.name,desc:r.metadata.summary||'',pub:'off',todo:!r.metadata.intro,src:'res',thumb:'',type:r.metadata.modality,form:r.metadata.modality,count:r.metadata.scale,org:r.metadata.provider,version:r.metadata.version,link:'dataset-edit-complete',outcomeId:r.id});M.write('agri-datasets',ds)}}if(M.write(M.key,list)){M.close();M.refreshReview?.();M.toast('审批结果已保存')}}};
 M.nextModelNo=()=>{const n=M.read('bdh-model-counter-1010',0)+1;M.write('bdh-model-counter-1010',n);return 'MDL-'+new Date().getFullYear()+'-N'+String(n).padStart(5,'0')};
 M.deliveryType=type=>{const n=document.getElementById('mt-files');n.multiple=type==='files';n.accept=type==='image'?'.tar,.tar.gz,.tgz':'.pkl,.joblib,.onnx,.pt,.pth,.py,.json,.yaml,.yml,.txt,.md,.pdf,.zip';n.value=''};
 M.fillDefaults=id=>{const a=M.assets()[id];if(!a)return;M.schemas[M.submitting.kind].forEach(([k])=>{const n=document.getElementById('mt-'+k);if(n)n.value=a[k]??''});document.getElementById('mt-intro').innerHTML=M.safeHTML(a.intro||'')};
@@ -1335,8 +1335,8 @@ if(family&&P){
 }
 
 // Dataset detail metadata and previews have one stable asset ID.
-if(/^后台-数据集详情编辑/.test(F)){
- const id=qs.get('asset')||({'后台-数据集详情编辑-已完善.html':'DS20260923018','后台-数据集详情编辑-待完善.html':'DS20260923020','后台-数据集详情编辑-数据预览.html':'DS20260923019'})[F],r=dsList().find(r=>r.id===id),main=Q('main');
+if(F==='后台-数据集管理.html'&&qs.get('asset')){
+ const id=qs.get('asset')||({'dataset-edit-complete':'DS20260923018','dataset-edit-todo':'DS20260923020','dataset-preview':'DS20260923019'})[F],r=dsList().find(r=>r.id===id),main=Q('main');
  if(r){
   M.editorAsset=id;const controls=M.editorControls||{},meta=M.assets()[id]||{};
   const materials=r.files||M.records().find(x=>x.id===r.outcomeId)?.files;
@@ -1349,7 +1349,7 @@ if(/^后台-数据集详情编辑/.test(F)){
    const v=M.collectMetadata();if(!v.name){M.toast('请填写数据名称');return false;}
    const rows=dsList(),item=rows.find(x=>x.id===id);if(!item){M.toast('数据集已删除，请返回列表');return false;}
    const intro=Q('#mt-backend-intro')?.textContent.trim();
-   Object.assign(item,{name:v.name,desc:v.summary,version:v.version,org:v.provider,form:v.modality||item.form,count:v.scale||item.count,todo:!intro||!v.version,link:'后台-数据集详情编辑-已完善.html'});
+   Object.assign(item,{name:v.name,desc:v.summary,version:v.version,org:v.provider,form:v.modality||item.form,count:v.scale||item.count,todo:!intro||!v.version,link:'dataset-edit-complete'});
    if(!M.write('agri-datasets',rows)||!M.write('agri-dataset-form:'+id,capture(main)))return false;M.registerAsset(id,'dataset',v);saveUploads();M.toast('数据集已保存');return true;
   };
   window.saveDraft=window.saveUpd=P.save;
@@ -1360,7 +1360,7 @@ if(/^后台-数据集详情编辑/.test(F)){
 }
 if(F==='后台-数据查询.html'){
  const r=dsList().find(r=>r.id===qs.get('asset'));
- if(r){const h=Q('main h1');if(h)h.textContent=r.name+' · 数据查询';QA('main a[href*="数据集"]').forEach(a=>a.href=(r.link||'后台-数据集详情编辑-已完善.html')+'?asset='+encodeURIComponent(r.id));}
+ if(r){const h=Q('main h1');if(h)h.textContent=r.name+' · 数据查询';QA('main a[href*="数据集"]').forEach(a=>a.href=(r.link?后台-数据集管理.html:'后台-数据集管理.html')+'?asset='+encodeURIComponent(r.id));}
  if(qs.get('mode')==='image'){const n=Q('#mode');if(n)n.selectedIndex=1;draw();}
  const original=window.draw;window.draw=()=>{const farm=val('farm'),day=val('day'),total=samples.filter(x=>(farm==='全部农场'||x.farm===farm)&&(!day||x.date===day)).length;page=Math.max(1,Math.min(page,Math.ceil(total/size)||1));original();};
  window.reset=()=>{set('farm','全部农场');set('day','');page=1;draw();};
@@ -1373,11 +1373,11 @@ if(F==='后台-数据集管理.html'){
  window.createDone=()=>{
   const name=get('数据名称')?.value.trim();if(!name){M.toast('请填写数据名称');return;}
   const files=[...Q('#upList').querySelectorAll('.up-name')].map(n=>({name:n.textContent.trim()}));if(!files.length){M.toast('请选择数据文件');return;}
-  const id='DS'+Date.now(),r={id,name,desc:val('createIntro'),pub:'off',todo:true,src:'manual',thumb:'',form:get('数据形态')?.value||get('数据类型')?.value||'',type:get('数据类型')?.value||'',org:get('提供方')?.value||'',count:files.length+' 个文件',files,link:'后台-数据集详情编辑-待完善.html'};
+  const id='DS'+Date.now(),r={id,name,desc:val('createIntro'),pub:'off',todo:true,src:'manual',thumb:'',form:get('数据形态')?.value||get('数据类型')?.value||'',type:get('数据类型')?.value||'',org:get('提供方')?.value||'',count:files.length+' 个文件',files,link:'dataset-edit-todo'};
   const rows=dsList();rows.unshift(r);if(!M.write('agri-datasets',rows))return;
-  M.registerAsset(id,'dataset',{name,summary:r.desc,provider:r.org,modality:r.form,region:get('区域')?.value||'',year:get('数据年份')?.value||'',owner:get('权属归属')?.value||'',scale:r.count});go(r.link,{asset:id});
+  M.registerAsset(id,'dataset',{name,summary:r.desc,provider:r.org,modality:r.form,region:get('区域')?.value||'',year:get('数据年份')?.value||'',owner:get('权属归属')?.value||'',scale:r.count});go('后台-数据集管理.html',{asset:id});
  };
- const render=window.renderGrid;window.renderGrid=()=>{render();QA('#dsGrid .ds-card').forEach(n=>{const r=dsList().find(r=>r.id===n.dataset.id);if(!r)return;n.querySelectorAll('a[href*="详情编辑"]').forEach(a=>a.href=(r.link||'后台-数据集详情编辑-已完善.html')+'?asset='+encodeURIComponent(r.id));});};renderGrid();
+ const render=window.renderGrid;window.renderGrid=()=>{render();QA('#dsGrid .ds-card').forEach(n=>{const r=dsList().find(r=>r.id===n.dataset.id);if(!r)return;n.querySelectorAll('a[href*="详情编辑"]').forEach(a=>a.href=(r.link?后台-数据集管理.html:'后台-数据集管理.html')+'?asset='+encodeURIComponent(r.id));});};renderGrid();
 }
 
 // Home content saves are scoped to a card/slot, so one edit never replaces another.
@@ -2385,7 +2385,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
   };
 
   /* -------------------------------------------------- 16 模型详情编辑 · 待完善（未上架 · 成果转化） */
-  DOCS['后台-模型详情编辑-待完善.html'] = {
+  DOCS['后台-模型管理.html'] = {
     name: '模型详情编辑 · 待完善（未上架）',
     intro: '来自<b>成果转化</b>的模型，资料尚未补全、未上架。页面同时展示<b>原始提交信息（只读）</b>与可编辑的模型资料。',
     field: [
@@ -2443,7 +2443,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
   };
 
   /* -------------------------------------------------- 17 模型详情编辑 · 已完善（已上架 · 成果转化） */
-  DOCS['后台-模型详情编辑-已完善.html'] = {
+  DOCS['后台-模型管理.html'] = {
     name: '模型详情编辑 · 已完善（已上架）',
     intro: '已完成资料补全并上架的模型详情，形态同「待完善」但资料齐备，且同样保留<b>原始提交信息（只读）</b>。',
     field: [
@@ -2496,7 +2496,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
   };
 
   /* -------------------------------------------------- 18 模型详情编辑 · 后台新建（未上架 · 无原始提交） */
-  DOCS['后台-模型详情编辑-后台新建.html'] = {
+  DOCS['后台-模型管理.html'] = {
     name: '模型详情编辑 · 后台新建（未上架）',
     intro: '⭐ 由运营侧<b>直接建档</b>的模型（<b>无原始提交信息、也无原始文件</b>）。与成果转化来的两个形态相比，本形态不出现「原始提交信息（只读）」与「提交文件」区块，「来源与权属」需人工填写。',
     field: [
@@ -2680,7 +2680,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
   };
 
   /* -------------------------------------------------- 21 数据集详情编辑 · 待完善（未上架） */
-  DOCS['后台-数据集详情编辑-待完善.html'] = {
+  DOCS['后台-数据集管理.html'] = {
     name: '数据集详情编辑 · 待完善（未上架）',
     intro: '来自成果转化的数据集，资料未补全、未上架。区块：<b>原始提交信息 / 提交文件 / 数据基本信息 / 暂不能上架 / 打包下载</b>。',
     field: [
@@ -2734,7 +2734,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
   };
 
   /* -------------------------------------------------- 22 数据集详情编辑 · 已完善（表格形态） */
-  DOCS['后台-数据集详情编辑-已完善.html'] = {
+  DOCS['后台-数据集管理.html'] = {
     name: '数据集详情编辑 · 已完善（表格形态）',
     intro: '已上架的数据集详情，示例为<b>地面实测数据表</b>：展示关键参数、适用方向与数据表预览。',
     field: [
@@ -2787,7 +2787,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
   };
 
   /* -------------------------------------------------- 23 数据集详情编辑 · 数据预览（影像形态） */
-  DOCS['后台-数据集详情编辑-数据预览.html'] = {
+  DOCS['后台-数据集管理.html'] = {
     name: '数据集详情编辑 · 数据预览（影像形态）',
     intro: '已上架的数据集详情，示例为<b>无人机航拍影像</b>：预览区为影像而非表格，其余区块与表格形态一致。',
     field: [
@@ -4037,13 +4037,13 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
     '后台-管理设置.html': '平台能力',
     '后台-数据查询.html': '数据',
     '后台-数据集管理.html': '数据',
-    '后台-数据集详情编辑-已完善.html': '数据',
-    '后台-数据集详情编辑-待完善.html': '数据',
-    '后台-数据集详情编辑-数据预览.html': '数据',
+    '后台-数据集管理.html': '数据',
+    '后台-数据集管理.html': '数据',
+    '后台-数据集管理.html': '数据',
     '后台-模型管理.html': '模型',
-    '后台-模型详情编辑-已完善.html': '模型',
-    '后台-模型详情编辑-待完善.html': '模型',
-    '后台-模型详情编辑-后台新建.html': '模型',
+    '后台-模型管理.html': '模型',
+    '后台-模型管理.html': '模型',
+    '后台-模型管理.html': '模型',
     '后台-课题指南管理.html': '课题',
     '后台-课题管理.html': '课题',
     '后台-科研人员推荐.html': '课题',
