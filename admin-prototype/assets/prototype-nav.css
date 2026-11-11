@@ -34,3 +34,45 @@ header.site-header.prototype-header .u-name{border:0;background:none;font:inheri
 
 header.site-header.prototype-header[data-system=admin]{--prototype-header-height:64px}
 @media(max-width:760px){header.site-header.prototype-header{--prototype-header-height:64px}}
+
+/* ---- admin 一级导航对齐管理设置页（1111）----
+   管理设置页未引用本文件，用的是页面原生样式：
+     .site-header .container{ width:100%; max-width:var(--content-max); margin:0 auto;
+                               padding:0 clamp(24px,3.65vw,56px) }
+     .site-header .header-inner{ gap:var(--s5) }      /* 24px */
+     .site-header .main-nav{ margin-left:var(--s4); flex:1; }
+     .site-header .main-nav a{ padding:0 14px; }
+   其余后台页引用本文件后，nav 被 margin-left:auto / flex:none 推到最右，
+   且 header-inner 宽度与 gap 规则不同 ⇒ 与管理设置页的导航位置不一致。
+   此处把 admin 恢复成同一套定位与间距；portal 不受影响。 */
+header.site-header.prototype-header[data-system=admin] .header-inner{
+  width:100%!important;
+  max-width:var(--content-max,1800px)!important;
+  margin:0 auto!important;
+  padding:0 clamp(24px,3.65vw,56px)!important;
+  gap:24px!important;
+}
+header.site-header.prototype-header[data-system=admin] .main-nav{
+  justify-content:flex-start!important;
+  gap:0!important;
+  margin:0 0 0 var(--s4,16px)!important;
+  flex:1 1 0%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+header.site-header.prototype-header[data-system=admin] .main-nav a{
+  padding:0 14px!important;
+  margin:0!important;
+}
+header.site-header.prototype-header[data-system=admin] .main-nav a.active::after{
+  left:14px!important;right:14px!important;bottom:0!important;height:3px!important;
+}
+@media(max-width:1500px){
+  header.site-header.prototype-header[data-system=admin] .header-inner{gap:24px!important}
+  header.site-header.prototype-header[data-system=admin] .main-nav{gap:0!important}
+}
+@media(max-width:760px){
+  header.site-header.prototype-header[data-system=admin] .header-inner{
+    width:calc(100% - 32px)!important;gap:12px!important;padding:0!important;
+  }
+}
