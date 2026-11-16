@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>课题管理工作台 · 北大荒智慧农业协同创新平台</title><style>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人中心 — 北大荒智慧农业协同创新平台</title>
+
+<style>
 
 :root{
   --brand:#005653; --brand-hover:#004542;
@@ -386,8 +392,88 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
   .dev-env{flex-direction:column;gap:2px;}
   .dev-two{grid-template-columns:1fr;}
 }
-</style><link rel="stylesheet" href="assets/meeting/meeting.css"><link rel="stylesheet" href="assets/meeting/project-workbench.css"><link rel="stylesheet" href="assets/prototype-nav.css">
-</head><body class="wb-page"><header class="site-header prototype-header" data-system="admin">
+
+/* ===== 能力映射（既有子系统 / 既有能力复用）声明页 ===== */
+.map-note{display:flex;gap:13px;padding:17px var(--s5);background:var(--brand-soft);border:1px solid #cfe3d9;border-radius:var(--radius-md);margin-bottom:var(--layout-gap);}
+.map-note .ic{color:var(--brand);flex-shrink:0;margin-top:2px;}
+.map-note .tx{min-width:0;}
+.map-note .tx h2{font-size:14.5px;line-height:23px;font-weight:600;color:var(--brand);margin-bottom:6px;}
+.map-note .tx p{font-size:13.5px;line-height:1.8;color:var(--text-secondary);}
+.map-note .tx p + p{margin-top:5px;}
+.map-note .tx b{font-weight:600;color:var(--text);}
+
+.panel{display:none;}
+.panel.on{display:block;}
+.panels > .card{margin-bottom:var(--layout-gap);}
+
+.lead{padding:13px var(--s5) 15px;font-size:13.5px;line-height:1.85;color:var(--text);}
+
+.kv{display:grid;border-top:1px solid var(--border);}
+.kv-row{display:grid;grid-template-columns:112px minmax(0,1fr);gap:6px 16px;padding:13px var(--s5);border-bottom:1px solid var(--border);font-size:13.5px;}
+.kv-row:last-child{border-bottom:0;}
+.kv-row .k{color:var(--text-muted);}
+.kv-row .v{min-width:0;line-height:1.75;}
+
+.pn-note{display:flex;gap:9px;margin:14px var(--s5) 0;padding:11px 14px;font-size:12.5px;line-height:1.75;color:var(--text-secondary);background:#f5f7f9;border-radius:var(--radius-sm);}
+.pn-note .ic{color:var(--text-muted);flex-shrink:0;margin-top:2px;}
+.pn-note b{font-weight:600;color:var(--text);}
+.pn-ft{display:flex;align-items:center;gap:14px;padding:14px var(--s5) 18px;flex-wrap:wrap;}
+.pn-ft .hint{font-size:12.5px;color:var(--text-muted);}
+
+table.duty-tbl th:first-child,table.duty-tbl td:first-child{width:26%;}
+table.duty-tbl td{line-height:1.75;color:var(--text-secondary);}
+table.duty-tbl td:first-child{color:var(--text);font-weight:600;}
+.duty-note{padding:0 var(--s5) 18px;}
+.duty-note .pn-note{margin:0;}
+
+@media (max-width:680px){
+  .kv-row{grid-template-columns:minmax(0,1fr);gap:3px;}
+  .map-note{flex-direction:column;gap:8px;}
+}
+
+/* ===== 0924：精简版（只留复用声明）主区变短，撑满首屏避免页脚上浮 ===== */
+body{min-height:100vh;display:flex;flex-direction:column;}
+.site-header,.site-footer{flex:0 0 auto;}
+.container{flex:1 1 auto;}
+</style>
+<style>/* 补全原型公共交互样式 */
+.px-mask{position:fixed;inset:0;background:rgba(12,35,39,.42);z-index:9998;display:flex;align-items:center;justify-content:center;padding:28px}.px-dialog{width:780px;max-width:95vw;max-height:90vh;background:#fff;border-radius:12px;box-shadow:0 24px 80px #1235;display:flex;flex-direction:column;color:#203c49;text-align:left}.px-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid #e3ece8;font-size:18px;font-weight:650}.px-dialog>header button{border:0;background:none;font-size:26px;color:#69807b;cursor:pointer}.px-body{padding:24px 26px;overflow:auto}.px-dialog footer{padding:16px 26px;border-top:1px solid #e3ece8;display:flex;justify-content:flex-end;gap:10px}.px-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}.px-field{display:flex;flex-direction:column;gap:8px;font-size:13px}.px-field.wide{grid-column:1/-1}.px-field input,.px-field select,.px-field textarea,.px-input{border:1px solid #d7e4df;border-radius:6px;background:white;padding:10px 12px;font:inherit;color:#27443f;min-width:0}.px-field textarea{min-height:100px;resize:vertical}.px-help{font-size:12px;color:#72867f;line-height:1.7;margin:12px 0}.px-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #cfded7;border-radius:6px;padding:8px 15px;background:#fff;color:#215547;font-size:13px;cursor:pointer;gap:6px;text-decoration:none}.px-btn.primary{background:#146c52;border-color:#146c52;color:white}.px-btn.danger{color:#b94f46}.px-btn:disabled{opacity:.5;cursor:not-allowed}.px-chip{display:inline-block;background:#edf7f1;color:#257151;border-radius:4px;padding:4px 9px;font-size:12px}.px-table{border-collapse:collapse;width:100%;font-size:13px}.px-table th{background:#f4f8f6;color:#70837b;font-weight:500}.px-table th,.px-table td{padding:14px 15px;border-bottom:1px solid #e9efec;text-align:left}.px-table td small{display:block;margin-top:5px;color:#8a9a94}.px-table button{margin-right:7px}.px-empty{padding:48px;text-align:center;color:#80928b}.px-card{background:#fff;border:1px solid #e0eae5;border-radius:10px;margin-bottom:20px;overflow:hidden}.px-card-head{padding:18px 22px;border-bottom:1px solid #e5ece8;display:flex;align-items:center;justify-content:space-between}.px-card-head h2{font-size:16px;margin:0}.px-filter{display:flex;gap:12px;align-items:center;padding:20px;flex-wrap:wrap}.px-filter input{width:260px}.px-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.px-tabs .on{background:#e4f3ec;color:#106448;border-color:#8bb7a0}.px-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.px-metric{padding:22px;background:#fff;border:1px solid #e0eae5;border-radius:9px;color:#71877e}.px-metric b{display:block;font-size:27px;color:#214b40;margin-top:14px}.px-log{background:#16302a;color:#cee7d9;white-space:pre-wrap;padding:18px;border-radius:7px;font:13px/1.8 monospace;overflow-wrap:anywhere}.px-pager{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:16px 20px;color:#74857f;font-size:13px}.px-checks{display:flex;gap:12px;flex-wrap:wrap}.px-checks label{display:flex;align-items:center;gap:7px;border:1px solid #dce7e1;border-radius:6px;padding:9px 13px;cursor:pointer}.px-upload{padding:14px;background:#f5faf7;border:1px dashed #a8cdb8;border-radius:7px;margin-top:10px}.px-preview{max-width:100%;max-height:420px;border-radius:8px}.px-kv{display:grid;grid-template-columns:130px 1fr;gap:15px;font-size:14px;line-height:1.6}.px-kv dt{color:#7a8d83}.px-kv dd{margin:0;overflow-wrap:anywhere}.px-fullscreen{position:fixed!important;inset:15px!important;z-index:9990!important;background:#fff!important;overflow:auto!important;padding:24px!important}.px-pagehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.px-pagehead h1{font-size:23px;margin:0}.px-scroller{overflow:auto}.px-error{color:#bb4034;font-size:13px;margin-top:12px}.px-layout{display:grid;grid-template-columns:220px 1fr;gap:18px}.px-filetree{background:#f4f8f5;padding:16px;border-radius:8px}.px-filetree button{display:block;margin:7px 0;width:100%;text-align:left}.px-timeline{border-left:2px solid #bad7c8;padding-left:18px;margin-left:8px}.px-timeline p{margin:0 0 18px}.px-timeline small{display:block;color:#7b9185}.px-size{padding:6px;border:1px solid #dae7df;border-radius:5px;color:#36564a;background:white}@media(max-width:800px){.px-grid,.px-layout{grid-template-columns:1fr}.px-metrics{grid-template-columns:repeat(2,1fr)}}
+[hidden]{display:none!important}
+</style>
+
+<style>
+/* 单文件导航与三个原页面的交互适配。 */
+.header-actions{margin-left:auto}
+.menu-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--border);border-radius:4px;color:var(--text-secondary)}
+.prototype-mobile{position:absolute;top:64px;right:24px;min-width:200px;padding:8px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px #10213a1a}
+.prototype-mobile a{display:block;padding:10px 14px;font-size:14px;color:var(--text-secondary);border-radius:4px}
+.prototype-mobile a:hover{background:var(--brand-soft);color:var(--brand);text-decoration:none}
+.px-btn:hover:not(:disabled){border-color:var(--brand);text-decoration:none}
+.px-btn.primary:hover:not(:disabled){background:#0d5b44}
+.px-field input[readonly]{background:#f4f7f5;color:var(--text-muted)}
+.px-field input:focus,.px-input:focus{outline:2px solid #146c5224;outline-offset:1px;border-color:var(--brand)}
+.px-table .px-empty{text-align:center;padding:48px 20px}
+.px-table td:first-child{overflow-wrap:anywhere}
+.px-table th:not(:first-child),.px-table td:not(:first-child){white-space:nowrap}
+.px-chip.read{background:#f0f3f2;color:#75847e}
+.security-table td:first-child{width:140px}
+.security-table td:last-child{width:170px}
+.security-readonly{color:var(--text-muted);font-size:12px}
+#securityLog p+p{margin-top:10px}
+#toast{z-index:10000}
+.px-dialog header h2{font-size:18px;font-weight:600;line-height:1.5;padding-right:18px}
+.px-dialog header button{flex-shrink:0}
+.message-body{line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
+.px-dialog .message-actions{margin-top:18px}
+body.dialog-open{overflow:hidden}
+:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+@media(max-width:1278px){.menu-toggle{display:inline-flex}}
+@media(max-width:1024px){.admin-side{display:flex;flex-wrap:wrap;gap:4px}.snav.cur::before{display:none}}
+@media(max-width:680px){.container{padding:0 16px}.admin-app{padding-top:16px;gap:16px}.px-pagehead{margin-bottom:16px}.px-card-head{padding:16px;gap:12px;flex-wrap:wrap}.px-filter{padding:16px}.px-table{min-width:660px}.security-table{min-width:520px}.px-dialog{max-width:100%;max-height:90dvh}.px-mask{padding:16px}.px-body{padding:20px}.px-dialog>header,.px-dialog footer{padding:16px 20px}.prototype-mobile{right:16px}#profileForm{padding:20px!important}}
+</style>
+</head>
+<body>
+<header class="site-header prototype-header" data-system="admin">
   <div class="container header-inner">
     <a class="brand" href="index.html" aria-label="北大荒智慧农业协同创新平台">
       <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
@@ -399,20 +485,20 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
       <span>北大荒智慧农业协同创新平台</span>
     </a>
     <span class="brand-tag">管理后台</span>
-    <nav class="main-nav" aria-label="主导航"><a data-px-own="1" href="index.html">工作台总览</a><a data-px-own="1" href="后台-课题工作台.html" class="active" aria-current="page">课题管理</a><a data-px-own="1" href="后台-审批中心.html">审批中心</a><a data-px-own="1" href="后台-模型管理.html">运营管理</a><a data-px-own="1" href="后台-时空数据管理.html">平台能力</a><a data-px-own="1" href="后台-管理设置.html">合作与组织</a></nav>
+    <nav class="main-nav" aria-label="主导航"><a data-px-own="1" href="index.html" class="active" aria-current="page">工作台总览</a><a data-px-own="1" href="后台-课题中心.html">课题管理</a><a data-px-own="1" href="后台-审批中心.html">审批中心</a><a data-px-own="1" href="后台-模型管理.html">运营管理</a><a data-px-own="1" href="后台-时空数据管理.html">平台能力</a><a data-px-own="1" href="后台-管理设置.html">合作与组织</a></nav>
     <div class="header-actions"><button type="button" class="menu-toggle" id="prototypeMenuToggle" aria-controls="prototypeMobileMenu" aria-expanded="false" aria-label="打开菜单">☰</button>
-      <a class="msg-btn" href="后台-消息中心.html" aria-label="消息通知">
+      <a class="msg-btn" href="#messages" data-view="messages" aria-label="消息通知">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-2 8-2 8h16s-2-1-2-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
-        <i class="msg-dot"></i>
+        <i class="msg-dot" aria-hidden="true"></i>
       </a>
       <div class="u-box">
         <button type="button" class="u-avatar" data-prototype-user aria-label="张明，打开用户菜单" aria-expanded="false" aria-controls="userMenu">张</button>
-        <button type="button" class="u-name" data-prototype-user aria-expanded="false" aria-controls="userMenu">张明
+        <button type="button" class="u-name" data-prototype-user aria-expanded="false" aria-controls="userMenu"><span id="headerUserName">张明</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="u-menu" id="userMenu">
-          <a class="u-mi" href="后台-个人资料.html">个人资料</a>
-          <a class="u-mi" href="后台-账号安全.html">账号安全</a>
+          <a class="u-mi" href="#profile" data-view="profile">个人资料</a>
+          <a class="u-mi" href="#security" data-view="security">账号安全</a>
           <div class="u-sep"></div>
           <a class="u-mi out" data-px-own="1" href="后台-登录.html">退出登录</a>
         </div>
@@ -420,29 +506,266 @@ table.cfg td.tight{padding-left:0;padding-right:0;}
     </div>
   </div>
 <nav id="prototypeMobileMenu" class="mobile-menu prototype-mobile" hidden aria-label="移动端主导航"></nav></header>
-<div class="container"><div class="admin-app"><aside class="admin-side" aria-label="课题管理二级导航"><div class="side-title">课题管理</div><a class="snav cur" aria-current="page" href="后台-课题工作台.html">课题管理工作台</a><a class="snav" href="后台-课题指南管理.html">课题指南管理</a><a class="snav" href="后台-科研人员推荐.html">科研人员推荐</a><a class="snav" href="后台-课题管理.html">课题管理</a></aside>
-<main class="admin-main" id="pm-root">
- <div class="wb-heading"><div><h1>课题管理工作台 <span id="wb-demo-label" class="wb-badge">演示数据</span></h1><p>课题推进与成果交付</p></div><div class="wb-heading-tools"><button class="wb-button" data-pm-action="refresh">刷新</button><button class="wb-button" data-pm-action="export">导出跟进清单</button></div></div>
- <div class="wb-controls pm-controls"><label for="pm-year">年度<select id="pm-year"></select></label><label for="pm-guide">所属指南<select id="pm-guide" style="max-width:245px"></select></label><div class="wb-source" aria-label="数据来源"><button type="button" data-pm-action="source" data-value="demo" aria-pressed="true">演示数据</button><button type="button" data-pm-action="source" data-value="current" aria-pressed="false">当前记录</button></div></div>
- <section class="pm-queue-cards" id="pm-queue-cards" aria-label="需要处理和协调的事项"></section>
- <div class="pm-main-grid">
-  <section class="wb-card pm-project-panel"><header class="wb-card-head"><div><h2>课题执行跟进</h2><p id="pm-scope" class="pm-section-meta"></p></div><label class="wb-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="pm-search" type="search" placeholder="搜索课题、负责人或单位" aria-label="搜索课题、负责人或单位"></label></header>
-  <div class="pm-project-tabs" aria-label="课题跟进筛选"><button data-pm-action="project-filter" data-value="attention" aria-pressed="true">有待跟进事项 <b data-pm-count="attention"></b></button><button data-pm-action="project-filter" data-value="research" aria-pressed="false">在研课题 <b data-pm-count="research"></b></button><button data-pm-action="project-filter" data-value="noOutcome" aria-pressed="false">在研暂无成果记录 <b data-pm-count="noOutcome"></b></button><button data-pm-action="project-filter" data-value="closed" aria-pressed="false">已结题 <b data-pm-count="closed"></b></button><button data-pm-action="project-filter" data-value="all" aria-pressed="false">全部 <b data-pm-count="all"></b></button></div>
-  <div class="wb-table-wrap"><table class="wb-table pm-project-table"><thead><tr><th>课题 / 负责人</th><th>研究资源</th><th>成果交付</th><th>待跟进事项</th><th>操作</th></tr></thead><tbody id="pm-project-rows"></tbody></table></div>
-  <div class="wb-pager"><span id="pm-total"></span><label class="push pm-page-size">每页 <select id="pm-page-size" aria-label="每页课题数量"><option value="5">5</option><option value="10">10</option><option value="20">20</option></select> 个</label><button id="pm-prev" data-pm-action="page" data-value="-1">上一页</button><span id="pm-page-label"></span><button id="pm-next" data-pm-action="page" data-value="1">下一页</button></div>
-  </section>
-  <aside class="wb-card pm-task-panel" id="pm-task-panel" aria-label="具体待跟进事项"><header class="wb-card-head"><div><h2 id="pm-task-title">事项清单</h2><p id="pm-task-count" class="pm-section-meta"></p></div><button id="pm-task-all" class="wb-text-btn" data-pm-action="all-tasks" hidden>全部事项</button></header><div id="pm-task-list" class="pm-task-list"></div></aside>
- </div>
- <div id="pm-unlinked" class="pm-unlinked" hidden></div>
- <footer class="wb-foot"><span id="pm-mode-note"></span><span id="pm-updated" aria-live="polite"></span></footer>
+
+<div class="container">
+  <div class="admin-app">
+
+    <aside class="admin-side" aria-label="个人中心二级导航"><a class="snav" href="#messages" data-view="messages">消息中心</a><a class="snav" href="#profile" data-view="profile">个人资料</a><a class="snav" href="#security" data-view="security">账号安全</a></aside>
+
+    <main class="admin-main">
+<section id="page-messages" data-page="messages" aria-labelledby="title-messages"><div class="px-pagehead"><h1 id="title-messages" tabindex="-1">消息中心</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><div class="px-tabs" style="margin:0"><button class="px-btn on" data-message-tab="all" aria-pressed="true">全部消息</button><button class="px-btn" data-message-tab="unread" aria-pressed="false">未读消息</button><button class="px-btn" data-message-tab="read" aria-pressed="false">已读消息</button></div><button class="px-btn" id="readAll">全部标为已读</button></div><div class="px-filter"><input class="px-input" id="kw" placeholder="搜索消息标题" aria-label="搜索消息标题"></div><div class="px-scroller"><table class="px-table"><thead><tr><th>消息标题</th><th>分类</th><th>接收时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="msgRows"></tbody></table></div><div class="px-pager" id="count"></div></section></section>
+<section id="page-profile" data-page="profile" aria-labelledby="title-profile" hidden><div class="px-pagehead"><h1 id="title-profile" tabindex="-1">个人资料</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>基本信息</h2><span class="px-chip">平台管理员</span></div><form id="profileForm" style="padding:26px;max-width:850px"><div class="px-grid"><label class="px-field">姓名<input name="name" required value="张明"></label><label class="px-field">账号<input name="account" value="zhangming" readonly></label><label class="px-field">所属机构<input name="org" value="智慧农场技术与系统全国重点实验室"></label><label class="px-field">联系电话<input name="phone" type="tel" placeholder="填写联系电话"></label><label class="px-field">电子邮箱<input name="email" type="email" placeholder="填写电子邮箱"></label><label class="px-field">岗位<input name="job" value="平台运营管理"></label></div><p class="px-help">账号角色与权限由平台统一配置。</p><button class="px-btn primary" type="submit">保存资料</button></form></section></section>
+<section id="page-security" data-page="security" aria-labelledby="title-security" hidden><div class="px-pagehead"><h1 id="title-security" tabindex="-1">账号安全</h1><a class="px-btn" href="index.html">返回工作台</a></div><section class="px-card"><div class="px-card-head"><h2>登录与安全</h2><span class="px-chip">账号已启用</span></div><div class="px-scroller"><table class="px-table security-table"><tbody><tr><td>登录密码</td><td>由中台统一管理</td><td class="security-readonly">暂不支持修改</td></tr><tr><td>邮箱绑定</td><td id="emailStatus">未绑定</td><td><button class="px-btn" id="bindEmail">设置邮箱</button></td></tr><tr><td>当前会话</td><td id="currentSession">当前浏览器 · 张明</td><td><a class="px-btn" href="后台-登录.html">退出登录</a></td></tr></tbody></table></div></section><section class="px-card"><div class="px-card-head"><h2>最近安全操作</h2></div><div id="securityLog" style="padding:22px"></div></section></section>
 </main>
-</div></div>
-<dialog id="wb-drawer" class="wb-drawer" aria-labelledby="wb-drawer-title"><header class="wb-drawer-head"><div><h2 id="wb-drawer-title"></h2><p id="wb-drawer-sub"></p></div><button data-pm-action="close" aria-label="关闭详情">×</button></header><div class="wb-drawer-body" id="wb-drawer-body"></div></dialog>
-<script src="assets/meeting/meeting-seed.js"></script><script src="assets/meeting/meeting-core.js"></script>
-<script src="assets/meeting/approval-seeds.js"></script>
-<script src="assets/meeting/project-space-seeds.js"></script>
-<script src="assets/meeting/backend-seeds.js"></script>
-<script src="assets/meeting/backend-state.js"></script><script src="assets/meeting/project-workbench.js"></script><script src="assets/meeting/backend-integration.js"></script>
-<!-- devdoc-1012:start --><script src="assets/meeting/meeting-devdoc.js"></script><!-- devdoc-1012:end -->
-<script src="assets/prototype-nav.js"></script>
-</body></html>
+
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="f-cell"><h4>平台使命</h4><p>汇聚数据资源 支撑农业科研<br>服务国家粮食安全战略</p></div>
+      <div class="f-cell"><h4>平台愿景</h4><p>打造开放协同、创新高效的<br>智慧农业科研生态</p></div>
+      <div class="f-cell"><h4>核心价值</h4><p>数据驱动 · 协同创新 · 服务科研 · 成果共享</p></div>
+      <div class="f-cell"><h4>服务对象</h4><p>科研团队 · 管理人员 · 合作机构 · 社会公众</p></div>
+    </div>
+  </div>
+</footer>
+
+<div id="toast" role="status"></div>
+
+
+
+<script>
+(() => {
+  'use strict';
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fallback = new Map();
+  const read = (key, defaults) => {
+    if (fallback.has(key)) return fallback.get(key);
+    try { return JSON.parse(localStorage.getItem(key)) ?? defaults; } catch { return defaults; }
+  };
+  const write = (key, value) => {
+    fallback.set(key, value);
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
+  };
+  let toastTimer;
+  function toast(message) {
+    clearTimeout(toastTimer);
+    $('#toast').textContent = message;
+    $('#toast').classList.add('show');
+    toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 2600);
+  }
+
+  const defaults = {name:'张明',org:'智慧农场技术与系统全国重点实验室',phone:'',email:'',job:'平台运营管理'};
+  const storedProfile = read('agri-profile', {});
+  let profile = Object.fromEntries(Object.entries(defaults).map(([key, value]) => [key, typeof storedProfile?.[key] === 'string' ? storedProfile[key] : value]));
+  if (!profile.name.trim()) profile.name = defaults.name;
+  const form = $('#profileForm');
+  function fillProfile() {
+    Object.entries(profile).forEach(([key, value]) => { form.elements.namedItem(key).value = value; });
+  }
+  function updateAccount() {
+    $('#headerUserName').textContent = profile.name;
+    $('.u-avatar').textContent = [...profile.name][0];
+    $('.u-avatar').setAttribute('aria-label', profile.name + '，打开用户菜单');
+    $('#currentSession').textContent = '当前浏览器 · ' + profile.name;
+    $('#emailStatus').textContent = profile.email || '未绑定';
+  }
+  function renderSecurityLog() {
+    const stored = read('agri-security', []);
+    const entries = Array.isArray(stored) ? stored.filter(item => typeof item === 'string' && !/密码|password/i.test(item)) : [];
+    $('#securityLog').innerHTML = entries.map(item => '<p>' + escape(item) + '</p>').join('') || '<p class="px-help">暂无安全操作记录</p>';
+  }
+  function logEmail() {
+    const previous = read('agri-security', []);
+    const entries = Array.isArray(previous) ? previous.filter(item => typeof item === 'string' && !/密码|password/i.test(item)) : [];
+    entries.unshift(new Date().toLocaleString('zh-CN') + '　更新联系邮箱');
+    write('agri-security', entries);
+    renderSecurityLog();
+  }
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const nameField = form.elements.namedItem('name');
+    if (!nameField.value.trim()) {
+      nameField.setCustomValidity('请填写姓名');
+      nameField.reportValidity();
+      return;
+    }
+    const next = Object.fromEntries(Object.keys(defaults).map(key => [key, form.elements.namedItem(key).value.trim()]));
+    const emailChanged = profile.email !== next.email;
+    profile = next;
+    const saved = write('agri-profile', profile);
+    fillProfile();
+    updateAccount();
+    if (emailChanged) logEmail();
+    const audit = read('agri-audit', []);
+    write('agri-audit', [{时间:new Date().toLocaleString('zh-CN'),操作人:profile.name,操作:'修改个人资料',对象:profile.name,结果:'成功'}, ...(Array.isArray(audit) ? audit : [])]);
+    toast(saved ? '资料已保存' : '资料已更新，当前浏览器无法持久保存');
+  });
+  form.elements.namedItem('name').addEventListener('input', event => event.target.setCustomValidity(''));
+
+  let returnFocus = null;
+  function closeDialog(restoreFocus = true) {
+    $('#pxMask')?.remove();
+    document.body.classList.remove('dialog-open');
+    if (restoreFocus && returnFocus) {
+      const messageIndex = returnFocus.dataset?.messageIndex;
+      const target = returnFocus.isConnected ? returnFocus : (messageIndex !== undefined ? $('[data-message-index="' + messageIndex + '"]') : null);
+      (target || $('[data-page]:not([hidden]) h1'))?.focus();
+    }
+    returnFocus = null;
+  }
+  function openDialog(title, body, save, buttonLabel = '保存') {
+    closeDialog(false);
+    closeMenus();
+    returnFocus = document.activeElement;
+    const mask = document.createElement('div');
+    mask.id = 'pxMask';
+    mask.className = 'px-mask';
+    mask.innerHTML = '<form class="px-dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><header><h2 id="dialogTitle">' + escape(title) + '</h2><button type="button" data-close-dialog aria-label="关闭">×</button></header><div class="px-body">' + body + '<div class="px-error" role="alert"></div></div><footer><button type="button" class="px-btn" data-close-dialog>' + (save ? '取消' : '关闭') + '</button>' + (save ? '<button class="px-btn primary" type="submit">' + escape(buttonLabel) + '</button>' : '') + '</footer></form>';
+    document.body.append(mask);
+    document.body.classList.add('dialog-open');
+    $$('[data-close-dialog]', mask).forEach(button => button.addEventListener('click', () => closeDialog()));
+    mask.addEventListener('click', event => { if (event.target === mask) closeDialog(); });
+    $('form', mask).addEventListener('submit', event => {
+      event.preventDefault();
+      if (save && save(new FormData(event.target), event.target) !== false) closeDialog();
+    });
+    ($('input', mask) || $('[data-close-dialog]', mask)).focus();
+  }
+  $('#bindEmail').addEventListener('click', () => {
+    openDialog('设置邮箱', '<div class="px-grid"><label class="px-field wide">电子邮箱<input name="email" type="email" value="' + escape(profile.email) + '" required placeholder="填写电子邮箱" autocomplete="email"></label></div>', fd => {
+      const email = fd.get('email').trim();
+      const changed = email !== profile.email;
+      profile.email = email;
+      const saved = write('agri-profile', profile);
+      // 只同步邮箱，不覆盖个人资料中尚未保存的其他填写内容。
+      form.elements.namedItem('email').value = email;
+      updateAccount();
+      if (changed) logEmail();
+      toast(saved ? '邮箱已保存' : '邮箱已更新，当前浏览器无法持久保存');
+    });
+  });
+
+  const seedMessages = [{title:'水稻估产研究空间申请待处理',type:'审批提醒',time:'2026-09-24 09:30',read:false,body:'李伟提交了科研开发空间申请，请查看申请资源和用途后处理。',link:'后台-审批中心.html#resources'},{title:'水稻估产模型构建完成',type:'任务通知',time:'2026-09-24 09:15',read:false,body:'模型 v2.3 构建完成，可查看构建记录并配置部署。',link:'后台-模型管理.html'},{title:'智慧农业技术服务公司提交合作申请',type:'合作消息',time:'2026-09-23 16:20',read:false,body:'合作单位已提交入驻资料，等待管理员联系并受理。',link:'后台-管理设置.html#cooperation'},{title:'数据集资料已更新',type:'运营通知',time:'2026-09-23 14:08',read:true,body:'寒地水稻全生育期观测数据集资料已更新，请核对门户展示内容。',link:'后台-数据集管理.html'}];
+  const storedMessages = read('agri-messages', seedMessages);
+  let messages = Array.isArray(storedMessages) && storedMessages.every(item => item && typeof item.title === 'string') ? storedMessages : seedMessages;
+  let messageMode = 'all';
+  function renderMessages() {
+    const query = $('#kw').value.trim().toLocaleLowerCase();
+    const rows = messages.map((item, index) => ({...item, index})).filter(item => (messageMode === 'all' || Boolean(item.read) === (messageMode === 'read')) && item.title.toLocaleLowerCase().includes(query));
+    $('#msgRows').innerHTML = rows.map(item => '<tr><td>' + escape(item.title) + '</td><td>' + escape(item.type) + '</td><td>' + escape(item.time) + '</td><td><span class="px-chip' + (item.read ? ' read' : '') + '">' + (item.read ? '已读' : '未读') + '</span></td><td><button class="px-btn" data-message-index="' + item.index + '">查看</button></td></tr>').join('') || '<tr><td colspan="5" class="px-empty">暂无符合条件的消息</td></tr>';
+    $('#count').textContent = '共 ' + rows.length + ' 条';
+    const unread = messages.filter(item => !item.read).length;
+    $('.msg-dot').hidden = unread === 0;
+    $('.msg-btn').setAttribute('aria-label', unread ? '消息通知，' + unread + ' 条未读' : '消息通知，无未读消息');
+    $('#readAll').disabled = unread === 0;
+  }
+  $$('[data-message-tab]').forEach(button => button.addEventListener('click', () => {
+    messageMode = button.dataset.messageTab;
+    $$('[data-message-tab]').forEach(item => {
+      item.classList.toggle('on', item === button);
+      item.setAttribute('aria-pressed', String(item === button));
+    });
+    renderMessages();
+  }));
+  $('#kw').addEventListener('input', renderMessages);
+  $('#readAll').addEventListener('click', () => {
+    messages.forEach(item => item.read = true);
+    const saved = write('agri-messages', messages);
+    renderMessages();
+    toast(saved ? '已全部标为已读' : '已标为已读，当前浏览器无法持久保存');
+  });
+  $('#msgRows').addEventListener('click', event => {
+    const button = event.target.closest('[data-message-index]');
+    if (!button) return;
+    const item = messages[Number(button.dataset.messageIndex)];
+    item.read = true;
+    const saved = write('agri-messages', messages);
+    let target = item.link === '后台-审批中心.html' && /科研开发空间申请|模型使用申请|数据使用申请|算力申请/.test(item.title + ' ' + item.body) ? '后台-资源申请审批.html' : item.link;
+    const link = typeof target === 'string' && /^[^/:\\?#]+\.html$/.test(target) ? '<div class="message-actions"><a class="px-btn primary" href="' + escape(target) + '">前往处理</a></div>' : '';
+    openDialog(item.title, '<p class="message-body">' + escape(item.body) + '</p><p class="px-help">' + escape(item.time) + '</p>' + link);
+    renderMessages();
+    if (!saved) toast('已标为已读，当前浏览器无法持久保存');
+  });
+
+  const userMenu = $('#userMenu');
+  const mobileMenu = $('#prototypeMobileMenu');
+  function closeMenus() {
+    userMenu.classList.remove('open');
+    $$('[data-prototype-user]').forEach(button => button.setAttribute('aria-expanded', 'false'));
+    mobileMenu.hidden = true;
+    $('#prototypeMenuToggle').setAttribute('aria-expanded', 'false');
+  }
+  $$('[data-prototype-user]').forEach(button => button.addEventListener('click', () => {
+    const opening = !userMenu.classList.contains('open');
+    closeMenus();
+    userMenu.classList.toggle('open', opening);
+    $$('[data-prototype-user]').forEach(item => item.setAttribute('aria-expanded', String(opening)));
+  }));
+  mobileMenu.innerHTML = $('.main-nav').innerHTML;
+  $('#prototypeMenuToggle').addEventListener('click', () => {
+    const opening = mobileMenu.hidden;
+    closeMenus();
+    mobileMenu.hidden = !opening;
+    $('#prototypeMenuToggle').setAttribute('aria-expanded', String(opening));
+  });
+  document.addEventListener('click', event => {
+    if (!event.target.closest('.u-box, #prototypeMenuToggle, #prototypeMobileMenu')) closeMenus();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { closeDialog(); closeMenus(); }
+    const dialog = $('#pxMask');
+    if (event.key !== 'Tab' || !dialog) return;
+    const focusable = $$('button:not(:disabled), a[href], input:not(:disabled), select, textarea, [tabindex="0"]', dialog);
+    const first = focusable[0], last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
+
+  const titles = {messages:'消息中心',profile:'个人资料',security:'账号安全'};
+  function currentView() {
+    const key = location.hash.slice(1);
+    return Object.hasOwn(titles, key) ? key : 'messages';
+  }
+  function renderView() {
+    const key = currentView();
+    closeDialog(false);
+    closeMenus();
+    $$('[data-page]').forEach(page => page.hidden = page.dataset.page !== key);
+    $$('.snav').forEach(link => {
+      const active = link.dataset.view === key;
+      link.classList.toggle('cur', active);
+      if (active) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+    });
+    document.title = titles[key] + ' — 北大荒智慧农业协同创新平台';
+    updateAccount();
+    if (key === 'security') renderSecurityLog();
+    if (key === 'messages') renderMessages();
+  }
+  $$('[data-view]').forEach(link => link.addEventListener('click', event => {
+    event.preventDefault();
+    const hash = '#' + link.dataset.view;
+    if (location.hash === hash) renderView(); else location.hash = hash;
+  }));
+  window.addEventListener('hashchange', renderView);
+  window.addEventListener('storage', event => {
+    if (event.key === 'agri-messages') {
+      fallback.delete(event.key);
+      const updated = read(event.key, messages);
+      if (Array.isArray(updated) && updated.every(item => item && typeof item.title === 'string')) messages = updated;
+      renderMessages();
+    }
+  });
+  fillProfile();
+  renderSecurityLog();
+  renderMessages();
+  renderView();
+})();
+
+</script>
+</body>
+</html>

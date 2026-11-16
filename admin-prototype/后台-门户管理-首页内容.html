@@ -734,9 +734,9 @@ dialog::backdrop{background:#102a3c60}
       <span>北大荒智慧农业协同创新平台</span>
     </a>
     <span class="brand-tag">管理后台</span>
-    <nav class="main-nav" aria-label="主导航"><a data-px-own="1" href="index.html">工作台总览</a><a data-px-own="1" href="后台-课题工作台.html">课题管理</a><a data-px-own="1" href="后台-审批中心.html">审批中心</a><a data-px-own="1" href="后台-模型管理.html" class="active" aria-current="page">运营管理</a><a data-px-own="1" href="后台-时空数据管理.html">平台能力</a><a data-px-own="1" href="后台-管理设置.html">合作与组织</a></nav>
+    <nav class="main-nav" aria-label="主导航"><a data-px-own="1" href="index.html">工作台总览</a><a data-px-own="1" href="后台-课题中心.html">课题管理</a><a data-px-own="1" href="后台-审批中心.html">审批中心</a><a data-px-own="1" href="后台-模型管理.html" class="active" aria-current="page">运营管理</a><a data-px-own="1" href="后台-时空数据管理.html">平台能力</a><a data-px-own="1" href="后台-管理设置.html">合作与组织</a></nav>
     <div class="header-actions"><button type="button" class="menu-toggle" id="prototypeMenuToggle" aria-controls="prototypeMobileMenu" aria-expanded="false" aria-label="打开菜单">☰</button>
-      <a class="msg-btn" href="后台-消息中心.html" aria-label="消息通知">
+      <a class="msg-btn" href="后台-个人中心.html#messages" aria-label="消息通知">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-2 8-2 8h16s-2-1-2-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
         <i class="msg-dot"></i>
       </a>
@@ -746,8 +746,8 @@ dialog::backdrop{background:#102a3c60}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="u-menu" id="userMenu">
-          <a class="u-mi" href="后台-个人资料.html">个人资料</a>
-          <a class="u-mi" href="后台-账号安全.html">账号安全</a>
+          <a class="u-mi" href="后台-个人中心.html#profile">个人资料</a>
+          <a class="u-mi" href="后台-个人中心.html#security">账号安全</a>
           <div class="u-sep"></div>
           <a class="u-mi out" data-px-own="1" href="后台-登录.html">退出登录</a>
         </div>
@@ -774,7 +774,7 @@ dialog::backdrop{background:#102a3c60}
       <a class="snav" href="后台-科研空间管理.html">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.2a2 2 0 0 1 2-2h3.4l1.8 2.2h7.8a2 2 0 0 1 2 2v8.4a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"></path></svg>
         科研空间管理</a>
-    </aside><main class="admin-main"><div class="page-head"><h1>门户管理</h1><div class="head-actions"><span class="saved" id="savedLabel"></span><button type="button" class="btn primary" data-action="preview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>预览首页</button></div></div><nav class="tabsw" aria-label="门户管理页签"><a class="tb on" href="#slides" data-action="section" data-args="slides" aria-current="page">首页内容</a><a class="tb" href="后台-门户管理-通知公告.html">通知公告</a></nav><div class="workspace"><div id="outline" class="outline" role="tablist" aria-label="首页栏目"></div><section class="pane" id="pane" role="tabpanel" aria-label="栏目维护"></section></div></main></div></div><footer class="site-footer">
+    </aside><main class="admin-main"><div class="page-head"><h1>门户管理</h1><div class="head-actions"><span class="saved" id="savedLabel"></span><button type="button" class="btn primary" data-action="preview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>预览首页</button></div></div><nav class="tabsw" aria-label="门户管理页签"><a class="tb on" href="#slides" data-action="section" data-args="slides" aria-current="page">首页内容</a><a class="tb" href="后台-门户管理.html#notices">通知公告</a></nav><div class="workspace"><div id="outline" class="outline" role="tablist" aria-label="首页栏目"></div><section class="pane" id="pane" role="tabpanel" aria-label="栏目维护"></section></div></main></div></div><footer class="site-footer">
   <div class="container">
     <div class="footer-inner">
       <div class="f-cell"><h4>平台使命</h4><p>汇聚数据资源 支撑农业科研<br>服务国家粮食安全战略</p></div>
@@ -845,7 +845,7 @@ function render(){
   html=head('特色模型','模型说明与展示图片',action('选择模型','choose','models','btn small'))+headingBox('models')+`<div class="title-row"><h3>${e(m.name)}</h3>${action('编辑文案说明','model-text')}</div><dl class="model-kv">${state.modelTextFields[m.id].map(f=>`<div><dt>${e(f.key)}</dt><dd>${e(f.value)}</dd></div>`).join('')||'<p class="muted">暂无说明字段</p>'}</dl><div class="subline"><h3>展示图片</h3></div><div class="model-images single-image"><figure class="model-image-card">${thumb(state.modelDisplayImages[m.id])}<div class="model-image-header">${action('更换图片','model-image')}</div></figure></div>`+sourceLink('进入模型管理','后台-模型管理.html');
  }
  if(section==='cases')html=head('应用案例','案例图片、成果说明与关联模型',action('选择案例','choose','cases','btn small'))+headingBox('cases')+'<div class="mini-card-grid">'+state.selected.cases.map((id,i)=>{const c=state.cases.find(r=>r.id===id);return `<article class="mini-card"><img src="${img(c.image)}" alt="${e(c.name)}"><div class="details"><span class="tag">${e(c.tag)}</span><h3>${e(c.name)}</h3><p>${e(summary('cases',c))}</p><p>${e(c.result)}</p><p class="muted">${e(c.model)}</p><div class="actions">${action('编辑首页简介','intro','cases|'+c.id)}${order('cases',i,state.selected.cases.length)}</div></div></article>`}).join('')+'</div>'+sourceLink('进入案例管理','后台-案例管理.html');
- if(section==='guide')html=head('课题指南','课题中心入口')+headingBox('guide')+`<div class="guide-image-card"><img src="${img(state.guide.image)}" alt="课题指南展示图片"><div class="actions">${action('更换图片','guide')}</div></div>`+sourceLink('进入课题指南管理','后台-课题指南管理.html');
+ if(section==='guide')html=head('课题指南','课题中心入口')+headingBox('guide')+`<div class="guide-image-card"><img src="${img(state.guide.image)}" alt="课题指南展示图片"><div class="actions">${action('更换图片','guide')}</div></div>`+sourceLink('进入课题指南管理','后台-课题中心.html#guides');
  if(section==='bases')html=head('示范基地','4 个基地')+headingBox('bases')+'<div class="mini-card-grid base-cards">'+state.bases.map((b,i)=>`<article class="mini-card"><div class="photo" style="background-image:url('${img(b.image)}');${e(b.style||'background-size:cover;background-position:center;')}"></div><div class="details"><div class="actions" style="margin:0"><h3>${e(b.name)}</h3>${action('编辑','base',i)}</div></div></article>`).join('')+'</div>';
  if(section==='partners')html=head('合作伙伴','按首页展示顺序排列',action('新增合作伙伴','partner','new','btn small'))+headingBox('partners')+'<div class="rows">'+state.partners.map((p,i)=>`<div class="row"><span class="order">${String(i+1).padStart(2,'0')}</span><div class="body"><h3>${e(p.name)}</h3><p>${e(p.category||'无分类标识')}</p></div><span class="pill ${p.show?'':'off'}">${p.show?'首页显示':'首页隐藏'}</span><div class="row-actions">${order('partners',i,state.partners.length)}${action('编辑','partner',i)}${action('移除','delete-partner',i)}</div></div>`).join('')+(!state.partners.length?'<div class="empty">暂无合作伙伴</div>':'')+'</div>';
  $('pane').innerHTML=html;

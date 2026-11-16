@@ -25,11 +25,11 @@ if(active)QA('.main-nav a').forEach(a=>a.classList.toggle('active',a.textContent
 QA('.brand').forEach(a=>{a.href='index.html';a.removeAttribute('onclick');});
 if(/后台-(课题|科研人员)/.test(F)){
  const side=Q('.admin-side');
- if(side){let a=[...side.querySelectorAll('a')].find(a=>/课题管理工作台/.test(a.textContent));if(!a){a=document.createElement('a');a.className='snav';a.textContent='课题管理工作台';a.href='后台-课题工作台.html';side.querySelector('.side-title')?side.querySelector('.side-title').after(a):side.prepend(a);}}
+ if(side){let a=[...side.querySelectorAll('a')].find(a=>/课题管理工作台/.test(a.textContent));if(!a){a=document.createElement('a');a.className='snav';a.textContent='课题管理工作台';a.href='后台-课题中心.html#workbench';side.querySelector('.side-title')?side.querySelector('.side-title').after(a):side.prepend(a);}}
 }
 // A selected submenu on a detail page must also provide a way back to its list.
 const listMap={模型:'后台-模型管理.html',数据集:'后台-数据集管理.html',案例:'后台-案例管理.html',需求:'后台-需求管理.html',科研空间:'后台-科研空间管理.html',通知公告:'后台-门户管理-通知公告.html'};
-QA('.admin-side a').forEach(a=>{if(!/^javascript:|^#$/.test(a.getAttribute('href')||''))return;for(const [k,f] of Object.entries(listMap))if(a.textContent.includes(k)&&F!==f){a.href=f;a.removeAttribute('onclick');}});
+QA('.admin-side a').forEach(a=>{if(!/^javascript:|^#$/.test(a.getAttribute('href')||''))return;for(const [k,f] of Object.entries(listMap))if((a.textContent.trim()===k||a.textContent.trim()===k+'管理')&&F!==f){a.href=f;a.removeAttribute('onclick');}});
 if(P){
  const old=P.action;
  P.action=(msg,el)=>{
@@ -84,11 +84,11 @@ if(F==='index.html'){
  const original=window.renderTable;
  const rebuild=()=>{
   const approvals=M.read('agri-approvals',ApprovalSeeds),wait=[...(approvals.WAIT||[]),...(approvals.WAIT2||[])].filter(r=>r.st==='待审批');
-  const convert=r=>({t:r.res||r.type,who:r.who,team:r.org,at:r.at,st:r.st,url:'后台-资源申请审批.html?request='+encodeURIComponent(r.no)+'&action=review'});
+  const convert=r=>({t:r.res||r.type,who:r.who,team:r.org,at:r.at,st:r.st,url:'后台-审批中心.html#resources?request='+encodeURIComponent(r.no)+'&action=review'});
   const list=[['model','模型使用申请'],['data','数据使用申请'],['compute','算力申请'],['space','创建科研开发空间']].map(([id,type])=>({id,label:type==='创建科研开发空间'?'科研开发空间申请':type,rows:wait.filter(r=>r.type===type).map(convert)}));
-  list.find(x=>x.id==='space').rows.push(...M.read('agri-space-applications-v8',[]).filter(s=>s.state==='申请中').map(s=>({t:s.name,who:s.who||s.applicant,team:s.team,at:s.time,st:'待审批',url:'后台-资源申请审批.html?spaceRequest='+encodeURIComponent(s.id)})));
+  list.find(x=>x.id==='space').rows.push(...M.read('agri-space-applications-v8',[]).filter(s=>s.state==='申请中').map(s=>({t:s.name,who:s.who||s.applicant,team:s.team,at:s.time,st:'待审批',url:'后台-审批中心.html#resources?spaceRequest='+encodeURIComponent(s.id)})));
   list.push({id:'outcomes',label:'成果验收',rows:M.records().filter(r=>r.status==='待审批').map(r=>({t:r.name,who:r.applicant,team:r.spaceName||'',at:r.time,st:r.status,url:'后台-审批中心.html?outcome='+encodeURIComponent(r.id)}))});
-  list.push({id:'coop',label:'合作申请受理',rows:M.read('agri-cooperation',[]).map((r,i)=>({...r,i})).filter(r=>!['已受理','不予受理'].includes(r.status)).map(r=>({t:r.name,who:r.who,team:r.name,at:r.time,st:r.status,url:'后台-合作申请受理.html?item='+r.i}))});
+  list.push({id:'coop',label:'合作申请受理',rows:M.read('agri-cooperation',[]).map((r,i)=>({...r,i})).filter(r=>!['已受理','不予受理'].includes(r.status)).map(r=>({t:r.name,who:r.who,team:r.name,at:r.time,st:r.status,url:'后台-管理设置.html#cooperation?item='+r.i}))});
   window.TAB_DATA=list.map(t=>({...t,cnt:t.rows.length}));if(!list.some(t=>t.id===CUR_TAB))window.CUR_TAB='model';
   window.renderTabs();window.renderTable();
   const numbers=QA('.kpi-val');
