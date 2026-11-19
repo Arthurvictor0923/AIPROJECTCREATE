@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
+<head><meta charset="UTF-8">
+<script src="assets/prototype-accounts.js"></script>
+<script src="assets/backend-role-ui.js"></script>
+
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 — 北大荒智慧农业协同创新平台</title>
 
@@ -542,14 +545,16 @@ body.dialog-open{overflow:hidden}
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const activeAccount=PrototypeAccounts.backendAccount();
+  const accountKey=key=>activeAccount.code==='R1'?key:key+':'+activeAccount.id;
   const fallback = new Map();
   const read = (key, defaults) => {
     if (fallback.has(key)) return fallback.get(key);
-    try { return JSON.parse(localStorage.getItem(key)) ?? defaults; } catch { return defaults; }
+    try { return JSON.parse(localStorage.getItem(accountKey(key))) ?? defaults; } catch { return defaults; }
   };
   const write = (key, value) => {
     fallback.set(key, value);
-    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
+    try { localStorage.setItem(accountKey(key), JSON.stringify(value)); return true; } catch { return false; }
   };
   let toastTimer;
   function toast(message) {
@@ -559,7 +564,9 @@ body.dialog-open{overflow:hidden}
     toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 2600);
   }
 
-  const defaults = {name:'张明',org:'智慧农场技术与系统全国重点实验室',phone:'',email:'',job:'平台运营管理'};
+  const defaults = {name:activeAccount.name,org:'',phone:'',email:'',job:activeAccount.label};
+  $('#page-profile .px-chip').textContent=activeAccount.label;
+  $('#profileForm [name=account]').value=activeAccount.login;
   const storedProfile = read('agri-profile', {});
   let profile = Object.fromEntries(Object.entries(defaults).map(([key, value]) => [key, typeof storedProfile?.[key] === 'string' ? storedProfile[key] : value]));
   if (!profile.name.trim()) profile.name = defaults.name;
@@ -685,8 +692,10 @@ body.dialog-open{overflow:hidden}
     const item = messages[Number(button.dataset.messageIndex)];
     item.read = true;
     const saved = write('agri-messages', messages);
-    let target = item.link === '后台-审批中心.html' && /科研开发空间申请|模型使用申请|数据使用申请|算力申请/.test(item.title + ' ' + item.body) ? '后台-资源申请审批.html' : item.link;
-    const link = typeof target === 'string' && /^[^/:\\?#]+\.html$/.test(target) ? '<div class="message-actions"><a class="px-btn primary" href="' + escape(target) + '">前往处理</a></div>' : '';
+    const resourceReminder = item.link === '后台-资源申请审批.html' ||
+      (item.link === '后台-审批中心.html' && /科研开发空间申请|模型使用申请|数据使用申请|算力申请|需求发布申请/.test(item.title + ' ' + item.body));
+    const target = resourceReminder ? '后台-审批中心.html#resources' : item.link;
+    const link = typeof target === 'string' && /^[^/:\\?#]+\.html(?:#[a-z0-9_-]+)?$/i.test(target) ? '<div class="message-actions"><a class="px-btn primary" href="' + escape(target) + '">前往处理</a></div>' : '';
     openDialog(item.title, '<p class="message-body">' + escape(item.body) + '</p><p class="px-help">' + escape(item.time) + '</p>' + link);
     renderMessages();
     if (!saved) toast('已标为已读，当前浏览器无法持久保存');
@@ -767,5 +776,6 @@ body.dialog-open{overflow:hidden}
 })();
 
 </script>
+<script src="assets/meeting/meeting-devdoc.js"></script>
 </body>
 </html>

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+<head><meta charset="UTF-8">
+<script src="assets/prototype-accounts.js"></script>
+<script src="assets/backend-role-ui.js"></script>
+
 <script src="assets/resource-fields.js"></script><style>.model-source-field{margin-top:18px;font-size:13px;min-width:0}.model-source-field>label{display:block;font-size:13px;font-weight:500;margin-bottom:7px;color:var(--text)}.model-source-field>label>span{font-weight:400;color:var(--text-muted)}.ms-control{display:flex;align-items:center;border:1px solid var(--border);border-radius:4px;background:white;min-height:36px;overflow:hidden}.ms-control:focus-within{outline:2px solid #d3e6df;border-color:var(--brand)}.ms-control input{min-width:0;flex:1;width:100%;border:0;outline:0;background:transparent;padding:8px 10px;font:13px var(--font-ui);color:var(--text)}.ms-control input::placeholder{color:#7c8896}.ms-control button{border:0;background:transparent;color:var(--text-secondary);height:34px;padding:0 9px;font-size:16px;cursor:pointer;flex-shrink:0}.ms-control button:hover{background:var(--brand-soft)}.ms-control button[hidden],.ms-options[hidden],.ms-error[hidden]{display:none!important}.ms-options{margin-top:6px;border:1px solid var(--border);border-radius:5px;background:#fff;box-shadow:0 4px 14px #163c3614;max-height:220px;overflow:auto;padding:4px}.ms-options>button{display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-radius:3px;cursor:pointer;background:white;font-family:var(--font-ui)}.ms-options>button:hover,.ms-options>button.ms-active,.ms-options>button[aria-selected=true]{background:var(--brand-soft)}.ms-options strong{display:block;font-size:13px;color:var(--text);font-weight:500;line-height:1.5}.ms-options span{display:block;font-size:12px;color:var(--text-muted);margin-top:3px}.ms-empty{padding:12px;margin:0;color:var(--text-muted);font-size:13px}.ms-error{font-size:12px;line-height:1.6;margin:6px 0 0;color:#b42318}.ms-control:has([aria-invalid=true]){border-color:#b42318}.mv-source-summary{margin:8px 0 0;font-size:13px;color:var(--text-secondary);line-height:1.7}.mv-source-summary button{text-align:left}.mv-source-summary .mv-muted-inline{margin-left:8px}.mv-history-version .mv-source-summary{font-size:12px;margin:8px 0 12px}
 #newModelSourceField{margin:0 0 20px;padding-bottom:18px;border-bottom:1px solid var(--border)}#newSourceCarry{display:flex;justify-content:flex-end;margin-top:8px}#newSourceCarry[hidden]{display:none!important}#newSourceCarry .lnk{font-size:13px}
 </style><script>/* A source points to an exact model version. It never changes model identity. */
@@ -218,7 +221,7 @@ window.ModelInterfaceStore = (() => {
 </script>
 
 
-<meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>模型管理 — 北大荒智慧农业协同创新平台 · 管理后台</title>
 

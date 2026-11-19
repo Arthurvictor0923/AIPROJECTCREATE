@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
+<head><meta charset="UTF-8">
+<script src="assets/prototype-accounts.js"></script>
+<script src="assets/backend-role-ui.js"></script>
+
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>科研空间管理 — 北大荒智慧农业协同创新平台 · 管理后台</title>
 
@@ -829,6 +832,23 @@ var activeNo = null, selectedNo = null, currentPage = 1, pageSize = 10;
 var filterState = { keyword: '', status: '全部' }, mountKind = 'data';
 var listScroll = 0, lastDialogFocus = null;
 var STORAGE_KEY = 'agri-space-management-merged-v1';
+var SPACE_REQUEST_KEY = 'agri-space-applications-v8';
+function readSpaceRequests(){
+  try{const rows=JSON.parse(localStorage.getItem(SPACE_REQUEST_KEY)||'[]');return Array.isArray(rows)?rows:[];}
+  catch(e){return [];}
+}
+function loadCreatedSpaces(){
+  for(const space of readSpaceRequests()){
+    if(!space.id||!['开通中','可用'].includes(space.state))continue;
+    const no=String(space.spaceNo||space.id);
+    if(!/^[A-Za-z0-9_-]+$/.test(no)||ROWS.some(row=>row.no===no))continue;
+    const st={'运行中':'run','异常':'err','重启中':'boot'}[space.instance]||'stop';
+    ROWS.push({no,name:space.name,who:space.applicant||space.who,st,
+      cpu:Number(space.cpu)||1,gpu:Number(space.gpu)||0,mem:Number(space.ram)||1,sto:0,quota:Number(space.storage)||1,
+      requestId:space.id});
+  }
+}
+loadCreatedSpaces();
 var initialRows = JSON.parse(JSON.stringify(ROWS));
 var initialRes = JSON.parse(JSON.stringify(RES));
 var detailView = document.getElementById('detailView');
@@ -857,8 +877,21 @@ function rowOf(no){return ROWS.find(function(r){return r.no===no})}
 function dot(st){var d=ST[st]||ST.stop;return '<span class="dotst '+d[0]+'"><i></i>'+d[1]+'</span>'}
 function consumes(r){return ['run','err','boot'].includes(r.st)}
 function contribution(r,key){return key==='quota'||consumes(r)?r[key]:0}
-function persist(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(ROWS.map(function(r){return {no:r.no,st:r.st,cpu:r.cpu,gpu:r.gpu,mem:r.mem,quota:r.quota,pendingStart:!!r.pendingStart}})))}
+function persist(changed){
+  if(!PrototypeAccounts.backendCanWrite())return;
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(ROWS.map(function(r){return {no:r.no,st:r.st,cpu:r.cpu,gpu:r.gpu,mem:r.mem,quota:r.quota,pendingStart:!!r.pendingStart}})));
+    if(changed?.requestId){
+      const requests=readSpaceRequests();
+      const record=requests.find(item=>String(item.id)===String(changed.requestId));
+      if(record){
+        Object.assign(record,{cpu:changed.cpu,gpu:changed.gpu,ram:changed.mem,storage:changed.quota,
+          state:changed.st==='deleted'?'已归档':'可用',
+          instance:{run:'运行中',stop:'已停止',err:'异常',boot:'重启中',deleted:'已停止'}[changed.st]});
+        localStorage.setItem(SPACE_REQUEST_KEY,JSON.stringify(requests));
+      }
+    }
+  }
   catch(e){toast('本次调整已生效，浏览器未能保存，刷新后将恢复初始数据')}
 }
 function restore(){
@@ -884,6 +917,7 @@ function updateResources(){
   renderRes();
 }
 function operationAllowed(r,action){
+  if(!PrototypeAccounts.backendCanWrite())return false;
   if(!r||r.st==='deleted'||r.st==='boot')return false;
   if(action==='config')return r.st==='run'||r.st==='stop';
   if(action==='start')return r.st==='stop';
@@ -897,7 +931,7 @@ function ops(r){
     return '<a class="lnk'+(red?' no':'')+'" href="javascript:void(0)" onclick="'+fn+'(\''+r.no+'\')">'+t+'</a>';
   }
   var h='<span class="ops"><a class="lnk" href="#space='+r.no+'" onclick="return openDetail(\''+r.no+'\',event)">查看</a>';
-  if(r.st==='deleted')return h+'</span>';
+  if(r.st==='deleted'||!PrototypeAccounts.backendCanWrite())return h+'</span>';
   if(r.st==='run')h+=a('调整配置','openConfig')+a('停止','openStop')+a('重启','openRestart');
   else if(r.st==='stop')h+=a('调整配置','openConfig')+a('启动','openStart');
   else if(r.st==='err')h+=a('重启','openRestart');
@@ -1040,8 +1074,8 @@ function openDelete(no){var r=fillHead('m-del',no,'delete');if(!r)return;var inp
 function checkDel(){var r=rowOf(selectedNo);document.getElementById('delOk').disabled=!(r&&document.getElementById('delCode').value.trim()===r.no)}
 function toggleInstance(no){var r=rowOf(no);if(r&&r.st==='stop')openStart(no);else openStop(no)}
 function finishBoot(r,message){
-  r.st='boot';r.pendingStart=true;persist();syncViews();
-  setTimeout(function(){if(r.pendingStart){r.st='run';delete r.pendingStart;persist();syncViews();toast(message)}},800);
+  r.st='boot';r.pendingStart=true;persist(r);syncViews();
+  setTimeout(function(){if(r.pendingStart){r.st='run';delete r.pendingStart;persist(r);syncViews();toast(message)}},800);
 }
 function okM(id){
   var r=rowOf(selectedNo),action={'m-config':'config','m-start':'start','m-stop':'stop','m-restart':'restart','m-del':'delete'}[id];
@@ -1052,17 +1086,17 @@ function okM(id){
     if(!valid){toast('请检查资源数量、可分配容量和存储已用容量');inputs.find(function(i){return i.getAttribute('aria-invalid')==='true'}).focus();return}
     ['cpu','gpu','mem','quota'].forEach(function(k,i){r[k]=Number(inputs[i].value)});
     r.st=document.getElementById('cfgAuto').checked?'run':'stop';
-    closeM(id);persist();syncViews();toast('配置已更新'+(r.st==='run'?'，实例已启动':'，实例已停止'));return;
+    closeM(id);persist(r);syncViews();toast('配置已更新'+(r.st==='run'?'，实例已启动':'，实例已停止'));return;
   }
   if(id==='m-del'&&document.getElementById('delCode').value.trim()!==r.no){checkDel();return}
   if(id==='m-restart'&&!document.getElementById('restartCk').checked)return;
   if(id==='m-start'){
     updateResources();
     if(r.cpu>FREE.CPU||r.gpu>FREE.GPU||r.mem>FREE['内存']){toast('当前可分配资源不足，请先调整配置');return}
-    r.st='run';closeM(id);persist();syncViews();toast('实例已启动');return;
+    r.st='run';closeM(id);persist(r);syncViews();toast('实例已启动');return;
   }
   if(id==='m-restart'){closeM(id);finishBoot(r,'实例已重启');return}
-  r.st=id==='m-del'?'deleted':'stop';closeM(id);persist();syncViews();toast(id==='m-del'?'实例已删除，研究文件与已提交成果已保留':'实例已停止');
+  r.st=id==='m-del'?'deleted':'stop';closeM(id);persist(r);syncViews();toast(id==='m-del'?'实例已删除，研究文件与已提交成果已保留':'实例已停止');
 }
 
 function toggleUserMenu(){var m=document.getElementById('userMenu');m.classList.toggle('open');document.querySelectorAll('[data-prototype-user]').forEach(function(b){b.setAttribute('aria-expanded',String(m.classList.contains('open')))})}
@@ -1085,5 +1119,8 @@ document.addEventListener('keydown',function(e){
 var cfg=document.querySelector('table.cfg'),wrap=document.createElement('div');wrap.className='cfg-wrap';cfg.parentNode.insertBefore(wrap,cfg);wrap.appendChild(cfg);
 window.addEventListener('hashchange',renderRoute);
 restore();syncViews();renderRoute();
-</script></body>
+window.addEventListener('storage',event=>{if(event.key===SPACE_REQUEST_KEY)location.reload();});
+</script>
+<script src="assets/meeting/meeting-devdoc.js"></script>
+</body>
 </html>

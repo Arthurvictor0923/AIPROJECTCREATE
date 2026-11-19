@@ -1,6 +1,123 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head>
-<script src="assets/resource-fields.js"></script><script src="assets/dataset-display.js"></script><link rel="stylesheet" href="assets/resource-display.css"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<script src="assets/prototype-accounts.js"></script>
+<script src="assets/backend-role-ui.js"></script>
+
+
+<script data-inline-source="assets/resource-fields.js">
+/* Shared field mapping for the standalone prototype. No network requests. */
+window.ResourceFields=(()=>{
+ 'use strict';
+ const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}};
+ const list=value=>Array.isArray(value)?value.filter(x=>x!==null&&x!==''):String(value??'').split(/[、,，;；]+/).map(x=>x.trim()).filter(Boolean);
+ const clone=v=>JSON.parse(JSON.stringify(v));
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const text=html=>{const d=document.createElement('div');d.innerHTML=html||'';return d.textContent.trim();};
+ const safe=html=>{const t=document.createElement('template');t.innerHTML=html||'';t.content.querySelectorAll('script,style,iframe,object,embed,link,form,input,button,svg,math').forEach(n=>n.remove());t.content.querySelectorAll('*').forEach(n=>[...n.attributes].forEach(a=>{if(/^on/i.test(a.name)||(/^(src|href)$/i.test(a.name)&&! /^(https?:|data:image\/(png|jpeg|webp|gif);base64,|#)/i.test(a.value)))n.removeAttribute(a.name);}));return t.innerHTML;};
+ const field=(r,label)=>{const v=r.metaFields?.[label];if(v?.selectedValues)return v.selectedValues;if(v?.tags){const d=document.createElement('div');d.innerHTML=v.tags;d.querySelectorAll('i,button,.x').forEach(n=>n.remove());const tags=[...d.querySelectorAll('.pick,.chip,.px-chip')].map(n=>n.textContent.trim());if(tags.length)return tags;}return v?.values?.[0]??'';};
+ const fileFormats=files=>[...new Set((files||[]).map(f=>{const ext=String(typeof f==='string'?f:f.name).split('.').pop().toLowerCase();return ({csv:'CSV',xls:'Excel',xlsx:'Excel',parquet:'Parquet',json:'JSON / JSONL',jsonl:'JSON / JSONL',tif:'GeoTIFF',tiff:'GeoTIFF',geojson:'GeoJSON',shp:'Shapefile',shx:'Shapefile',dbf:'Shapefile',jpg:'JPEG / PNG',jpeg:'JPEG / PNG',png:'JPEG / PNG',nc:'NetCDF',h5:'HDF5'})[ext]||ext.toUpperCase();}))];
+ function dataset(value={},files=[]){const v=clone(value);v.containsGeographicData=v.containsGeographicData===true||v.containsGeographicData==='true';v.crop=list(v.crop);v.researchDirections=list(v.researchDirections);v.coverageCodes=list(v.coverageCodes);v.coverageAll=v.coverageAll===true||v.coverageAll==='true';v.format=fileFormats(files).join('、');v.annotation=v.annotation||'未说明';v.tags=[...fileFormats(files),v.annotation];delete v.version;delete v.scale;delete v.dataSource;delete v.modality;delete v.dataType;return v;}
+ function modelFromOutcome(r,base={}){
+  const v=r.metadata||{},meta={...base.metaFields};
+  for(const [key,label]of [['business','业务分类'],['task','技术任务'],['crop','适用作物']])meta[label]={values:[list(v[key]).join('、')],selectedValues:list(v[key])};
+  for(const [key,label]of [['source','成果来源'],['owner','权属归属'],['license','授权范围']])meta[label]={values:[key==='license'?(v.scope||v.license||''):v[key]||'']};
+  const resources={gpuType:({'NVIDIA A100 40GB':'a100','NVIDIA V100 32GB':'v100','NVIDIA RTX 4090 24GB':'rtx4090','NVIDIA T4 16GB':'t4','CPU 推理（无 GPU）':'none'})[v.gpuType]||v.gpuType,gpuCount:Number(v.gpuCount)||0,gpuMemory:Number(v.gpuMemory)||0,cpu:Number(v.cpu)||undefined,memory:Number(v.memory)||undefined,disk:Number(v.storage)||undefined,environment:v.runtime||'',precision:v.precision||''};
+  return {...base,imageCategory:v.imageCategory||null,requiresGPU:typeof v.requiresGPU==='boolean'?v.requiresGPU:null,externalProvision:clone(v.externalProvision||{}),updateNote:v.updateNote||base.updateNote||'',name:v.name||r.name,alias:v.abbr||'',owner:v.provider||'',modelType:v.modelType||'',summary:v.summary||'',business:list(v.business),task:list(v.task),crop:list(v.crop),cover:v.cover||'',intro:v.intro||'',introOverview:v.introOverview??text(v.intro),introAbility:v.introAbility||'',interfaceDoc:clone(v.interfaceDoc||r.interfaceDoc||{usage:'',content:'JSON',inputs:[],outputs:[]}),recommendedResources:resources,metaFields:meta,sourceVersionKey:read('bdh-outcome-review-1010',[]).find(x=>x.id===v.sourceVersionKey)?.acceptedAssetId||v.sourceVersionKey||null,sourceModelId:v.sourceModelId||null,sourceModelName:v.sourceModelName||null,sourceModelVersion:v.sourceModelVersion||null,sourceProjectId:v.sourceProjectId||'',sourceDemandId:v.sourceDemandId||'',sourceDemandName:v.sourceDemandName||'',submittedAt:r.time,submittedBy:r.applicant,submittedFiles:clone(r.files||[]),submittedMetadata:clone(v),debugValidation:clone(r.debugValidation||null),debugRecords:clone(r.debugRecords||[]),run:clone(r.run||null),deployment:clone(r.deployment||null),imageArtifact:clone(r.imageArtifact||r.artifact||null),readme:clone(v.readme||null),src:'res'};
+ }
+ function catalogModel(r,service={}){
+  return {...r,alias:r.alias||field(r,'模型简称'),owner:r.owner||field(r,'提供方'),modelType:r.modelType||field(r,'模型类型'),summary:r.summary||field(r,'模型简介'),business:list(r.business?.length?r.business:field(r,'业务分类')),task:list(r.task?.length?r.task:field(r,'技术任务')),crop:list(r.crop?.length?r.crop:field(r,'适用作物')),trialEnabled:service.active?.config?.dTrial==='是'||service.active?.trial===true,published:r.up==='on'};
+ }
+ function portalModels(seeds){
+  const rows=read('bdh-model-catalog-v1',[]);if(!rows.length)return seeds;
+  const names=new Set(rows.map(r=>r.name)),out=seeds.filter(m=>!names.has(m.name));
+  const groups=new Map();rows.filter(r=>!r.deleted).forEach(r=>{const key=r.modelId||r.no||r.key;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r);});
+  for(const versions of groups.values()){
+   const r=versions.find(r=>r.up==='on');if(!r)continue;
+   const base=seeds.find(m=>m.name===r.name)||{},doc=r.interfaceDoc||{usage:'',content:'JSON',inputs:[],outputs:[]};
+   const inputs=(doc.inputs||[]).map(p=>p.description||p.name).filter(Boolean),outputs=(doc.outputs||[]).map(p=>p.description||p.name).filter(Boolean);
+   out.push({...base,id:base.id||r.modelId||r.no,key:r.key,name:r.name,ver:r.ver,modelType:r.modelType,mtype:r.modelType,crop:list(r.crop),capabilities:list(r.business),scenes:list(r.business),type:list(r.task)[0]||'',technicalTasks:list(r.task),task:r.introAbility||'',owner:r.owner||'',author:r.owner||'',abbr:r.alias||'',summary:r.summary||'',abstract:r.introOverview||r.summary||'',overview:r.introOverview||'',business:r.introAbility||'',interfaceDoc:doc,input:inputs.join('；')||'—',output:outputs.join('；')||'—',ins:inputs,outs:outputs,upd:r.metaUpdatedAt?.slice(0,10)||r.d||'',calls:base.calls||0,ic:r.cover?'<img src="'+esc(r.cover)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px">':base.ic||'◇',use:'平台内在线运行',open:!!r.externalProvision?.access&&r.externalProvision.access!=='否',trialEnabled:r.trialEnabled===true,published:true,trial:base.trial||{params:[],base:{},sample:'',kind:'value'},outcome:r.src!=='new',source:r.metaFields?.['成果来源']?.values?.[0]||'',rightsOwner:r.metaFields?.['权属归属']?.values?.[0]||'',_managed:true,_versions:versions.map(x=>({v:x.ver,d:x.d||'',cur:x.key===r.key,n:x.updateNote||'',row:x}))});
+  }
+  return out;
+ }
+ function registry(seeds){const rows=read('bdh-model-catalog-v1',[]);if(!rows.length)return seeds;const names=new Set(rows.map(r=>r.name)),out=seeds.filter(x=>!names.has(x.name)),groups=new Map();rows.filter(r=>!r.deleted).forEach(r=>{const id=r.modelId||r.no||r.key;if(!groups.has(id))groups.set(id,[]);groups.get(id).push(r);});for(const [id,vs]of groups){const r=vs.find(x=>x.up==='on')||vs[0];out.push({id,name:r.name,version:r.ver,published:r.up==='on',trialEnabled:r.trialEnabled===true});}return out;}
+ function portalDatasets(seeds){
+  const rows=read('bdh-published-datasets-v1',read('agri-datasets-merged-20261110',[]));if(!rows.length)return seeds;
+  const names=new Set(rows.map(r=>r.name)),out=seeds.filter(d=>!names.has(d.name));
+  rows.filter(r=>!r.deleted&&r.pub==='on').forEach(r=>{const m=dataset(r.metadata||r,r.files||[]);out.push({...m,id:r.id,name:m.name||r.name,title:m.name||r.name,desc:m.summary||'',form:'',crop:list(m.crop),researchDirections:list(m.researchDirections),format:list(m.format),annotation:m.annotation,region:m.region||'',year:m.year||'',owner:m.provider||'',rightsOwner:m.owner||'',src:r.src==='res'?'res':'zone',zone:({'作物长势':'growth','土壤墒情':'soil','产量估测':'yield'})[m.topic]||'',upd:r.updatedAt?.slice(0,10)||r.submittedAt?.slice(0,10)||'',apply:r.apply||0,dataKind:r.src==='res'?'成果数据':'原始数据',_managed:true,published:true});});return out;
+ }
+ function previewKind(files=[],state={}){if(files.length)return files.some(f=>/\.(csv|tsv|xlsx?|parquet|sql|json)$/i.test(f.name||f))?'structured':'display';return state.previewType||'display';}
+ async function readFile(f){
+  if(f?.file)return f.file;if(!f?.blobId)return null;
+  for(const name of ['agri-dataset-preview-materials','bdh-outcome-materials-1010','agri-outcome-files-v1']){
+   const value=await new Promise(resolve=>{const req=indexedDB.open(name,1);req.onupgradeneeded=()=>req.transaction.abort();req.onerror=()=>resolve(null);req.onsuccess=()=>{const db=req.result;if(!db.objectStoreNames.contains('files')){db.close();resolve(null);return;}const tx=db.transaction('files'),r=tx.objectStore('files').get(f.blobId);r.onsuccess=()=>resolve(r.result?.file||r.result?.blob||null);r.onerror=()=>resolve(null);tx.oncomplete=()=>db.close();};});if(value)return value;
+  }return null;
+ }
+ return {read,list,clone,esc,safe,field,dataset,modelFromOutcome,catalogModel,portalModels,portalDatasets,registry,readFile,previewKind};
+})();
+
+</script><script data-inline-source="assets/dataset-display.js">
+window.DatasetPreview=(()=>{
+ const e=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function db(mode,fn){return new Promise((resolve,reject)=>{const r=indexedDB.open('agri-dataset-preview-materials',1);r.onupgradeneeded=()=>r.result.createObjectStore('files',{keyPath:'id'});r.onerror=()=>reject(r.error);r.onsuccess=()=>{const d=r.result,t=d.transaction('files',mode),q=fn(t.objectStore('files'));t.oncomplete=()=>{resolve(q?.result);d.close();};t.onerror=()=>{reject(t.error);d.close();};};});}
+ const modes=(imageFirst,mapFile=false)=>{const out=imageFirst?[['image','图片展示'],['file','文件展示']]:[['file','文件展示'],['image','图片展示']];if(mapFile===true)out.splice(1,0,['map','地图预览']);return out;};
+ async function save(file){const id='preview-'+crypto.randomUUID();await db('readwrite',s=>s.put({id,file}));return {id,name:file.name,size:file.size,type:file.type};}
+ function map(box,data){const geoms=data.type==='FeatureCollection'?data.features.map(f=>f.geometry):data.type==='Feature'?[data.geometry]:[data];const paths=[],points=[];function walk(g){if(!g)return;const line=c=>{if(!Array.isArray(c))return;const valid=c.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90);if(valid.length!==c.length)throw Error('坐标');points.push(...valid);return valid;};if(g.type==='Point'){const a=line([g.coordinates]);paths.push({point:a[0]});}else if(g.type==='MultiPoint')line(g.coordinates).forEach(p=>paths.push({point:p}));else if(g.type==='LineString')paths.push({line:line(g.coordinates)});else if(g.type==='MultiLineString')g.coordinates.forEach(c=>paths.push({line:line(c)}));else if(g.type==='Polygon')paths.push({rings:g.coordinates.map(line)});else if(g.type==='MultiPolygon')g.coordinates.forEach(c=>paths.push({rings:c.map(line)}));else if(g.type==='GeometryCollection')g.geometries.forEach(walk);}
+ geoms.forEach(walk);if(!points.length||points.length>100000)throw Error('范围');let minX=180,maxX=-180,minY=90,maxY=-90;for(const [x,y]of points){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}const scale=Math.min(540/(maxX-minX||.01),280/(maxY-minY||.01)),cx=(maxX+minX)/2,cy=(maxY+minY)/2;const xy=p=>[300+(p[0]-cx)*scale,160-(p[1]-cy)*scale];const d=ps=>ps.map((p,i)=>(i?'L':'M')+xy(p).join(' ')).join(' ');
+ box.innerHTML='<p class="ds-note">空间样例预览 · 经纬度坐标 · 无底图</p><div class="dp-map-tools"><button type="button" data-zoom="1.3">放大</button><button type="button" data-zoom="0.77">缩小</button><button type="button" data-zoom="reset">复位</button></div><svg class="dp-map" viewBox="0 0 600 320" role="img" aria-label="空间样例地图">'+paths.map(p=>p.point?'<circle cx="'+xy(p.point)[0]+'" cy="'+xy(p.point)[1]+'" r="4" fill="#005653"/>':p.rings?'<path d="'+p.rings.map(r=>d(r)+' Z').join(' ')+'" fill="#74ba9c77" fill-rule="evenodd" stroke="#005653" vector-effect="non-scaling-stroke"/>':'<path d="'+d(p.line)+'" fill="none" stroke="#005653" vector-effect="non-scaling-stroke"/>').join('')+'</svg>';let view=[0,0,600,320];const svg=box.querySelector('svg'),paint=()=>svg.setAttribute('viewBox',view.join(' '));box.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{if(b.dataset.zoom==='reset')view=[0,0,600,320];else{const f=Number(b.dataset.zoom),w=view[2]/f,h=view[3]/f;view=[view[0]+(view[2]-w)/2,view[1]+(view[3]-h)/2,w,h];}paint();});let start;svg.onpointerdown=ev=>{start={x:ev.clientX,y:ev.clientY,v:[...view]};svg.setPointerCapture(ev.pointerId);};svg.onpointermove=ev=>{if(!start)return;const rect=svg.getBoundingClientRect();view=[start.v[0]-(ev.clientX-start.x)*start.v[2]/rect.width,start.v[1]-(ev.clientY-start.y)*start.v[3]/rect.height,view[2],view[3]];paint();};svg.onpointerup=()=>start=null;svg.onpointercancel=()=>start=null;
+ }
+ async function show(box,meta,mode){const key=JSON.stringify([meta?.id,mode]);box.dataset.previewKey=key;if(!meta){box.textContent='尚未上传预览材料';return;}box.textContent='正在加载预览材料…';try{const item=meta.dataURL?.startsWith('data:image/png;base64,')?{file:new File([Uint8Array.from(atob(meta.dataURL.split(',')[1]),c=>c.charCodeAt(0))],meta.name,{type:'image/png'})}:await db('readonly',s=>s.get(meta.id));if(box.dataset.previewKey!==key||!box.isConnected)return;if(!item?.file){box.textContent=meta.name+'：当前浏览器暂无该预览文件';return;}const file=item.file,url=URL.createObjectURL(file);box.innerHTML='<p>'+e(meta.name)+' · '+Math.ceil(meta.size/1024)+' KB <a href="'+url+'" download="'+e(meta.name)+'">下载预览材料</a></p><div class="dp-content"></div>';const body=box.querySelector('.dp-content');const obs=new MutationObserver(()=>{if(!box.isConnected||box.dataset.previewKey!==key){URL.revokeObjectURL(url);obs.disconnect();}});obs.observe(document.body,{childList:true,subtree:true});
+ if(mode==='map'){if(!/\.(geojson|json)$/i.test(meta.name)){body.innerHTML='<p class="ds-note">当前原型支持带经纬度坐标的 GeoJSON 样例地图。此文件暂不能显示为地图，可切换为图片或文件展示。</p>';return;}try{map(body,JSON.parse(await file.text()));}catch{body.innerHTML='<p class="ds-note">未识别到可展示的经纬度几何数据，请检查样例文件或切换预览方式。</p>';}}
+ else if(/^image\/(png|jpeg|gif|webp)$/.test(file.type)||/\.(png|jpe?g|gif|webp)$/i.test(meta.name))body.innerHTML='<img class="ds-image" src="'+url+'" alt="'+e(meta.name)+'">';
+ else if(mode==='image')body.innerHTML='<p class="ds-note">请上传图片或成果截图用于图片展示。</p>';
+ else if(/\.pdf$/i.test(meta.name))body.innerHTML='<object type="application/pdf" data="'+url+'" width="100%" height="360"><p>请下载预览文档查看。</p></object>';
+ else if(/\.(txt|md|csv|sql|json|geojson)$/i.test(meta.name)){body.innerHTML='<pre></pre>';body.querySelector('pre').textContent=await file.slice(0,12000).text();}
+ else body.innerHTML='<p class="ds-note">此格式暂不支持在线展示，可下载预览材料查看。</p>';
+ }catch{box.textContent='预览材料读取失败，请重试。';}}
+ function view(d){return '<div class="dp-saved" data-dp-meta="'+e(JSON.stringify(d.previewMaterial||null))+'" data-dp-mode="'+e(d.previewMode||'file')+'"></div>';}
+ const observer=new MutationObserver(()=>{document.querySelectorAll('.dp-saved:not([data-loaded])').forEach(n=>{n.dataset.loaded='true';show(n,JSON.parse(n.dataset.dpMeta),n.dataset.dpMode);});});observer.observe(document.documentElement,{childList:true,subtree:true});
+ async function read(meta){return (await db('readonly',s=>s.get(meta.id)))?.file||null;}
+ return {modes,save,show,view,read};
+})();
+
+window.DatasetUI=(()=>{
+ const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const choices={'结构化':['表格','时序'],'非结构化':['无人机影像','遥感栅格','遥感影像','矢量','图像','文本','压缩包']};
+ const plain=html=>{const d=document.createElement('div');d.innerHTML=html||'';d.querySelectorAll('br').forEach(n=>n.replaceWith('\n'));d.querySelectorAll('p,li,tr').forEach(n=>n.append('\n'));return d.textContent.trim();};
+ function initial(v){if(v.datasetContent)return JSON.parse(JSON.stringify(v.datasetContent));const d=document.createElement('div');d.innerHTML=v.intro||'';const out={overview:'',direction:'',parameters:[],structureFile:'',sampleFile:'',note:'',previews:{}};let key='overview';for(const n of d.childNodes){if(n.nodeType===1&&/^H[1-6]$/.test(n.tagName)){key=/适用/.test(n.textContent)?'direction':/参数/.test(n.textContent)?'parameters':/预览|样例/.test(n.textContent)?'note':'overview';continue;}const t=plain(n.outerHTML||e(n.textContent));if(t){if(key==='parameters')out.parameters.push({name:'关键参数',value:t,unit:''});else out[key]+=(out[key]?'\n':'')+t;}}return out;}
+ function render(){return '<section class="ds-editor"><div role="tablist" aria-label="数据内容" class="ds-tabs"><button type="button" id="ds-tab-intro" role="tab" aria-selected="true" aria-controls="ds-pane-intro" data-ds-tab="intro">数据介绍</button><button type="button" id="ds-tab-preview" role="tab" aria-selected="false" aria-controls="ds-pane-preview" data-ds-tab="preview">数据预览</button></div><section id="ds-pane-intro" role="tabpanel" aria-labelledby="ds-tab-intro"><label for="ds-overview">数据概述</label><textarea id="ds-overview" rows="5" placeholder="填写数据内容、来源及覆盖范围"></textarea><label for="ds-direction">适用方向</label><textarea id="ds-direction" rows="4" placeholder="填写适用的研究任务或业务场景"></textarea><div class="ds-heading"><h4>关键参数</h4><button type="button" data-ds-add>＋ 添加参数</button></div><div class="ds-scroll"><table class="ds-parameters"><thead><tr><th>参数名称</th><th>参数值</th><th>单位（选填）</th><th>操作</th></tr></thead><tbody id="ds-parameters"></tbody></table></div><datalist id="ds-param-options"><option>核心指标</option><option>时间分辨率</option><option>空间分辨率</option></datalist></section><section id="ds-pane-preview" role="tabpanel" aria-labelledby="ds-tab-preview" hidden><div id="ds-structured-preview"><p class="ds-note">从已上传的成果文件中选择；结构文件与样例数据可使用同一个文件。</p><div id="ds-structure-block"><label for="ds-structure-file">结构文件（选填）</label><select id="ds-structure-file"></select><div id="ds-structure-preview" class="ds-preview"></div></div><label for="ds-sample-file">样例数据文件</label><select id="ds-sample-file"></select><div id="ds-sample-preview" class="ds-preview"></div></div><div id="ds-display-preview" hidden><p class="ds-note">单独上传用于展示的节选、脱敏样例或截图，不默认展示完整成果文件。</p><label for="ds-display-mode">预览方式</label><select id="ds-display-mode"></select><label for="ds-display-file">预览材料</label><input id="ds-display-file" type="file"><p id="ds-display-status" class="ds-note" role="status"></p><button type="button" id="ds-display-remove">移除预览材料</button><div id="ds-display-content" class="ds-preview"></div></div><label for="ds-preview-note">预览说明（选填）</label><textarea id="ds-preview-note" rows="3" placeholder="补充字段含义、单位或样例说明"></textarea></section></section>';}
+ function csv(text,delimiter){const rows=[];let row=[],cell='',quote=false;for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quote&&text[i+1]==='"'){cell+='"';i++;}else quote=!quote;}else if(c===delimiter&&!quote){row.push(cell);cell='';}else if((c==='\n'||c==='\r')&&!quote){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x!==''))rows.push(row);row=[];cell='';if(rows.length>=21)return rows;}else cell+=c;}if(quote)throw Error('引号未闭合');if(cell||row.length){row.push(cell);rows.push(row);}return rows;}
+ function table(headers,rows){return '<div class="ds-scroll"><table><thead><tr>'+headers.map(x=>'<th>'+e(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+e(typeof x==='object'?JSON.stringify(x):x)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';}
+ function previewHTML(p,structure){if(!p)return '<p class="ds-note">请选择文件</p>';const title='<p class="ds-file-name">'+e(p.name)+'</p>';if(p.headers)return title+(structure?table(['字段名称'],p.headers.map(x=>[x])):table(p.headers,p.rows))+'<p class="ds-note">'+(structure?'从样例列名提取；字段含义与单位可在预览说明中补充。':'仅展示前 '+p.rows.length+' 条样例，不改变原文件。')+'</p>';if(p.text!==undefined)return title+'<pre>'+e(p.text)+'</pre><p class="ds-note">'+e(p.message||'文件内容节选')+'</p>';return title+'<p class="ds-note">'+e(p.message||'文件信息已保留')+'</p>';}
+ function mount(root,v,options){if(!root)return;const form=options.form||root.closest('form'),state=initial(v);state.previews??={};const tokens={structure:0,sample:0};const urls=[];const q=s=>root.querySelector(s),isTable=()=>ResourceFields.previewKind(options.files(),state)==='structured';
+ const rows=()=>[...q('#ds-parameters').querySelectorAll('tr[data-param]')].map(r=>Object.fromEntries([...r.querySelectorAll('input')].map(n=>[n.dataset.key,n.value]))).filter(r=>r.name||r.value||r.unit);
+ const add=(p={})=>{q('#ds-parameters .ds-param-empty')?.remove();const r=document.createElement('tr');r.dataset.param='true';r.innerHTML=['name','value','unit'].map((k,i)=>'<td><input data-key="'+k+'" aria-label="'+['参数名称','参数值','单位'][i]+'" '+(k==='name'?'list="ds-param-options"':'')+' value="'+e(p[k]||'')+'"></td>').join('')+'<td><button type="button" data-remove>删除</button></td>';r.querySelector('button').onclick=()=>{r.remove();empty();};q('#ds-parameters').append(r);};
+ function empty(){if(!q('#ds-parameters [data-param]'))q('#ds-parameters').innerHTML='<tr class="ds-param-empty"><td colspan="4">尚未添加参数</td></tr>';}
+ q('#ds-overview').value=state.overview||'';q('#ds-direction').value=state.direction||'';q('#ds-preview-note').value=state.note||'';(state.parameters||[]).forEach(add);empty();q('[data-ds-add]').onclick=()=>add();
+ function files(){return options.files().map((f,i)=>({...f,key:f.key||JSON.stringify([f.name,f.size??f.bytes??'',f.path||'']),index:i}));}
+ function refresh(){const list=files();for(const [role,key]of [['structure','structureFile'],['sample','sampleFile']]){const select=q('#ds-'+role+'-file');if(select.options.length)state[key]=select.value;const previous=list.some(f=>f.key===state[key])?state[key]:(list.find(f=>f.name===state.previews[role]?.name)?.key||state[key]);state[key]=previous;select.innerHTML='<option value="">请选择已上传的文件</option>'+list.map(f=>'<option value="'+e(f.key)+'">'+e(f.name)+'</option>').join('');if(list.some(f=>f.key===previous))select.value=previous;else{state[key]='';delete state.previews[role];q('#ds-'+role+'-preview').innerHTML=previewHTML(null);}}}
+ async function show(role){const key=role==='structure'?'structureFile':'sampleFile',id=q('#ds-'+role+'-file').value;state[key]=id;const f=files().find(x=>x.key===id),box=q('#ds-'+role+'-preview'),ticket=++tokens[role];if(!f){delete state.previews[role];box.innerHTML=previewHTML(null);return;}box.textContent='正在读取预览…';let p={name:f.name};try{const blob=f.file||await options.read?.(f);if(!blob&&options.preview?.(f))p={...options.preview(f)};else if(!blob&&state.previews[role]?.name===f.name)p={...state.previews[role]};else if(!blob)p.message='当前文件仅有记录信息，暂无可读取的预览内容。可填写预览说明。';else if(/^image\/(png|jpeg|gif|webp)$/.test(blob.type)){p.message='图片文件';if(!root.isConnected||state[key]!==id||ticket!==tokens[role])return;const url=URL.createObjectURL(blob);urls.push(url);state.previews[role]=p;box.innerHTML='<p>'+e(f.name)+'</p><img class="ds-image" src="'+url+'" alt="'+e(f.name)+'">';return;}else if(/\.(csv|tsv|json|sql|txt|md)$/i.test(f.name)){if(blob.size>2*1024*1024){p.message='文件较大，暂不自动解析；文件仍可提交，可另选样例文件。';}else{const txt=(await blob.text()).replace(/^\uFEFF/,'');if(/\.(csv|tsv)$/i.test(f.name)){const rr=csv(txt,/\.tsv$/i.test(f.name)?'\t':',');if(!rr.length)throw Error('没有可预览的数据');p.headers=rr[0];p.rows=rr.slice(1,21);}else if(/\.json$/i.test(f.name)){const data=JSON.parse(txt);if(Array.isArray(data)&&data.length&&data.every(x=>x&&typeof x==='object'&&!Array.isArray(x))){p.headers=[...new Set(data.slice(0,20).flatMap(Object.keys))];p.rows=data.slice(0,20).map(r=>p.headers.map(k=>r[k]??''));}else p.text=JSON.stringify(data,null,2).slice(0,12000);}else{p.text=txt.slice(0,12000);p.message=/\.sql$/i.test(f.name)?'SQL 源码预览，不执行脚本；字段结构可通过说明补充。':'文件内容节选';}}}else p.message='该格式暂不支持在线解析，文件仍可提交，可填写预览说明。';}catch{p.message='暂时无法解析该文件，文件仍可提交，可填写预览说明。';}if(!root.isConnected||state[key]!==id||ticket!==tokens[role])return;state.previews[role]=p;box.innerHTML=previewHTML(p,role==='structure');}
+ for(const role of ['structure','sample'])q('#ds-'+role+'-file').onchange=()=>show(role);
+ let previewBusy=false;
+ function display(){const unstructured=!isTable();q('#ds-structured-preview').hidden=unstructured;q('#ds-display-preview').hidden=!unstructured;state.previewType=unstructured?'display':'structured';const modes=DatasetPreview.modes(state.previewMode==='image',/\.(geojson|json)$/i.test(state.previewMaterial?.name||''));if(!modes.some(([id])=>id===state.previewMode))state.previewMode=modes[0][0];q('#ds-display-mode').innerHTML=modes.map(([id,label])=>'<option value="'+id+'">'+label+'</option>').join('');q('#ds-display-mode').value=state.previewMode;q('#ds-display-remove').hidden=!state.previewMaterial;if(unstructured)DatasetPreview.show(q('#ds-display-content'),state.previewMaterial,state.previewMode);}
+ q('#ds-display-mode').onchange=()=>{state.previewMode=q('#ds-display-mode').value;DatasetPreview.show(q('#ds-display-content'),state.previewMaterial,state.previewMode);};
+ q('#ds-display-file').onchange=async event=>{const file=event.target.files[0];if(!file)return;previewBusy=true;q('#ds-display-status').textContent='正在保存预览材料…';try{const meta=await DatasetPreview.save(file);state.previewMaterial=meta;display();q('#ds-display-status').textContent='预览材料已添加';}catch{q('#ds-display-status').textContent='预览材料保存失败，请重试';}finally{previewBusy=false;event.target.value='';}};
+ q('#ds-display-remove').onclick=()=>{state.previewMaterial=null;q('#ds-display-status').textContent='';display();};
+
+
+ display();
+ root.querySelectorAll('[data-ds-tab]').forEach(b=>b.onclick=()=>{root.querySelectorAll('[data-ds-tab]').forEach(n=>n.setAttribute('aria-selected',String(n===b)));q('#ds-pane-intro').hidden=b.dataset.dsTab!=='intro';q('#ds-pane-preview').hidden=b.dataset.dsTab!=='preview';if(b.dataset.dsTab==='preview'){if(!isTable())display();else{refresh();show('structure');show('sample');}}});
+ root._dataset={collect:()=>{refresh();return {...state,previewBusy,overview:q('#ds-overview').value,direction:q('#ds-direction').value,parameters:rows(),note:q('#ds-preview-note').value,};},refresh:()=>{refresh();display();}};refresh();for(const role of ['structure','sample'])q('#ds-'+role+'-preview').innerHTML=previewHTML(state.previews[role],role==='structure');
+ const obs=new MutationObserver(()=>{if(!root.isConnected){urls.forEach(URL.revokeObjectURL);obs.disconnect();}});obs.observe(document.body,{childList:true,subtree:true});
+ }
+ function intro(d){const p=x=>'<p>'+e(x).replace(/\n/g,'<br>')+'</p>';return '<h3>数据概述</h3>'+p(d.overview)+'<h3>适用方向</h3>'+p(d.direction)+(d.parameters.length?'<h3>关键参数</h3>'+table(['参数名称','参数值','单位'],d.parameters.map(x=>[x.name,x.value,x.unit])):'');}
+ function collect(){const r=[...document.querySelectorAll('.ds-editor')].find(n=>n._dataset);if(!r?._dataset)return null;const d=r._dataset.collect();return {datasetContent:d,intro:intro(d)};}
+ function view(d){return d?'<section class="ds-editor"><h3>数据预览</h3>'+(d.previewType!=='display'&&d.structureFile?'<h4>数据结构</h4>'+previewHTML(d.previews?.structure,true):'')+(d.previewType==='display'?'<h4>预览材料</h4>'+DatasetPreview.view(d):'<h4>参考数据</h4>'+previewHTML(d.previews?.sample,false))+(d.note?'<p class="ds-note">'+e(d.note)+'</p>':'')+'</section>':'';}
+ return {render,mount,collect,view,choices};
+})();
+
+</script><style data-inline-source="assets/resource-display.css">
+.ds-editor{font-size:14px;line-height:1.7}.ds-editor table{border-collapse:collapse;width:100%}.ds-editor th,.ds-editor td{padding:10px 12px;border:1px solid #e2e8e7;text-align:left}.ds-editor th{background:#f5f8f7}.ds-editor pre{white-space:pre-wrap;overflow:auto;padding:16px;background:#f7f9f8}.ds-scroll{overflow:auto}.ds-note{color:#697771;font-size:13px}.ds-image{max-width:100%;max-height:520px;object-fit:contain}.dp-map{width:100%;max-height:420px}.dp-map-tools{display:flex;gap:8px}.ds-editor h4{margin:20px 0 10px}
+</style><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>成果验收审批 — 北大荒智慧农业协同创新平台 · 管理后台</title>
 <style>
 :root{
@@ -330,7 +447,87 @@ table.tbl th:last-child,table.tbl td:last-child{padding-right:var(--s5);}
 #approval-review-form>h3{font-size:16px;font-weight:600;margin-bottom:16px}
 @media(max-width:600px){.da-fields{grid-template-columns:1fr}.da-dialog footer{gap:8px;flex-wrap:wrap}.da-dialog footer .mt-btn{padding:8px 12px}}
 </style>
-<link rel="stylesheet" href="assets/prototype-nav.css">
+<style data-inline-source="assets/prototype-nav.css">
+/* Shared navigation only; business content retains each page's original styles. */
+header.site-header.prototype-header{--prototype-header-height:80px;position:sticky!important;top:0;z-index:100!important;height:auto!important;min-height:var(--prototype-header-height);background:#fff!important;border-bottom:1px solid #dce5e9!important;color:#10213a;font-family:"Microsoft YaHei","PingFang SC",sans-serif;box-shadow:none!important}
+header.site-header.prototype-header .header-inner{width:calc(100% - 64px)!important;max-width:1600px!important;min-height:var(--prototype-header-height)!important;height:var(--prototype-header-height)!important;margin:0 auto!important;padding:0!important;display:flex!important;align-items:center!important;flex-wrap:nowrap!important;gap:24px!important;box-sizing:border-box}
+header.site-header.prototype-header .brand{display:inline-flex!important;align-items:center!important;gap:10px!important;flex:none!important;margin:0!important;padding:0!important;color:#10213a!important;font-size:18px!important;font-weight:600!important;line-height:26px!important;white-space:nowrap!important;text-decoration:none!important}
+header.site-header.prototype-header .brand svg{width:30px!important;height:30px!important;flex:none!important}
+header.site-header.prototype-header .brand-tag{margin-left:-14px!important;white-space:nowrap;flex:none;color:#526078;font-size:12px;padding:3px 7px;background:#f1f5f4;border-radius:3px}
+header.site-header.prototype-header .main-nav{display:flex!important;align-items:center!important;justify-content:center!important;gap:22px!important;min-width:0;margin:0 0 0 auto!important;height:var(--prototype-header-height)!important;flex:none!important;padding:0!important;border:0!important;overflow:visible!important}
+header.site-header.prototype-header .main-nav a{position:relative!important;display:flex!important;align-items:center!important;height:var(--prototype-header-height)!important;padding:0!important;margin:0!important;font-size:14px!important;font-weight:400!important;line-height:22px!important;white-space:nowrap!important;color:#263b38!important;border:0!important;background:transparent!important;text-decoration:none!important;border-radius:0!important}
+header.site-header.prototype-header .main-nav a:hover,header.site-header.prototype-header .main-nav a.active{color:#005653!important}
+header.site-header.prototype-header .main-nav a.active{font-weight:600!important}
+header.site-header.prototype-header .main-nav a::after{content:none!important}
+header.site-header.prototype-header .main-nav a.active::after{content:""!important;position:absolute!important;bottom:0!important;left:0!important;right:0!important;height:2px!important;background:#005653!important;border-radius:0!important}
+header.site-header.prototype-header [hidden],header.site-header.prototype-header .main-nav a[hidden]{display:none!important}
+header.site-header.prototype-header .header-actions{display:flex!important;align-items:center!important;gap:14px!important;flex:none!important;margin:0!important;padding:0!important;font-size:14px!important;white-space:nowrap}
+header.site-header.prototype-header .header-actions .button-primary{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 16px;background:#005653!important;color:white!important;border:0;border-radius:4px;font:14px/20px "Microsoft YaHei",sans-serif;text-decoration:none;white-space:nowrap}
+header.site-header.prototype-header .menu-toggle{display:none!important;align-items:center!important;justify-content:center!important;flex:none;width:36px!important;height:36px!important;padding:6px!important;border:1px solid #dce5e9!important;border-radius:4px!important;background:#fff!important;color:#263b38!important;cursor:pointer}
+header.site-header.prototype-header .prototype-mobile{display:none!important;position:static!important;width:auto!important;height:auto!important;max-height:calc(100vh - var(--prototype-header-height));overflow:auto;margin:0!important;padding:8px 24px 16px!important;border-top:1px solid #e4eae7;background:#fff!important;box-shadow:0 5px 12px #163c3610}
+header.site-header.prototype-header .prototype-mobile.open:not([hidden]){display:block!important}
+header.site-header.prototype-header .prototype-mobile a,header.site-header.prototype-header .prototype-mobile>button{display:block!important;box-sizing:border-box;width:100%!important;height:auto!important;margin:0!important;padding:11px 8px!important;border:0!important;border-bottom:1px solid #edf1ee!important;border-radius:0!important;background:transparent!important;color:#263b38!important;font:14px/22px "Microsoft YaHei",sans-serif;text-align:left;text-decoration:none}
+header.site-header.prototype-header .prototype-mobile .active{color:#005653!important;font-weight:600!important}
+header.site-header.prototype-header .u-menu{z-index:110}
+header.site-header.prototype-header .u-menu:not(.open){display:none!important}
+header.site-header.prototype-header .u-menu.open{display:block!important}
+header.site-header.prototype-header .u-avatar{border:0;cursor:pointer}
+header.site-header.prototype-header .u-name{border:0;background:none;font:inherit;cursor:pointer}
+.platform-detail-nav{margin:6px 0 12px 12px;padding-left:10px;border-left:1px solid #dce5e9}
+.prototype-about-side a{display:block;padding:12px 16px;border-radius:5px;color:#526078;text-decoration:none;font-size:14px}
+.prototype-about-side a.active{background:#e9f3ee;color:#005653;font-weight:600}
+@media(max-width:1500px){header.site-header.prototype-header .header-inner{gap:18px!important}header.site-header.prototype-header .main-nav{gap:16px!important}header.site-header.prototype-header .brand{font-size:17px!important}}
+@media(max-width:1390px){header.site-header.prototype-header[data-system=portal] .main-nav{display:none!important}header.site-header.prototype-header[data-system=portal] .menu-toggle{display:inline-flex!important}header.site-header.prototype-header[data-system=portal] .header-actions{margin-left:auto!important}}
+@media(max-width:1200px){header.site-header.prototype-header[data-system=admin] .main-nav{display:none!important}header.site-header.prototype-header[data-system=admin] .menu-toggle{display:inline-flex!important}header.site-header.prototype-header[data-system=admin] .header-actions{margin-left:auto!important}}
+@media(max-width:760px){header.site-header.prototype-header .header-inner{width:calc(100% - 32px)!important;gap:12px!important}header.site-header.prototype-header .brand{font-size:15px!important;gap:6px!important}header.site-header.prototype-header .brand svg{width:24px!important;height:24px!important}header.site-header.prototype-header .header-actions{gap:8px!important}header.site-header.prototype-header .header-actions .button-primary,header.site-header.prototype-header .brand-tag,header.site-header.prototype-header .bdh-user,header.site-header.prototype-header .u-name{display:none!important}}
+@media(max-width:480px){header.site-header.prototype-header .brand{font-size:13px!important}header.site-header.prototype-header .header-inner{width:calc(100% - 24px)!important}header.site-header.prototype-header .header-actions .bdh-me,header.site-header.prototype-header .header-actions .signed-user,header.site-header.prototype-header .header-actions .bdh-logout,header.site-header.prototype-header .header-actions .readonly{display:none!important}}
+
+header.site-header.prototype-header[data-system=admin]{--prototype-header-height:64px}
+@media(max-width:760px){header.site-header.prototype-header{--prototype-header-height:64px}}
+
+/* ---- admin 一级导航对齐管理设置页（1111）----
+   管理设置页未引用本文件，用的是页面原生样式：
+     .site-header .container{ width:100%; max-width:var(--content-max); margin:0 auto;
+                               padding:0 clamp(24px,3.65vw,56px) }
+     .site-header .header-inner{ gap:var(--s5) }      /* 24px */
+     .site-header .main-nav{ margin-left:var(--s4); flex:1; }
+     .site-header .main-nav a{ padding:0 14px; }
+   其余后台页引用本文件后，nav 被 margin-left:auto / flex:none 推到最右，
+   且 header-inner 宽度与 gap 规则不同 ⇒ 与管理设置页的导航位置不一致。
+   此处把 admin 恢复成同一套定位与间距；portal 不受影响。 */
+header.site-header.prototype-header[data-system=admin] .header-inner{
+  width:100%!important;
+  max-width:var(--content-max,1800px)!important;
+  margin:0 auto!important;
+  padding:0 clamp(24px,3.65vw,56px)!important;
+  gap:24px!important;
+}
+header.site-header.prototype-header[data-system=admin] .main-nav{
+  justify-content:flex-start!important;
+  gap:0!important;
+  margin:0 0 0 var(--s4,16px)!important;
+  flex:1 1 0%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+header.site-header.prototype-header[data-system=admin] .main-nav a{
+  padding:0 14px!important;
+  margin:0!important;
+}
+header.site-header.prototype-header[data-system=admin] .main-nav a.active::after{
+  left:14px!important;right:14px!important;bottom:0!important;height:3px!important;
+}
+@media(max-width:1500px){
+  header.site-header.prototype-header[data-system=admin] .header-inner{gap:24px!important}
+  header.site-header.prototype-header[data-system=admin] .main-nav{gap:0!important}
+}
+@media(max-width:760px){
+  header.site-header.prototype-header[data-system=admin] .header-inner{
+    width:calc(100% - 32px)!important;gap:12px!important;padding:0!important;
+  }
+}
+
+</style>
 </head><body class="approval-page"><header class="site-header prototype-header" data-system="admin">
   <div class="container header-inner">
     <a class="brand" href="index.html" aria-label="北大荒智慧农业协同创新平台">
@@ -422,7 +619,7 @@ window.MeetingSeeds={datasets:[
 </script><script data-inline-source="assets/meeting/meeting-core.js">
 (()=>{'use strict';
 const M=window.Meeting={},file=decodeURIComponent(location.pathname.split('/').pop()),admin=file.startsWith('后台-')||file==='index.html'||!file;M.file=file;M.admin=admin;
-M.e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));M.read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};M.write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch{M.toast('保存失败，请检查浏览器存储后重试');return false}};M.date=()=>new Date().toLocaleString('sv-SE',{timeZone:'Asia/Shanghai'}).slice(0,16);M.key='bdh-outcome-review-1010';M.metaKey='bdh-asset-metadata-1010';M.projectsKey='bdh-projects-1010';M.front=n=>(admin?'../前端门户端/':'')+n;M.back=n=>(admin?'':'../后台管理端原型/')+n;
+M.e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));M.read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};M.write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch{M.toast('保存失败，请检查浏览器存储后重试');return false}};M.date=()=>new Date().toLocaleString('sv-SE',{timeZone:'Asia/Shanghai'}).slice(0,16);M.key='bdh-outcome-review-1010';M.metaKey='bdh-asset-metadata-1010';M.projectsKey='bdh-projects-1010';M.front=n=>(admin?'https://arthurvictor0923.github.io/AI_PLATFORM_CREATE/portal-prototype/':'')+n;M.back=n=>(admin?'':'https://arthurvictor0923.github.io/AIPROJECTCREATE/admin-prototype/')+n;
 M.toast=t=>{document.querySelector('.mt-toast')?.remove();const n=document.createElement('div');n.className='mt-toast';n.textContent=t;document.body.append(n);setTimeout(()=>n.remove(),3000)};
 M.btn=(label,call,primary=false)=>`<button type="button" class="mt-btn ${primary?'primary':''}" onclick="${M.e(call)}">${label}</button>`;M.link=(label,call)=>`<button type="button" class="mt-link" onclick="${M.e(call)}">${label}</button>`;M.badge=s=>`<span class="mt-badge ${/待/.test(s)?'warn':/驳回|拒绝/.test(s)?'bad':''}">${M.e(s)}</span>`;
 M.dialog=(title,body,foot='')=>{let d=document.getElementById('mtDialog');if(!d){d=document.createElement('dialog');d.id='mtDialog';d.className='mt-dialog';document.body.append(d)}d.innerHTML=`<header><h2>${M.e(title)}</h2><button class="mt-close" aria-label="关闭" onclick="Meeting.close()">×</button></header><div class="mt-body">${body}</div><footer>${foot||M.btn('关闭','Meeting.close()')}</footer>`;if(!d.open)d.showModal();return d};M.close=()=>document.getElementById('mtDialog')?.close();
@@ -439,7 +636,17 @@ M.commitOutcome=async e=>{e.preventDefault();const f=e.target,values=Object.from
 M.viewOutcome=id=>{const r=M.records().find(x=>x.id===id);if(!r)return;M.dialog(r.name,`<p>${M.badge(r.status)}　${M.e(r.id)}　${M.e(r.time)}</p><div class="mt-grid">${M.schemas[r.kind].map(([k,l])=>`<div><small class="mt-note">${l}</small><p>${M.e(r.metadata?.[k]||'—')}</p></div>`).join('')}</div><h3 class="mt-section">介绍内容</h3><article>${M.safeHTML(r.metadata?.intro||'')}</article><h3 class="mt-section">成果材料</h3><div>${r.files.map((x,i)=>`<p>${M.e(x.name)} ${x.blobId?M.link('下载材料',`Meeting.downloadMaterial('${r.id}',${i})`):''}</p>`).join('')}</div><h3 class="mt-section">审批记录</h3>${(r.history||[]).map(x=>`<div class="mt-timeline"><strong>${M.e(x.action)}</strong> · ${M.e(x.by)} · ${M.e(x.time)}<p>${M.e(x.note)}</p></div>`).join('')}`,(M.admin&&r.status==='待审批'?M.btn('返回审批',`Meeting.review('${r.id}')`):M.btn('关闭','Meeting.close()'))+(!M.admin&&r.kind==='model'?M.btn('调试',`Meeting.debug('${r.id}')`):'')+(!M.admin&&r.status==='已驳回'?M.btn('修改后重新提交',`Meeting.submit('${r.kind}','${r.assetId||''}','${r.id}')`,true):''))};
 M.debug=id=>{if(M.spaceContext&&typeof editable==='function'&&!editable()){M.toast('研究已结束，成果仅可查看');return}const r=M.records().find(x=>x.id===id);M.dialog('成果调试',`<p>${M.e(r?.name||M.spaceContext?.name||'科研成果')}</p><p class="mt-note">原型调试演示，不执行真实镜像或远程接口。</p><form id="mt-debug-form">${M.field('debuginput','调试输入','{}','textarea')}<label class="mt-field" style="margin-top:16px">样例文件（选填）<input id="mt-debug-file" type="file" multiple></label><h3 class="mt-section">运行输出</h3><pre id="mt-debug-result" class="mt-debug">尚未执行</pre></form>`,M.btn('关闭','Meeting.close()')+'<button form="mt-debug-form" class="mt-btn primary" type="submit">运行调试（演示）</button>');document.getElementById('mt-debug-form').onsubmit=e=>{e.preventDefault();const text=document.getElementById('mt-debuginput').value.trim();document.getElementById('mt-debug-result').textContent='[演示] 已读取调试输入'+(document.getElementById('mt-debug-file').files.length?'及样例文件':'')+'\n[演示] 输入长度：'+text.length+' 字符\n[演示] 本轮流程完成；真实运行结果由开发环境执行后返回。';if(r){const list=M.records();list.find(x=>x.id===id).debugTime=M.date();M.write(M.key,list)}}};
 M.outcomeTable=(rows,review=false)=>`<div class="mt-table-wrap"><table class="mt-table"><thead><tr><th>成果名称</th><th>类型 / 版本</th><th>提交人 / 时间</th><th>审批状态</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${M.e(r.name)}</strong><small>${M.e(r.spaceName||'')}</small></td><td>${r.kind==='model'?'成果模型':'成果数据'}<small>${M.e(r.metadata.version)}</small></td><td>${M.e(r.applicant)}<small>${M.e(r.time)}</small></td><td>${M.badge(r.status)}</td><td><div class="mt-actions">${M.link('查看',`Meeting.viewOutcome('${r.id}')`)}${review&&r.status==='待审批'?M.link('审批验收',`Meeting.review('${r.id}')`):''}${!review&&r.kind==='model'?M.link('调试',`Meeting.debug('${r.id}')`):''}${!review&&r.status==='已驳回'?M.link('修改提交',`Meeting.submit('${r.kind}','${r.assetId||''}','${r.id}')`):''}</div></td></tr>`).join('')||'<tr><td colspan="5" class="mt-empty">暂无成果提交记录</td></tr>'}</tbody></table></div>`;
-M.review=id=>{const r=M.records().find(x=>x.id===id);if(!r||r.status!=='待审批')return;M.dialog('成果审批验收',`<p><strong>${M.e(r.name)}</strong> · ${M.e(r.metadata.version)} · ${M.e(r.applicant)}</p>${M.link('查看完整成果材料',`Meeting.viewOutcome('${id}')`)}<form id="mt-review-form" style="margin-top:18px">${M.field('decision','审批结果','','select',['通过','驳回','拒绝'])}${M.field('opinion','审批意见','','textarea')}<p class="mt-error" id="mt-review-error"></p></form>`,M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="mt-review-form">确认审批</button>');document.getElementById('mt-review-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),list=M.records(),r=list.find(x=>x.id===id);if(r.status!=='待审批'){M.toast('该成果已处理');return}const decision=f.get('decision'),opinion=f.get('opinion').trim();if(!opinion)return;r.status={通过:'已通过',驳回:'已驳回',拒绝:'已拒绝'}[decision];r.history.push({action:decision,by:'张明',time:M.date(),note:opinion});if(decision==='通过'){const id=r.acceptedAssetId||r.assetId||'new-outcome-'+r.id;r.acceptedAssetId=id;M.registerAsset(id,r.kind,{...r.metadata,...(!r.assetId?{up:'none'}:{})});if(!r.assetId&&r.kind==='model'){const s=M.read('bdh-model-service-v3',{});s.newRows??=[];if(!s.newRows.some(x=>x.key===id))s.newRows.push({key:id,no:r.metadata.modelNo||M.nextModelNo(),name:r.name,ver:r.metadata.version,files:r.files.map(x=>x.name),materialType:r.materialType||'image',access:'platform',src:'res',who:r.applicant,d:M.date().slice(0,10),t:M.date().slice(11),done:!!r.metadata.intro,up:'none',detailPage:'model-edit-new',outcomeId:r.id});const accepted=s.newRows.find(x=>x.key===id);if(accepted)Object.assign(accepted,ResourceFields.modelFromOutcome(r,accepted));M.write('bdh-model-service-v3',s)}else if(!r.assetId){const ds=M.read('agri-datasets',MeetingSeeds.datasets);if(!ds.some(x=>x.id===id))ds.unshift({id,name:r.name,desc:r.metadata.summary||'',pub:'off',todo:!r.metadata.intro,src:'res',thumb:'',type:r.metadata.modality,form:r.metadata.modality,count:r.metadata.scale,org:r.metadata.provider,version:r.metadata.version,link:'dataset-edit-complete',outcomeId:r.id,metadata:ResourceFields.dataset(r.metadata,r.files),files:r.files,submittedAt:r.time,submittedBy:r.applicant});M.write('agri-datasets',ds)}}if(M.write(M.key,list)){M.close();M.refreshReview?.();M.toast('审批结果已保存')}}};
+M.labelReviewOptions = select => {
+  const labels = {驳回:'驳回（退回修改）',拒绝:'拒绝（结束流程）'};
+  for (const option of select.options) {
+    if (labels[option.value]) option.textContent = labels[option.value];
+  }
+};
+M.reviewResultMessage = decision => ({
+  驳回:'已驳回，退回修改后可重新提交',
+  拒绝:'已拒绝，本次流程已结束'
+}[decision] || '审批结果已保存');
+M.review=id=>{const r=M.records().find(x=>x.id===id);if(!r||r.status!=='待审批')return;M.dialog('成果审批验收',`<p><strong>${M.e(r.name)}</strong> · ${M.e(r.metadata.version)} · ${M.e(r.applicant)}</p>${M.link('查看完整成果材料',`Meeting.viewOutcome('${id}')`)}<form id="mt-review-form" style="margin-top:18px">${M.field('decision','审批结果','','select',['通过','驳回','拒绝'])}${M.field('opinion','审批意见','','textarea')}<p class="mt-error" id="mt-review-error"></p></form>`,M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="mt-review-form">确认审批</button>');M.labelReviewOptions(document.getElementById('mt-decision'));document.getElementById('mt-review-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),list=M.records(),r=list.find(x=>x.id===id);if(r.status!=='待审批'){M.toast('该成果已处理');return}const decision=f.get('decision'),opinion=f.get('opinion').trim();if(!opinion)return;r.status={通过:'已通过',驳回:'已驳回',拒绝:'已拒绝'}[decision];r.history.push({action:decision,by:PrototypeAccounts.backendAccount().name,time:M.date(),note:opinion});if(decision==='通过'){const id=r.acceptedAssetId||r.assetId||'new-outcome-'+r.id;r.acceptedAssetId=id;M.registerAsset(id,r.kind,{...r.metadata,...(!r.assetId?{up:'none'}:{})});if(!r.assetId&&r.kind==='model'){const s=M.read('bdh-model-service-v3',{});s.newRows??=[];if(!s.newRows.some(x=>x.key===id))s.newRows.push({key:id,no:r.metadata.modelNo||M.nextModelNo(),name:r.name,ver:r.metadata.version,files:r.files.map(x=>x.name),materialType:r.materialType||'image',access:'platform',src:'res',who:r.applicant,d:M.date().slice(0,10),t:M.date().slice(11),done:!!r.metadata.intro,up:'none',detailPage:'model-edit-new',outcomeId:r.id});const accepted=s.newRows.find(x=>x.key===id);if(accepted)Object.assign(accepted,ResourceFields.modelFromOutcome(r,accepted));M.write('bdh-model-service-v3',s)}else if(!r.assetId){const ds=M.read('agri-datasets',MeetingSeeds.datasets);if(!ds.some(x=>x.id===id))ds.unshift({id,name:r.name,desc:r.metadata.summary||'',pub:'off',todo:!r.metadata.intro,src:'res',thumb:'',type:r.metadata.modality,form:r.metadata.modality,count:r.metadata.scale,org:r.metadata.provider,version:r.metadata.version,link:'dataset-edit-complete',outcomeId:r.id,metadata:ResourceFields.dataset(r.metadata,r.files),files:r.files,submittedAt:r.time,submittedBy:r.applicant});M.write('agri-datasets',ds)}}if(M.write(M.key,list)){M.close();M.refreshReview?.();M.toast(M.reviewResultMessage(decision))}}};
 M.nextModelNo=()=>{const n=M.read('bdh-model-counter-1010',0)+1;M.write('bdh-model-counter-1010',n);return 'MDL-'+new Date().getFullYear()+'-N'+String(n).padStart(5,'0')};
 M.deliveryType=type=>{const n=document.getElementById('mt-files');n.multiple=type==='files';n.accept=type==='image'?'.tar,.tar.gz,.tgz':'.pkl,.joblib,.onnx,.pt,.pth,.py,.json,.yaml,.yml,.txt,.md,.pdf,.zip';n.value=''};
 M.fillDefaults=id=>{const a=M.assets()[id];if(!a)return;M.schemas[M.submitting.kind].forEach(([k])=>{const n=document.getElementById('mt-'+k);if(n)n.value=a[k]??''});document.getElementById('mt-intro').innerHTML=M.safeHTML(a.intro||'')};
@@ -893,12 +1100,13 @@ window.BackendState={
   M.viewOutcome = id => {
     const r = M.records().find(x => x.id === id);
     if (!r) { M.toast('未找到该成果记录'); return; }
-    const footer = M.btn('关闭','Meeting.close()') + (M.admin && r.status === '待审批' ? M.btn('审批验收',invoke('review',id),true) : '');
+    const footer = M.btn('关闭','Meeting.close()') + (M.admin && PrototypeAccounts.backendCanWrite() && r.status === '待审批' ? M.btn('审批验收',invoke('review',id),true) : '');
     decorateDialog(M.dialog(r.kind === 'model' ? '模型成果详情' : '数据成果详情', M.outcomeDetailsHTML(r), footer), r);
   };
 
   const originalReview = M.review;
   M.review = id => {
+    if(!PrototypeAccounts.backendCanWrite())return;
     const r = M.records().find(x => x.id === id);
     if (!r || r.status !== '待审批') { M.toast('该成果已处理，请查看最新审批记录'); return; }
     originalReview(id);
@@ -942,14 +1150,46 @@ window.BackendState={
   const badge = s => '<span class="tag '+({'待审批':'wait','通过':'ok','驳回':'back','拒绝':'no'}[s]||'gray')+'">'+E(s)+'</span>';
   const legacy = () => M.read(legacyKey,null) || JSON.parse(JSON.stringify(window.ApprovalSeeds));
   const spaces = () => M.read(spaceKey,[]);
+  const portalKeys = {'数据使用申请':'LS_AUTH_APPS','模型使用申请':'bdh-model-applications-v1'};
+  function portalRequests(key) {
+    const rows=M.read(key,[]);
+    return Array.isArray(rows)?rows:[];
+  }
+  function portalRequestStatus(record) {
+    if(['pending','审核中','待审批','待审核','申请中'].includes(record.status))return '待审批';
+    if(record.reviewDecision)return status(record.reviewDecision);
+    if(['approved','已通过'].includes(record.status))return '通过';
+    return status(record.status);
+  }
   const demands = () => {const rows=M.read(demandKey,[]);return Array.isArray(rows)?rows:[];};
+  const demandResultStatus = {通过:'发布中',驳回:'未通过',拒绝:'已结束'};
+  const storedDemands = demands();
+  const legacyRefusals = storedDemands.filter(d => d && (
+    ['已拒绝','拒绝'].includes(d.status) || (d.status === '未通过' && d.reviewDecision === '拒绝')
+  ));
+  if (legacyRefusals.length) {
+    for (const demand of legacyRefusals) {
+      demand.status = demandResultStatus.拒绝;
+      demand.reviewDecision = '拒绝';
+    }
+    M.write(demandKey,storedDemands);
+  }
   const demandStatus = d => ['待审核','待审批','申请中'].includes(d.status) ? '待审批' : status(d.reviewDecision || ({'发布中':'通过','已获取联系方式':'通过'}[d.status]) || d.status);
   const demandHistory = d => Array.isArray(d.approvalHistory) ? d.approvalHistory : [];
   A.rows = () => {
     if (view === 'outcomes') return M.records().map(r=>({key:String(r.id),id:r.id,name:r.name,type:r.kind==='model'?'成果模型':'成果数据',who:r.applicant,org:r.spaceName,time:r.time,status:status(r.status),raw:r}));
     const s=legacy(), spaceRows=spaces(), spaceIds=new Set(spaceRows.map(r=>String(r.id))), dedup=new Map();
     ['WAIT','WAIT2','DONE'].forEach(k=>(s[k]||[]).forEach(r=>{if(!spaceIds.has(String(r.no)))dedup.set(String(r.no),{key:'legacy:'+r.no,id:r.no,source:'legacy',name:r.res,type:r.type,who:r.who,org:r.org,time:r.at,status:status(r.st),raw:r});}));
-    spaceRows.forEach(r=>dedup.set('space:'+r.id,{key:'space:'+r.id,id:r.id,source:'space',name:r.name,type:'创建科研开发空间',who:r.who||r.applicant,org:r.team,time:r.time||r.at,status:status(r.state),raw:r}));
+    spaceRows.filter(r=>r.authorizationMode!=='direct').forEach(r=>dedup.set('space:'+r.id,{key:'space:'+r.id,id:r.id,source:'space',name:r.name,type:'创建科研开发空间',who:r.who||r.applicant,org:r.team,time:r.time||r.at,status:status(r.state),raw:r}));
+    for(const [type,key] of Object.entries(portalKeys)){
+      for(const r of portalRequests(key)){
+        const id=r.id||r.appId, reviewState=portalRequestStatus(r);
+        if(!id||r.authorizationMode==='direct'||r.applicationKind==='commercial'||!['待审批','通过','驳回','拒绝'].includes(reviewState))continue;
+        const rowKey='portal:'+key+':'+id;
+        dedup.set(rowKey,{key:rowKey,id,source:'portal',storeKey:key,type,name:r.name,
+          who:r.applicant||r.applicantId,org:r.team||r.org,time:r.submittedAt||r.date,status:reviewState,raw:r});
+      }
+    }
     demands().forEach(r=>{
       const st=demandStatus(r);
       // Published operating records without a submission or review do not become fictitious approvals.
@@ -966,7 +1206,7 @@ window.BackendState={
     ['wait','done'].forEach(tab=>{const n=Q('approval-'+tab);n.classList.toggle('active',A.state.tab===tab);n.setAttribute('aria-selected',String(A.state.tab===tab));Q('approval-'+tab+'-count').textContent=filtered.filter(r=>tab==='wait'?r.status==='待审批':r.status!=='待审批').length;});
     Q('approval-result-filter').hidden=A.state.tab==='wait';
     Q('approval-rows').innerHTML=rows.slice((A.state.page-1)*A.state.pageSize,A.state.page*A.state.pageSize).map(r=>{
-      const actions=M.link('查看',call('viewRecord',r.key))+(r.status==='待审批'?M.link(view==='outcomes'?'审批验收':'审批',call('review',r.key)):'');
+      const actions=M.link('查看',call('viewRecord',r.key))+(r.status==='待审批'&&PrototypeAccounts.backendCanWrite()?M.link(view==='outcomes'?'审批验收':'审批',call('review',r.key)):'');
       const first=view==='outcomes'?'<td class="resource-cell"><strong>'+E(r.name)+'</strong><small>'+E(r.id)+'</small></td><td>'+E(r.type)+'<small>'+E(r.raw.metadata?.version||'—')+'</small></td>':'<td class="t-code approval-id">'+E(r.id)+'</td><td class="nowrap">'+E(r.type)+'</td><td class="resource-cell">'+E(text(r.name))+'</td>';
       return '<tr data-approval-key="'+E(r.key)+'">'+first+'<td>'+E(text(r.who))+'<small>'+(r.source==='demand'?'发布单位：':'')+E(r.org||'')+'</small></td><td class="nowrap">'+E(text(r.time))+'</td><td>'+badge(r.status)+'</td><td><div class="mt-actions">'+actions+'</div></td></tr>';
     }).join('')||'<tr><td class="approval-empty" colspan="'+(view==='outcomes'?6:7)+'">'+(A.state.query||A.state.type||(A.state.tab==='done'&&A.state.status)?'暂无符合筛选条件的记录':A.state.tab==='wait'?(view==='outcomes'?'暂无待验收的成果':'暂无待审批的资源申请'):'暂无已办审批记录')+'</td></tr>';
@@ -990,6 +1230,11 @@ window.BackendState={
   A.detail = r => {
     const d=r.raw;
     if(r.source==='demand')return A.demandDetail(r);
+    if(r.source==='portal')return grid([
+      ['申请编号',r.id],['申请类型',r.type],['申请资源',r.name],['版本',d.version],
+      ['申请人',r.who],['授权用途',d.purpose||d.use],['用途说明',d.note||d.reason],
+      ['提交时间',r.time],['审批状态',r.status],['审批人',d.reviewer],['审批时间',d.reviewedAt],['审批意见',d.reviewNote],
+    ]);
     if(r.source==='legacy')return grid([['申请编号',r.id],['申请类型',r.type],['申请人',d.who],['所属机构',d.org],['申请资源',d.res],['用途说明',d.use],['提交时间',d.at],['审批状态',r.status]])+'<h3 class="mt-section">审批记录</h3>'+((d.rounds||[]).map(x=>'<div class="mt-timeline"><strong>'+E(x.r)+'</strong> · '+E(x.by)+' · '+E(x.t)+'<p>'+E(x.note)+'</p></div>').join('')||'<p class="mt-note">暂无审批记录</p>');
     return grid([['申请编号',r.id],['审批状态',r.status],['空间名称',d.name],['所属团队',d.team],['研究用途',d.desc],['关联模型',d.model||'未关联模型'],['开发镜像',d.image],['运行环境',d.compute?.runtime],['系统环境',d.compute?.detail],['开发工具',d.ide],['CPU / 内存',text(d.cpu)+' 核 / '+text(d.ram)+' GB'],['GPU',text(d.gpu)+' 张 · 单卡显存 '+text(d.gpuMemory)+' GB'],['研究存储 / 系统盘',text(d.storage)+' GB / '+text(d.systemDisk)+' GB'],['审批意见',d.reviewNote||'尚未审批']]);
   };
@@ -1002,13 +1247,15 @@ window.BackendState={
   A.viewRecord = key => {
     const r=A.rows().find(x=>x.key===key);if(!r){M.toast('未找到该审批记录');return;}
     if(view==='outcomes'){M.viewOutcome(r.id);return;}
-    A.dialog(r.source==='demand'?'需求申请详情':'资源申请详情',A.detail(r),M.btn('关闭','Meeting.close()')+(r.status==='待审批'?M.btn('审批',call('review',key),true):''),r);
+    A.dialog(r.source==='demand'?'需求申请详情':'资源申请详情',A.detail(r),M.btn('关闭','Meeting.close()')+(r.status==='待审批'&&PrototypeAccounts.backendCanWrite()?M.btn('审批',call('review',key),true):''),r);
   };
   A.review = key => {
+    if(!PrototypeAccounts.backendCanWrite())return;
     const r=A.rows().find(x=>x.key===key);if(!r||r.status!=='待审批'){M.toast('该申请已处理，请查看最新审批记录');A.render();return;}
     if(view==='outcomes'){M.review(r.id);return;}
     const demand=r.source==='demand';
     const dialog=A.dialog(demand?'需求申请审批':'资源申请审批',A.detail(r)+'<form id="approval-review-form"'+(demand?' class="oa-review-form"':'')+'><h3>审批处理</h3>'+M.field('resource-decision','审批结果','','select',['通过','驳回','拒绝'])+M.field('resource-opinion','审批意见','','textarea')+'<p id="approval-review-error" class="mt-error" role="alert"></p></form>',(demand?M.btn('填写审批意见','ApprovalCenter.jumpToReview()'):'')+M.btn('取消','Meeting.close()')+'<button class="mt-btn primary" type="submit" form="approval-review-form">确认审批</button>',r);
+    M.labelReviewOptions(Q('mt-resource-decision'));
     Q('mt-resource-opinion').maxLength=500;
     const form=Q('approval-review-form');form.addEventListener('input',()=>{Q('approval-review-error').textContent='';});
     form.onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),decision=f.get('resource-decision'),opinion=String(f.get('resource-opinion')||'').trim();if(!['通过','驳回','拒绝'].includes(decision)||!opinion){Q('approval-review-error').textContent='请选择审批结果并填写审批意见';return;}A.commit(key,decision,opinion);};
@@ -1016,6 +1263,7 @@ window.BackendState={
   };
   A.jumpToReview = () => {const form=Q('approval-review-form');if(!form)return;form.scrollIntoView({block:'start',behavior:'smooth'});form.elements['resource-decision'].focus({preventScroll:true});};
   A.commit = (key,decision,opinion) => {
+    if(!PrototypeAccounts.backendCanWrite())return false;
     if(!['通过','驳回','拒绝'].includes(decision)||!String(opinion||'').trim())return false;
     opinion=String(opinion).trim();const current=A.rows().find(x=>x.key===key);
     if(!current||current.status!=='待审批'){M.toast('该申请已处理，请查看最新审批记录');M.close();A.render();return false;}
@@ -1024,18 +1272,28 @@ window.BackendState={
       const rows=demands(),d=rows.find(x=>String(x.id)===String(current.id));if(!d)return false;
       const now=M.date(),history=demandHistory(d).slice();
       if(!history.length)history.push({action:'提交需求',by:current.who||'申请人',time:d.submittedAt||d.date,note:''});
-      history.push({action:decision,by:'张明',time:now,note:opinion});
-      Object.assign(d,{status:decision==='通过'?'发布中':decision==='驳回'?'已驳回':'已拒绝',reviewDecision:decision,reviewNote:opinion,reviewer:'张明',reviewedAt:now,reject:decision==='通过'?'':opinion,approvalHistory:history,date:now.slice(0,10)});
+      history.push({action:decision,by:PrototypeAccounts.backendAccount().name,time:now,note:opinion});
+      Object.assign(d,{status:demandResultStatus[decision],reviewDecision:decision,reviewNote:opinion,reviewer:PrototypeAccounts.backendAccount().name,reviewedAt:now,reject:decision==='通过'?'':opinion,approvalHistory:history,date:now.slice(0,10)});
       saved=M.write(demandKey,rows);
+    }else if(current.source==='portal'){
+      const rows=portalRequests(current.storeKey);
+      const record=rows.find(row=>String(row.id||row.appId)===String(current.id));
+      if(!record||portalRequestStatus(record)!=='待审批')return false;
+      const reviewer=PrototypeAccounts.backendAccount().name,reviewedAt=M.date();
+      Object.assign(record,{
+        status:{通过:'已通过',驳回:'已驳回',拒绝:'已拒绝'}[decision],reviewDecision:decision,reviewNote:opinion,reviewer,reviewedAt,
+        approvalHistory:[...(record.approvalHistory||[]),{action:decision,by:reviewer,time:reviewedAt,note:opinion}],
+      });
+      saved=M.write(current.storeKey,rows);
     }else if(current.source==='legacy'){
       const s=legacy(),r=['WAIT','WAIT2'].flatMap(k=>s[k]||[]).find(x=>String(x.no)===String(current.id));if(!r)return false;
-      r.st=decision;r.rounds=r.rounds||[];r.rounds.push({r:decision,by:'张明',t:M.date(),note:opinion});s.WAIT=(s.WAIT||[]).filter(x=>String(x.no)!==String(r.no));s.WAIT2=(s.WAIT2||[]).filter(x=>String(x.no)!==String(r.no));s.DONE=[r,...(s.DONE||[]).filter(x=>String(x.no)!==String(r.no))];saved=M.write(legacyKey,s);
-      if(saved){const log=M.read('agri-audit',[]);log.unshift({时间:new Date().toLocaleString('zh-CN'),操作人:'张明',操作:decision,对象:r.no,结果:'成功'});M.write('agri-audit',log);}
+      r.st=decision;r.rounds=r.rounds||[];r.rounds.push({r:decision,by:PrototypeAccounts.backendAccount().name,t:M.date(),note:opinion});s.WAIT=(s.WAIT||[]).filter(x=>String(x.no)!==String(r.no));s.WAIT2=(s.WAIT2||[]).filter(x=>String(x.no)!==String(r.no));s.DONE=[r,...(s.DONE||[]).filter(x=>String(x.no)!==String(r.no))];saved=M.write(legacyKey,s);
+      if(saved){const log=M.read('agri-audit',[]);log.unshift({时间:new Date().toLocaleString('zh-CN'),操作人:PrototypeAccounts.backendAccount().name,操作:decision,对象:r.no,结果:'成功'});M.write('agri-audit',log);}
     }else if(current.source==='space'){
       const rows=spaces(),r=rows.find(x=>String(x.id)===String(current.id));if(!r)return false;
       r.state=decision==='通过'?'可用':decision==='驳回'?'已驳回':'已拒绝';r.reviewNote=opinion;r.instance=decision==='通过'?'已停止':'未开通';r.progress='审批'+decision+'：'+opinion;saved=M.write(spaceKey,rows);
     }
-    if(saved){M.close();A.render();M.toast(current.source==='demand'&&decision==='通过'?'审批通过，需求已发布':'审批结果已保存');}
+    if(saved){M.close();A.render();M.toast(current.source==='demand'&&decision==='通过'?'审批通过，需求已发布':M.reviewResultMessage(decision));}
     return saved;
   };
   A.switchView = next => {
@@ -1061,14 +1319,14 @@ window.BackendState={
   document.addEventListener('click',e=>{const box=document.querySelector('.u-box'),menu=Q('userMenu');if(menu&&box&&!box.contains(e.target)){menu.classList.remove('open');document.querySelector('.u-name')?.setAttribute('aria-expanded','false');}});
   M.refreshReview=A.render;M.refreshSpaces=A.render;
   M.viewSpace=id=>A.viewRecord('space:'+id);M.reviewSpace=id=>A.review('space:'+id);
-  window.addEventListener('storage',e=>{if([legacyKey,spaceKey,demandKey,M.key,null].includes(e.key))A.render();});
+  window.addEventListener('storage',e=>{if([legacyKey,spaceKey,demandKey,...Object.values(portalKeys),M.key,null].includes(e.key))A.render();});
   window.addEventListener('focus',()=>A.render());
   const route = () => {
     const params=new URLSearchParams(location.search);
     const next=['#resources','#mt-space-requests'].includes(location.hash)?'resources':location.hash==='#outcomes'?'outcomes':(params.has('spaceRequest')||params.has('request')||params.has('demand')||decodeURIComponent(location.pathname).endsWith('后台-资源申请审批.html'))?'resources':'outcomes';
     A.switchView(next);
     let key=next==='outcomes'&&params.has('outcome')?params.get('outcome'):next==='resources'&&params.has('spaceRequest')?'space:'+params.get('spaceRequest'):next==='resources'&&params.has('demand')?'demand:'+params.get('demand'):next==='resources'&&params.has('request')?'legacy:'+params.get('request'):null;
-    if(key){const r=A.rows().find(x=>x.key===key);if(r)(r.status==='待审批'&&(params.get('action')==='review'||next==='outcomes')?A.review:A.viewRecord)(key);else M.toast('未找到该审批记录，请在列表中查询');}
+    if(key){const r=A.rows().find(x=>x.key===key);if(r)(PrototypeAccounts.backendCanWrite()&&r.status==='待审批'&&(params.get('action')==='review'||next==='outcomes')?A.review:A.viewRecord)(key);else M.toast('未找到该审批记录，请在列表中查询');}
   };
   document.querySelectorAll('[data-approval-view]').forEach(n=>n.addEventListener('click',e=>{
     e.preventDefault();const target=n.dataset.approvalView;const url=new URL(location.href);
@@ -1411,6 +1669,869 @@ window.addEventListener('pageshow',e=>{if(e.persisted&&/管理\.html$/.test(F))l
 })();
 
 </script>
-<!-- devdoc-1012:start --><script src="assets/meeting/meeting-devdoc.js"></script><!-- devdoc-1012:end -->
-<script src="assets/prototype-nav.js"></script>
+<!-- devdoc-1012:start --><script id="approval-devdoc">
+/* 智慧农业平台 · 全项目字段与交互说明 · 2026-11-18
+   按页面及当前业务视图提供说明。 */
+(function(){
+  'use strict';
+  var BRAND = '#005653';
+  var DOCS = {};
+
+  /* ========================== 渲染层（通用） ============================ */
+  var CSS = [
+    '.mtdev-group{position:fixed;right:24px;bottom:24px;z-index:960;display:flex;gap:8px;width:max-content;cursor:grab;user-select:none;transition:opacity .2s}',
+    'body:has(dialog[open]) .mtdev-group,.mtdev-group.mtdev-dim{opacity:0;pointer-events:none}',
+    '.mtdev-btn{display:flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:19px;font-size:14px;font-weight:500;white-space:nowrap;border:1px solid transparent;font-family:inherit;cursor:pointer;transition:all .2s}',
+    '.mtdev-btn.guide{background:' + BRAND + ';color:#fff;box-shadow:0 4px 12px rgba(0,86,83,.28)}',
+    '.mtdev-btn.guide:hover{background:#0a6b66;transform:translateY(-1px)}',
+    '.mtdev-btn.field{background:#edf6f2;color:' + BRAND + ';border-color:#c6ddd4;box-shadow:0 4px 12px rgba(0,86,83,.12)}',
+    '.mtdev-btn.field:hover{background:#dceee6;transform:translateY(-1px)}',
+    '.mtdev-mask{display:none;position:fixed;inset:0;background:rgba(10,30,28,.45);z-index:12000;align-items:center;justify-content:center}',
+    '.mtdev-mask.on{display:flex}',
+    '.mtdev-drawer{background:#fff;border-radius:8px;width:780px;max-width:92vw;max-height:84vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(6,40,38,.28)}',
+    '.mtdev-hd{display:flex;align-items:center;gap:10px;padding:16px 22px;border-bottom:1px solid #dce5e9;background:#f4f8f5;flex-shrink:0}',
+    '.mtdev-hd b{font-size:16px;color:#10213a;flex:1;font-weight:600}',
+    '.mtdev-hd .p{font-size:12px;color:#526078;white-space:nowrap}',
+    '.mtdev-x{font-size:16px;color:#526078;background:none;border:0;cursor:pointer;padding:2px 8px;border-radius:4px;line-height:1.4}',
+    '.mtdev-x:hover{color:#10213a;background:#e6efeb}',
+    '.mtdev-bd{padding:20px 22px;overflow-y:auto;flex:1;color:#10213a;font-size:13.5px;line-height:1.7}',
+    '.mtdev-tabs{display:flex;flex-wrap:wrap;gap:2px;border-bottom:1px solid #dce5e9;margin:-4px 0 16px}',
+    '.mtdev-tab{background:none;border:0;font-family:inherit;padding:8px 14px;font-size:13.5px;color:#526078;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}',
+    '.mtdev-tab:hover{color:' + BRAND + '}',
+    '.mtdev-tab.on{color:' + BRAND + ';border-bottom-color:' + BRAND + ';font-weight:600}',
+    '.mtdev-sec{margin-bottom:22px}', '.mtdev-sec:last-child{margin-bottom:2px}',
+    '.mtdev-sec h4{margin:0 0 10px;font-size:14px;color:#10213a;font-weight:600}',
+    '.mtdev-intro{background:#f4f8f5;border-left:3px solid ' + BRAND + ';padding:12px 14px;border-radius:0 6px 6px 0;margin-bottom:18px;color:#31445c}',
+    '.mtdev-tw{overflow-x:auto;border:1px solid #dce5e9;border-radius:6px}',
+    '.mtdev-tw table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:auto}',
+    '.mtdev-tw-fx table{table-layout:fixed}',
+    '.mtdev-tw-fx .mtdev-tag{white-space:normal}',
+    '.mtdev-tw th,.mtdev-tw td{padding:8px 11px;text-align:left;border-bottom:1px solid #eef3f1;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere}',
+    '.mtdev-tw th{background:#f4f8f5;color:#526078;font-weight:600;white-space:nowrap;position:sticky;top:0}',
+    '.mtdev-tw tr:last-child td{border-bottom:0}',
+    '.mtdev-tw td:first-child{font-weight:600;color:#10213a}',
+    '.mtdev-tw td code,.mtdev-code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#f4f8f5;border:1px solid #e4ecea;border-radius:3px;padding:0 4px;font-size:12px;color:#0a4b48;word-break:break-all;overflow-wrap:anywhere}',
+    '.mtdev-note{margin-top:8px;font-size:12px;color:#526078;line-height:1.65}',
+    '.mtdev-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;white-space:nowrap}',
+    '.mtdev-tag.do{background:#e6f4ec;color:#1a7f5a}',
+    '.mtdev-tag.no{background:#fdecea;color:#c0392b}',
+    '.mtdev-tag.req{background:#fdecea;color:#c0392b}',
+    '.mtdev-tag.mid{background:#eaf0fb;color:#3b6fb6}',
+    '.mtdev-tag.info{background:#edf6f2;color:' + BRAND + '}',
+    '.mtdev-tag.opt{background:#f0f2f5;color:#526078}',
+    '.mtdev-tag.warn{background:#fdf4e3;color:#b7791f}',
+    '.mtdev-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:2px 0 14px}',
+    '.mtdev-flow i{font-style:normal;background:#edf6f2;color:' + BRAND + ';border:1px solid #c6ddd4;border-radius:14px;padding:3px 10px;font-size:12px}',
+    '.mtdev-flow s{text-decoration:none;color:#7d8c9c;font-size:12px}'
+  ].join('');
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  /* 单元格状态标记：以 {{tag}} 开头时渲染为彩色标签
+     tag ∈ do 可用·免申请（绿） / mid 需申请（蓝） / opt 不显示·不适用（灰） / warn 注意（黄） / no 禁用（红） / info 品牌色 */
+  function cellHTML(c) {
+    var s = (c == null ? '' : String(c));
+    var m = /^\{\{(\w+)\}\}([\s\S]*)$/.exec(s);
+    if (m) return '<span class="mtdev-tag ' + m[1] + '">' + m[2] + '</span>';
+    return s;
+  }
+
+  function tableHTML(sec) {
+    var h = '<div class="mtdev-tw' + (sec.w ? ' mtdev-tw-fx' : '') + '"><table>';
+    if (sec.w) {
+      h += '<colgroup>';
+      sec.w.forEach(function (w) { h += '<col style="width:' + w + '">'; });
+      h += '</colgroup>';
+    }
+    h += '<thead><tr>';
+    sec.head.forEach(function (c) { h += '<th>' + c + '</th>'; });
+    h += '</tr></thead><tbody>';
+    sec.rows.forEach(function (r) {
+      h += '<tr>';
+      r.forEach(function (c) { h += '<td>' + cellHTML(c) + '</td>'; });
+      h += '</tr>';
+    });
+    return h + '</tbody></table></div>' + (sec.note ? '<p class="mtdev-note">' + sec.note + '</p>' : '');
+  }
+
+  function tabBody(tab) {
+    var h = '';
+    (tab.sections || []).forEach(function (s) {
+      h += '<div class="mtdev-sec"><h4>' + s.title + '</h4>' + tableHTML(s) + '</div>';
+    });
+    return h;
+  }
+
+  function drawerHTML(overlayId, bodyId, titleId) {
+    return '<div class="mtdev-mask" id="' + overlayId + '">' +
+      '<div class="mtdev-drawer" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '">' +
+      '<div class="mtdev-hd"><b id="' + titleId + '"></b><span class="p">2026-11-18 更新</span>' +
+      '<button class="mtdev-x" type="button" aria-label="关闭说明" title="关闭（Esc）">✕</button></div>' +
+      '<div class="mtdev-bd" id="' + bodyId + '"></div></div></div>';
+  }
+
+  function renderDrawer(mask, doc, title, tabs, prefix, foot) {
+    mask.querySelector('.mtdev-hd b').textContent = title + ' — ' + doc.name;
+    var body = mask.querySelector('.mtdev-bd');
+    var html = '<div class="mtdev-intro">' + doc.intro + '</div><div class="mtdev-tabs" role="tablist" aria-label="' + title + '">';
+    tabs.forEach(function (tab, i) {
+      html += '<button type="button" class="mtdev-tab" id="' + prefix + 'Tab' + i + '" role="tab" aria-controls="' + prefix + i + '">' + esc(tab.label) + '</button>';
+    });
+    html += '</div>';
+    tabs.forEach(function (tab, i) {
+      html += '<div class="mtdev-tabpane" id="' + prefix + i + '" role="tabpanel" aria-labelledby="' + prefix + 'Tab' + i + '">' + tabBody(tab) + '</div>';
+    });
+    body.innerHTML = html + (foot || '');
+    bindTabs(body);
+  }
+
+  function selectTab(body, index) {
+    body.querySelectorAll('.mtdev-tab').forEach(function (tab, i) {
+      tab.classList.toggle('on', i === index);
+      tab.setAttribute('aria-selected', String(i === index));
+      tab.tabIndex = i === index ? 0 : -1;
+    });
+    body.querySelectorAll('.mtdev-tabpane').forEach(function (pane, i) {
+      pane.style.display = i === index ? '' : 'none';
+    });
+  }
+
+  function bindTabs(body) {
+    var tabs = Array.from(body.querySelectorAll('.mtdev-tab'));
+    tabs.forEach(function (tab, index) {
+      tab.onclick = function () { selectTab(body, index); };
+      tab.onkeydown = function (event) {
+        var next = index;
+        if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+        else if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        selectTab(body, next);
+        tabs[next].focus();
+      };
+    });
+    selectTab(body, 0);
+    body.scrollTop = 0;
+  }
+
+
+  /* 悬浮按钮组与抽屉头部可拖拽（拖完抑制一次点击，避免误触） */
+  function draggable(el, handle, onMove) {
+    handle = handle || el;
+    var st = null;
+    handle.addEventListener('mousedown', function (e) {
+      if (e.button !== 0 || (e.target.closest && e.target.closest('.mtdev-x'))) return;
+      var r = el.getBoundingClientRect();
+      st = { sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, w: r.width, h: r.height, moved: false };
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) {
+      if (!st) return;
+      var dx = e.clientX - st.sx, dy = e.clientY - st.sy;
+      if (!st.moved && Math.abs(dx) + Math.abs(dy) > 4) st.moved = true;
+      if (!st.moved) return;
+      if (el.style.position !== 'fixed') {
+        el.style.position = 'fixed'; el.style.margin = '0';
+        el.style.left = st.ox + 'px'; el.style.top = st.oy + 'px';
+        el.style.right = 'auto'; el.style.bottom = 'auto';
+      }
+      var mx = Math.max(0, window.innerWidth - st.w), my = Math.max(0, window.innerHeight - st.h);
+      el.style.left = Math.min(mx, Math.max(0, st.ox + dx)) + 'px';
+      el.style.top = Math.min(my, Math.max(0, st.oy + dy)) + 'px';
+      if (onMove) onMove();
+    });
+    document.addEventListener('mouseup', function () {
+      if (!st) return;
+      if (st.moved) {
+        var sup = function (ev) { ev.preventDefault(); ev.stopPropagation(); document.removeEventListener('click', sup, true); };
+        document.addEventListener('click', sup, true);
+      }
+      st = null;
+    });
+  }
+
+
+  DOCS = {
+  "后台-审批中心.html": {
+    "name": "审批中心 · 成果验收审批",
+    "intro": "受理前端正式提交的模型和数据成果，查看内容与提交端一致。",
+    "field": [
+      {
+        "label": "审批记录",
+        "sections": [
+          {
+            "title": "审批记录",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "待审批 / 已办审批",
+                "列表 Tab",
+                "办理后进入已办列表，保留申请与审批内容。"
+              ],
+              [
+                "申请人、所属团队、提交时间",
+                "提交人、科研空间、提交时间",
+                "对应本次成果记录；个人中心来源按记录展示。"
+              ],
+              [
+                "审批结果",
+                "通过 / 驳回 / 拒绝",
+                "驳回退回上一步，提交人可修改后重新提交。拒绝结束本次验收流程，记录仅供查看。"
+              ],
+              [
+                "审批意见",
+                "必填多行文本",
+                "选择审批结果后填写，保存于审批记录，提交人可查。"
+              ],
+              [
+                "审批记录",
+                "审批人、时间、结果、意见",
+                "展示本次办理信息及已有记录。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "成果材料与提交",
+        "sections": [
+          {
+            "title": "成果材料与提交",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "成果类型",
+                "成果模型 / 成果数据",
+                "审批按提交的成果类型展示不同材料。"
+              ],
+              [
+                "关联课题、来源模型",
+                "关联选择",
+                "科研空间提交带出空间内模型；个人中心按可选模型关联。"
+              ],
+              [
+                "成果模型基本信息",
+                "名称、版本、类型、业务分类、任务、作物、提供方、权属等",
+                "保持与后台接收字段一致；个人中心按单条成果记录管理。"
+              ],
+              [
+                "成果模型介绍",
+                "简介、概述、业务能力、输入输出规范与示例",
+                "在成果材料中填写用于验收及后续展示，审批接入时保留。后台本地新建仍先建元数据、再编辑介绍。"
+              ],
+              [
+                "模型文件",
+                "镜像压缩包",
+                "个人中心上传模型使用镜像包，上传后在记录行部署、调试、提交。"
+              ],
+              [
+                "调试记录",
+                "输入、输出、日志、通过结果及材料关联",
+                "正式提交模型成果前须通过调试；审批中心可查看该记录并核对说明。"
+              ],
+              [
+                "数据文件及说明",
+                "数据基本信息、数据介绍、数据预览",
+                "沿用同一套数据字段与布局；不要求数据版本号或数据规模。"
+              ],
+              [
+                "提交时间、提交人、成果状态",
+                "系统记录",
+                "个人中心展示审批进展；空间成果区主要展示提交记录。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "数据基本信息",
+        "sections": [
+          {
+            "title": "数据基本信息",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "数据名称",
+                "文本，必填",
+                "作为列表标题及详情名称；后台数据集 ID 自动生成。"
+              ],
+              [
+                "是否包含地理信息数据",
+                "布尔：是 / 否；新建默认否",
+                "只判断是否提供地理信息查询功能。门户当前入口名称为“影像查询”；不作为数据分类，也不决定预览方式。"
+              ],
+              [
+                "研究方向",
+                "多选，选填",
+                "AI 数智基础、作物模型、资源环境、精准感控、智能装备、规模化应用；对应数据中心筛选。"
+              ],
+              [
+                "作物",
+                "多选，选填",
+                "沿用作物选项，可保留已有记录的作物值。"
+              ],
+              [
+                "覆盖年份",
+                "年份，选填",
+                "填写时校验四位年份；用于时间筛选。"
+              ],
+              [
+                "覆盖区域",
+                "区划选择器，可多选",
+                "可跨地区选择；保存区域代码及展示名称；全国（不限）与具体区域选择互斥。"
+              ],
+              [
+                "提供方 / 归属单位、权属归属",
+                "文本",
+                "分别描述提供单位和权属主体。"
+              ],
+              [
+                "关联专题",
+                "下拉选择",
+                "用于数据中心专题归类。"
+              ],
+              [
+                "数据格式",
+                "从已上传文件自动识别",
+                "按文件格式汇总去重；不是手工增加的业务分类。"
+              ],
+              [
+                "标注情况",
+                "下拉：有标注 / 无标注 / 未说明",
+                "与文件格式共同生成展示标签。标签仅包含这两类内容。"
+              ],
+              [
+                "数据简介",
+                "多行文本，最多 1000 字",
+                "用于列表的一句简介；数据介绍在后续内容编辑区维护。"
+              ],
+              [
+                "数据封面",
+                "图片上传、预览、移除",
+                "沿用当前表单支持的图片格式。"
+              ],
+              [
+                "成果文件 / 数据文件",
+                "文件列表",
+                "保留文件名称及文件内容引用，用于管理、审批和样例选择。"
+              ]
+            ],
+            "note": "当前数据基本信息中没有“数据形态”、数据版本号、数据规模或重复的“数据集元数据卡片”。"
+          }
+        ]
+      },
+      {
+        "label": "数据介绍与预览",
+        "sections": [
+          {
+            "title": "数据介绍与预览",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "数据概述、适用方向",
+                "多行内容",
+                "在“数据介绍”中编辑，保存后同步到详情展示。"
+              ],
+              [
+                "关键参数",
+                "可增删行：参数名称、参数值、单位",
+                "单位选填；保留参数原有含义，不重复生成固定元数据卡片。"
+              ],
+              [
+                "结构文件",
+                "从已上传成果文件选择，选填",
+                "用于展示字段结构；可与样例文件使用同一文件。"
+              ],
+              [
+                "样例数据文件",
+                "从已上传成果文件选择",
+                "可解析的表格文件展示字段及样例行。"
+              ],
+              [
+                "预览材料",
+                "单独上传文件 / 图片",
+                "不能直接表格展示的内容使用额外提交的预览材料。材料与真实成果文件分别保存。"
+              ],
+              [
+                "预览方式、预览说明",
+                "只读提交材料",
+                "核对提交人选择的预览方式及说明，随成果同步给数据集管理。"
+              ],
+              [
+                "前台展示",
+                "介绍内容 + 保存的样例",
+                "审批和后台编辑保留样例内容，前台读取同一数据记录。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "模型调试核验",
+        "sections": [
+          {
+            "title": "模型调试核验",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "是否通过调试",
+                "调试结果",
+                "模型验收查看已提交材料对应的通过结果。"
+              ],
+              [
+                "调试入参、出参、日志",
+                "只读材料",
+                "与模型介绍中的使用说明、输入输出规范进行核对。"
+              ],
+              [
+                "模型类型、简介、规范与示例",
+                "来源成果材料",
+                "通过后连同权属和来源信息进入模型管理；不在审批时重填。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "页面控件取值",
+        "sections": [
+          {
+            "title": "页面控件取值",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "成果类型",
+                "下拉",
+                "全部类型 / 成果模型 / 成果数据"
+              ],
+              [
+                "审批结果",
+                "下拉",
+                "全部结果 / 通过 / 驳回 / 拒绝"
+              ],
+              [
+                "每页条数",
+                "下拉",
+                "每页 6 条 / 每页 10 条 / 每页 20 条"
+              ]
+            ],
+            "note": "仅记录当前页面已有的选项和长度限制；业务必填与联动规则见相应业务页签。"
+          }
+        ]
+      }
+    ],
+    "guide": [
+      {
+        "label": "成果验收交互",
+        "sections": [
+          {
+            "title": "成果验收交互",
+            "head": [
+              "场景",
+              "操作入口",
+              "结果与限制"
+            ],
+            "rows": [
+              [
+                "筛选",
+                "类型、关键词、审批结果 → 查询 / 重置",
+                "定位当前成果记录；审批结果主要用于已办记录。"
+              ],
+              [
+                "查看",
+                "成果记录 → 查看",
+                "核对基本信息、原始材料、模型使用说明或数据预览及审批历史。"
+              ],
+              [
+                "验收模型",
+                "审批验收 → 调试记录",
+                "查看入参、出参、日志及问题提示。对照模型使用说明核对后办理。"
+              ],
+              [
+                "通过",
+                "选择通过并提交",
+                "保留原材料，接入模型 / 数据集管理，后续另行编辑与上架。"
+              ],
+              [
+                "驳回",
+                "选择“驳回”，填写审批意见并提交",
+                "退回上一步，成果提交人可修改后重新提交验收。"
+              ],
+              [
+                "拒绝",
+                "选择“拒绝”，填写审批意见并提交",
+                "结束本次验收流程，成果提交人可查看审批结果和意见。"
+              ],
+              [
+                "已办审批",
+                "已办审批 → 选择结果 / 查看",
+                "按审批结果筛选，并查看审批意见和材料。"
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "后台-资源申请审批.html": {
+    "name": "审批中心 · 资源申请审批",
+    "intro": "在审批中心办理数据、模型、算力、科研开发空间及需求发布申请。",
+    "field": [
+      {
+        "label": "审批记录",
+        "sections": [
+          {
+            "title": "审批记录",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "待审批 / 已办审批",
+                "列表 Tab",
+                "办理后进入已办列表，保留申请与审批内容。"
+              ],
+              [
+                "申请人、所属团队、提交时间",
+                "来源申请记录",
+                "查看原提交对象的身份和范围。"
+              ],
+              [
+                "审批结果",
+                "通过 / 驳回 / 拒绝",
+                "驳回退回上一步，申请人可修改后重新提交。拒绝结束本次申请流程，记录仅供查看。"
+              ],
+              [
+                "审批意见",
+                "必填，最多 500 字",
+                "通过、驳回和拒绝均需填写意见，记录审批人和办理时间。"
+              ],
+              [
+                "审批记录",
+                "审批人、时间、结果、意见",
+                "展示本次办理信息及已有记录。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "申请分类与材料",
+        "sections": [
+          {
+            "title": "申请分类与材料",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "数据使用申请",
+                "申请编号、数据资源、申请人、机构 / 范围及用途说明",
+                "查看申请记录。前台数据申请同时包含数据使用承诺。"
+              ],
+              [
+                "模型使用申请",
+                "申请模型、版本、用途及说明",
+                "选择科研用途时申请端可补充科研相关资料。"
+              ],
+              [
+                "算力申请",
+                "空间、所需 CPU / 内存 / GPU / 存储等",
+                "展示申请端提交的配置。"
+              ],
+              [
+                "创建科研开发空间",
+                "空间、团队、用途、关联模型及开发环境、资源与挂载数据",
+                "审阅 CPU、内存、GPU、单卡显存与存储配置。"
+              ],
+              [
+                "需求发布申请",
+                "需求信息、需求说明、发布方与联系方式、审批记录",
+                "保留涉及作物、已有资料、逐条工作、交付成果及时间等已填内容。"
+              ],
+              [
+                "预计使用时长（空间申请）",
+                "申请端可选安排信息",
+                "只展示申请者填写的天数，不据此自动回收算力或结束研究。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "页面控件取值",
+        "sections": [
+          {
+            "title": "页面控件取值",
+            "head": [
+              "字段 / 内容",
+              "类型 / 取值",
+              "规则与用途"
+            ],
+            "rows": [
+              [
+                "申请类型",
+                "下拉",
+                "全部类型 / 数据使用申请 / 模型使用申请 / 算力申请 / 创建科研开发空间 / 需求发布申请"
+              ],
+              [
+                "审批结果",
+                "下拉",
+                "全部结果 / 通过 / 驳回 / 拒绝"
+              ],
+              [
+                "每页条数",
+                "下拉",
+                "每页 6 条 / 每页 10 条 / 每页 20 条"
+              ]
+            ],
+            "note": "仅记录当前页面已有的选项和长度限制；业务必填与联动规则见相应业务页签。"
+          }
+        ]
+      }
+    ],
+    "guide": [
+      {
+        "label": "资源审批交互",
+        "sections": [
+          {
+            "title": "资源审批交互",
+            "head": [
+              "场景",
+              "操作入口",
+              "结果与限制"
+            ],
+            "rows": [
+              [
+                "筛选",
+                "类型、关键词、审批结果 → 查询 / 重置",
+                "更新待审批或已办列表。"
+              ],
+              [
+                "查看申请",
+                "查看",
+                "按类型展示对应字段及提交内容。"
+              ],
+              [
+                "办理",
+                "待审批 → 审批 → 选择结果、填写意见 → 提交",
+                "刷新待审批与已办列表；已办记录可查看原始材料和意见。"
+              ],
+              [
+                "空间通过",
+                "通过创建科研空间申请",
+                "申请端可进入对应空间，显示实例开通状态。"
+              ],
+              [
+                "需求通过",
+                "申请类型选择“需求发布申请” → 审批 → 通过",
+                "需求中心可浏览通过的需求。个人中心“我的需求”查看审批意见。"
+              ],
+              [
+                "查看已办",
+                "已办审批 → 查看",
+                "查看当次材料与办理结果。"
+              ],
+              [
+                "驳回",
+                "选择“驳回”，填写审批意见并提交",
+                "退回上一步，申请人可修改后重新提交。需求发布申请在“我的需求”中显示“未通过”。"
+              ],
+              [
+                "拒绝",
+                "选择“拒绝”，填写审批意见并提交",
+                "结束本次申请流程，原申请及意见仅供查看。需求发布申请在“我的需求”中显示“已结束”。"
+              ],
+              [
+                "需求审批内容导航",
+                "需求审批弹窗 → 填写审批意见",
+                "从需求材料定位到审批表单。已办详情可查看审批记录。"
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  }
+};
+
+  function pageDocKey() {
+    var main = document.getElementById('approval-root');
+    return main && main.dataset.view === 'resources' ? '后台-资源申请审批.html' : '后台-审批中心.html';
+  }
+
+  function inject() {
+    if (document.querySelector('.mtdev-group')) return;
+
+    var style = document.createElement('style');
+    style.textContent = CSS;
+    document.head.appendChild(style);
+
+    var wrap = document.createElement('div');
+    wrap.setAttribute('data-devdoc-version', '2026-11-18');
+    wrap.innerHTML =
+      drawerHTML('mtdevFieldMask', 'mtdevFieldBody', 'mtdevFieldTitle') +
+      drawerHTML('mtdevGuideMask', 'mtdevGuideBody', 'mtdevGuideTitle') +
+      '<div class="mtdev-group">' +
+      '<button class="mtdev-btn field" type="button" aria-haspopup="dialog" aria-controls="mtdevFieldMask">📋 字段说明</button>' +
+      '<button class="mtdev-btn guide" type="button" aria-haspopup="dialog" aria-controls="mtdevGuideMask">🧪 交互演示指引</button>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function (event) { event.stopPropagation(); });
+
+    var group = wrap.querySelector('.mtdev-group');
+    var fieldMask = wrap.querySelector('#mtdevFieldMask');
+    var guideMask = wrap.querySelector('#mtdevGuideMask');
+    var activeMask, opener, activeKey;
+
+    function syncDocs() {
+      var next = pageDocKey();
+      if (activeKey === next) return;
+      activeKey = next;
+      wrap.dataset.devdocPage = next;
+      var doc = DOCS[next] || DOCS.__default__;
+      var foot = '<p class="mtdev-note">表单校验以原型当前操作为准。示例数据、模拟任务及账号切换用于原型演示。</p>';
+      renderDrawer(fieldMask, doc, '📋 字段说明', doc.field, 'mtdevF', foot);
+      renderDrawer(guideMask, doc, '🧪 交互演示指引', doc.guide, 'mtdevG');
+      if (activeMask) activeMask.querySelector('.mtdev-x').focus({ preventScroll: true });
+    }
+
+    function close() {
+      if (!activeMask) return;
+      activeMask.classList.remove('on');
+      activeMask = null;
+      if (opener && opener.isConnected) opener.focus({ preventScroll: true });
+      opener = null;
+    }
+
+    function attach(mask, trigger) {
+      trigger.onclick = function () {
+        syncDocs();
+        close();
+        opener = trigger;
+        activeMask = mask;
+        var body = mask.querySelector('.mtdev-bd');
+        selectTab(body, 0);
+        body.scrollTop = 0;
+        mask.classList.add('on');
+        mask.querySelector('.mtdev-x').focus({ preventScroll: true });
+      };
+      mask.querySelector('.mtdev-x').onclick = close;
+      mask.onclick = function (event) { if (event.target === mask) close(); };
+      mask.onkeydown = function (event) {
+        if (event.key !== 'Tab') return;
+        var first = mask.querySelector('.mtdev-x');
+        var last = mask.querySelector('.mtdev-tab.on');
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      };
+      draggable(mask.querySelector('.mtdev-drawer'), mask.querySelector('.mtdev-hd'));
+    }
+
+    attach(fieldMask, group.querySelector('.mtdev-btn.field'));
+    attach(guideMask, group.querySelector('.mtdev-btn.guide'));
+    syncDocs();
+    window.addEventListener('hashchange', syncDocs);
+    window.addEventListener('popstate', syncDocs);
+    window.addEventListener('approval:viewchange', syncDocs);
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') close();
+    });
+    draggable(group);
+
+    /* Avoid covering the host application's full-screen dialog controls. */
+    setInterval(function () {
+      var overlays = document.querySelectorAll('[class*=mask],[class*=overlay],[class*=backdrop],[class*=modal]');
+      var covered = Array.from(overlays).some(function (element) {
+        if (/mtdev/.test(element.className || '')) return false;
+        var style = window.getComputedStyle(element);
+        if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0) return false;
+        var box = element.getBoundingClientRect();
+        return box.width > window.innerWidth * 0.9 && box.height > window.innerHeight * 0.9;
+      });
+      group.classList.toggle('mtdev-dim', covered);
+    }, 250);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
+  else inject();
+})();
+
+</script><!-- devdoc-1012:end -->
+<script data-inline-source="assets/prototype-nav.js">
+(function(){
+'use strict';
+function init(){
+ const file=window.PROTOTYPE_PORTAL_PREVIEW?'index.html':decodeURIComponent(location.pathname.split('/').pop()),admin=file.startsWith('后台-')||file==='index.html';
+ const header=document.querySelector('header.site-header.prototype-header');if(!header)return;
+ header.dataset.system=admin?'admin':'portal';
+ const main=header.querySelector('.main-nav'),toggle=header.querySelector('.menu-toggle');
+ let menu=document.getElementById(toggle?.getAttribute('aria-controls'));
+ if(menu){menu.classList.add('prototype-mobile');const extras=admin?'':Array.from(menu.children).filter(n=>n.matches('[data-bdh-login],[data-bdh-me],[data-bdh-logout],[data-consult],[data-consult-1020]')).map(n=>n.outerHTML).join('');menu.innerHTML=main.innerHTML+extras;menu.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));menu.hidden=true;menu.classList.remove('open');}
+ if(!admin){
+  const actions=header.querySelector('.header-actions');
+  if(!actions.querySelector('[data-consult],[data-consult-1020]')){const a=document.createElement('a');a.href='合作咨询.html';a.className='button button-primary';a.textContent='合作咨询';a.dataset.consult1020='';actions.insertBefore(a,toggle);}
+  if(menu&&!menu.querySelector('[data-consult],[data-consult-1020]')){const a=document.createElement('a');a.href='合作咨询.html';a.textContent='合作咨询';a.dataset.consult1020='';menu.append(a);}
+  if(file==='门户-领导数据看板.html'&&menu){const a=document.createElement('a');a.href='个人中心-高保真原型.html';a.textContent='个人中心';menu.append(a);}
+  const sync=()=>{const O=window.PortalOrg;header.querySelectorAll('a').forEach(a=>{if(decodeURIComponent(a.getAttribute('href')||'').startsWith('门户-领导数据看板.html'))a.hidden=O?!O.canViewDashboard():false;});if(O?.isLogged()){header.querySelectorAll('.bdh-name,.username').forEach(n=>n.textContent=O.current().name);}};
+  sync();window.addEventListener('portal-account-change',sync);window.addEventListener('portal-org-change',sync);
+ }
+ function close(){if(menu){menu.hidden=true;menu.classList.remove('open');}toggle?.setAttribute('aria-expanded','false');toggle?.setAttribute('aria-label','打开菜单');}
+ // Capture once before historical menu handlers, preventing a second toggle.
+ window.addEventListener('click',ev=>{if(toggle?.contains(ev.target)){ev.preventDefault();ev.stopImmediatePropagation();const open=menu?.hidden;if(menu){menu.hidden=!open;menu.classList.toggle('open',open);}toggle.setAttribute('aria-expanded',String(!!open));toggle.setAttribute('aria-label',open?'关闭菜单':'打开菜单');return;}
+  if(ev.target.closest('[data-prototype-user]')){ev.preventDefault();ev.stopImmediatePropagation();const u=header.querySelector('#userMenu');u?.classList.toggle('open');header.querySelectorAll('[data-prototype-user]').forEach(b=>b.setAttribute('aria-expanded',String(u?.classList.contains('open'))));return;}
+  if(menu?.contains(ev.target)&&ev.target.closest('a'))close();if(!header.contains(ev.target)){close();header.querySelector('#userMenu')?.classList.remove('open');}
+ },true);
+ window.addEventListener('keydown',ev=>{if(ev.key==='Escape'){close();header.querySelector('#userMenu')?.classList.remove('open');}});
+ window.addEventListener('resize',close);
+ if(admin){
+  const nav=[['工作台总览','index.html'],['课题管理','后台-课题中心.html'],['审批中心','后台-审批中心.html'],['运营管理','后台-模型管理.html'],['平台能力','后台-时空数据管理.html'],['合作与组织','后台-管理设置.html']];
+  const labels=nav.map(x=>x[0]),links=main.querySelectorAll('a');links.forEach((a,i)=>{a.textContent=labels[i];a.href=nav[i][1];a.dataset.pxOwn='1';});if(menu)menu.innerHTML=main.innerHTML;
+  document.querySelectorAll('.admin-side a').forEach(a=>{const t=a.textContent.trim();const mapping={'工作台总览':'index.html','消息中心':'后台-个人中心.html#messages','个人资料':'后台-个人中心.html#profile','账号安全':'后台-个人中心.html#security','课题管理工作台':'后台-课题中心.html#workbench','课题指南管理':'后台-课题中心.html#guides','科研人员推荐':'后台-科研人员推荐.html','课题管理':'后台-课题中心.html#projects','成果验收审批':'后台-审批中心.html','资源申请审批':'后台-审批中心.html#resources','门户管理':'后台-门户管理-首页内容.html','模型管理':'后台-模型管理.html','数据集管理':'后台-数据集管理.html','案例管理':'后台-案例管理.html','需求管理':'后台-需求管理.html','科研空间管理':'后台-科研空间管理.html'};if(mapping[t]){a.href=mapping[t];a.removeAttribute('onclick');a.dataset.pxOwn='1';}});
+  if(['后台-时空数据管理.html','后台-地图引擎.html','后台-能力共享.html'].includes(file)){
+   const side=document.querySelector('.admin-side');if(side){side.querySelectorAll('.mt-subsystems').forEach(n=>n.remove());const old=Array.from(side.children).filter(n=>!n.classList.contains('side-title'));side.innerHTML='<div class="side-title">平台能力</div>';for(const [label,target] of [['时空数据管理','后台-时空数据管理.html'],['地图引擎','后台-地图引擎.html'],['能力共享','后台-能力共享.html']]){const a=document.createElement('a');a.className='snav'+(file===target?' active':'');a.href=target;a.textContent=label;a.dataset.pxOwn='1';if(file===target)a.setAttribute('aria-current','page');side.append(a);if(file===target){const wrap=document.createElement('div');wrap.className='platform-detail-nav';old.forEach(n=>wrap.append(n));side.append(wrap);}}}
+  }
+ }else if(file.startsWith('关于平台-')){
+  const side=document.querySelector('aside.side');if(side){side.classList.add('prototype-about-side');side.innerHTML='<div class="side-title">关于平台</div>'+[['平台介绍','平台介绍'],['使用帮助','使用帮助'],['开发者接入','开发者接入'],['部署说明','部署说明'],['联系支持','联系支持']].map(([t,s])=>{const current=file==='关于平台-'+s+'.html'||(s==='使用帮助'&&file==='关于平台-数据使用指南.html');return '<a href="关于平台-'+s+'.html"'+(current?' class="active" aria-current="page"':'')+'>'+t+'</a>';}).join('');}
+ }
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+
+</script>
 </body></html>
