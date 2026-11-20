@@ -5,6 +5,25 @@
 <script src="assets/backend-role-ui.js"></script>
 
 <script src="assets/resource-fields.js"></script>
+<script>
+// Required dataset helpers when the HTML is opened on its own.
+if (!window.ResourceFields) window.ResourceFields=(()=>{
+ 'use strict';
+ const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}};
+ const list=value=>Array.isArray(value)?value.filter(x=>x!==null&&x!==''):String(value??'').split(/[、,，;；]+/).map(x=>x.trim()).filter(Boolean);
+ const clone=v=>JSON.parse(JSON.stringify(v));
+ const fileFormats=files=>[...new Set((files||[]).map(f=>{const ext=String(typeof f==='string'?f:f.name).split('.').pop().toLowerCase();return ({csv:'CSV',xls:'Excel',xlsx:'Excel',parquet:'Parquet',json:'JSON / JSONL',jsonl:'JSON / JSONL',tif:'GeoTIFF',tiff:'GeoTIFF',geojson:'GeoJSON',shp:'Shapefile',shx:'Shapefile',dbf:'Shapefile',jpg:'JPEG / PNG',jpeg:'JPEG / PNG',png:'JPEG / PNG',nc:'NetCDF',h5:'HDF5'})[ext]||ext.toUpperCase();}))];
+ function dataset(value={},files=[]){const v=clone(value);v.containsGeographicData=v.containsGeographicData===true||v.containsGeographicData==='true';v.crop=list(v.crop);v.researchDirections=list(v.researchDirections);v.coverageCodes=list(v.coverageCodes);v.coverageAll=v.coverageAll===true||v.coverageAll==='true';v.format=fileFormats(files).join('、');v.annotation=v.annotation||'未说明';v.tags=[...fileFormats(files),v.annotation];delete v.version;delete v.scale;delete v.dataSource;delete v.modality;delete v.dataType;return v;}
+ function previewKind(files=[],state={}){if(files.length)return files.some(f=>/\.(csv|tsv|xlsx?|parquet|sql|json)$/i.test(f.name||f))?'structured':'display';return state.previewType||'display';}
+ async function readFile(f){
+  if(f?.file)return f.file;if(!f?.blobId)return null;
+  for(const name of ['agri-dataset-preview-materials','bdh-outcome-materials-1010','agri-outcome-files-v1']){
+   const value=await new Promise(resolve=>{const req=indexedDB.open(name,1);req.onupgradeneeded=()=>req.transaction.abort();req.onerror=()=>resolve(null);req.onsuccess=()=>{const db=req.result;if(!db.objectStoreNames.contains('files')){db.close();resolve(null);return;}const tx=db.transaction('files'),r=tx.objectStore('files').get(f.blobId);r.onsuccess=()=>resolve(r.result?.file||r.result?.blob||null);r.onerror=()=>resolve(null);tx.oncomplete=()=>db.close();};});if(value)return value;
+  }return null;
+ }
+ return {read,dataset,previewKind,readFile};
+})();
+</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>数据集管理 — 北大荒智慧农业协同创新平台 · 管理后台</title>
@@ -1380,7 +1399,7 @@ textarea.inp{height:82px;padding:9px 12px 22px;resize:none;line-height:1.7;}
       <div class="fsec first">
         <h3 class="fsec-hd">数据资源<span class="fsec-tip"></span></h3>
         <div class="ro-inline">
-          <span class="ri"><span class="k">接入来源</span><span class="v"><select class="sel" id="createSource" name="accessSource" aria-label="接入来源"><option value="res">科研成果</option><option value="space">时空数据管理</option><option value="manual" selected>手动新建</option></select></span></span><span class="vsep2"></span>
+          <span class="ri"><span class="k">接入来源</span><span class="v"><select class="sel" id="createSource" name="accessSource" aria-label="接入来源"><option value="res">科研成果</option><option value="manual" selected>手动新建</option></select></span></span><span class="vsep2"></span>
           <span class="ri"><span class="k">数据集ID</span><span class="v">保存后自动生成</span></span>
         </div>
         <div class="up-hd">
@@ -1617,7 +1636,7 @@ const shapes={'结构化':['表格','时序'],'非结构化':['无人机影像',
 const schema=[['name','数据名称'],['containsGeographicData','是否包含地理信息数据'],['researchDirections','研究方向'],['crop','作物'],['year','覆盖年份'],['region','覆盖区域'],['provider','提供方 / 归属单位'],['owner','权属归属'],['topic','关联专题'],['tags','标签'],['summary','数据简介']];
 const required=['name'];
 function render(v={}){const field=(k,label,control,wide=false)=>'<div class="dm-field '+(wide?'dm-wide':'')+'"><label for="dm-'+k+'">'+label+(required.includes(k)?' <span class="dm-required">*</span>':'')+'</label>'+control+'</div>';const input=(k,type='text')=>'<input id="dm-'+k+'" name="'+k+'" type="'+type+'" value="'+e(v[k]??'')+'" '+(required.includes(k)?'required':'')+(k==='year'?' min="1" max="9999" step="1"':'')+'>';const select=(k,opts)=>'<select id="dm-'+k+'" name="'+k+'" '+(required.includes(k)?'required':'')+'>'+['',...new Set([...opts,...(v[k]?[v[k]]:[])])].map(x=>'<option value="'+e(x)+'" '+(x===v[k]?'selected':'')+'>'+e(x||'请选择')+'</option>').join('')+'</select>';
-return '<section class="dm-card"><h3>数据基本信息</h3><div class="dm-grid">'+schema.map(([k,l])=>field(k,l,k==='containsGeographicData'?'<div class="geo-choice" role="group" aria-label="是否包含地理信息数据"><label><input type="radio" name="containsGeographicData" value="true" '+(v.containsGeographicData===true?'checked':'')+'>是</label><label><input type="radio" name="containsGeographicData" value="false" '+(v.containsGeographicData!==true?'checked':'')+'>否</label></div>':k==='researchDirections'?'<details class="dm-directions"><summary id="dm-researchDirections">'+e(split(v.researchDirections).join('、')||'请选择，可多选')+'</summary><div>'+['AI 数智基础','作物模型','资源环境','精准感控','智能装备','规模化应用'].map(x=>'<label><input type="checkbox" name="researchDirections" value="'+e(x)+'" '+(split(v.researchDirections).includes(x)?'checked':'')+'>'+e(x)+'</label>').join('')+'</div></details>':k==='crop'?'<details class="dm-crops"><summary id="dm-crop">'+e(split(v.crop).join('、')||'请选择，可多选')+'</summary><div>'+[...new Set(['水稻','玉米','大豆','林草湿地',...split(v.crop)])].map(x=>'<label><input type="checkbox" name="crop" value="'+e(x)+'" '+(split(v.crop).includes(x)?'checked':'')+'>'+e(x)+'</label>').join('')+'</div></details>':k==='region'?'<button type="button" id="dm-region" data-region-open>'+e(v.region||'选择覆盖区域')+'</button><input type="hidden" name="region" value="'+e(v.region||'')+'"><input type="hidden" name="coverageCodes" value="'+e(JSON.stringify(v.coverageCodes||[]))+'"><input type="hidden" name="coverageAll" value="'+(v.coverageAll?'true':'false')+'">':k==='topic'?select(k,['作物长势','土壤墒情','产量估测']):k==='tags'?'<div class="dm-tag-fields"><div><span class="dm-tag-label">数据格式</span><div class="dm-file-types" aria-live="polite"></div><input type="hidden" name="format" value="'+e(v.format||'')+'"></div><div><label class="dm-tag-label" for="dm-annotation">标注情况</label>'+select('annotation',['有标注','无标注','未说明'])+'</div></div><div class="dm-tag-values"></div>':k==='summary'?'<textarea id="dm-summary" name="summary" rows="3" maxlength="1000">'+e(v.summary||'')+'</textarea>':input(k,k==='year'?'number':'text'),['summary','tags'].includes(k))).join('')+field('cover','数据封面','<div class="dm-cover">'+(v.cover?'<img src="'+e(v.cover)+'" alt="数据封面">':'')+'<input type="hidden" name="cover" value="'+e(v.cover||'')+'"><input id="dm-cover" type="file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="上传数据封面"><button type="button" data-dm-clear>移除封面</button><span class="dm-cover-error" role="alert"></span></div>',true)+'</div></section>';}
+return '<section class="dm-card"><h3>数据基本信息</h3><div class="dm-grid">'+schema.map(([k,l])=>field(k,l,k==='containsGeographicData'?'<div class="geo-choice" role="group" aria-label="是否包含地理信息数据"><label><input type="radio" name="containsGeographicData" value="true" '+(v.containsGeographicData===true?'checked':'')+'>是</label><label><input type="radio" name="containsGeographicData" value="false" '+(v.containsGeographicData!==true?'checked':'')+'>否</label></div>':k==='researchDirections'?'<details class="dm-directions"><summary id="dm-researchDirections">'+e(split(v.researchDirections).join('、')||'请选择，可多选')+'</summary><div>'+['AI 数智基础','作物模型','资源环境','精准感控','智能装备','规模化应用'].map(x=>'<label><input type="checkbox" name="researchDirections" value="'+e(x)+'" '+(split(v.researchDirections).includes(x)?'checked':'')+'>'+e(x)+'</label>').join('')+'</div></details>':k==='crop'?'<details class="dm-crops"><summary id="dm-crop">'+e(split(v.crop).join('、')||'请选择，可多选')+'</summary><div>'+[...new Set(['水稻','玉米','大豆','林草湿地',...split(v.crop)])].map(x=>'<label><input type="checkbox" name="crop" value="'+e(x)+'" '+(split(v.crop).includes(x)?'checked':'')+'>'+e(x)+'</label>').join('')+'</div></details>':k==='region'?'<button type="button" id="dm-region" data-region-open>'+e(v.region||'选择覆盖区域')+'</button><input type="hidden" name="region" value="'+e(v.region||'')+'"><input type="hidden" name="coverageCodes" value="'+e(JSON.stringify(v.coverageCodes||[]))+'"><input type="hidden" name="coverageAll" value="'+(v.coverageAll?'true':'false')+'">':k==='topic'?select(k,['作物长势','土壤墒情','产量估测']):k==='tags'?'<div class="dm-tag-fields"><div><div class="dm-file-types" role="group" aria-label="文件类型" aria-live="polite"></div><input type="hidden" name="format" value="'+e(v.format||'')+'"></div><div><label class="dm-tag-label" for="dm-annotation">标注情况</label>'+select('annotation',['有标注','无标注','未说明'])+'</div></div><div class="dm-tag-values"></div>':k==='summary'?'<textarea id="dm-summary" name="summary" rows="3" maxlength="1000">'+e(v.summary||'')+'</textarea>':input(k,k==='year'?'number':'text'),['summary','tags'].includes(k))).join('')+field('cover','数据封面','<div class="dm-cover">'+(v.cover?'<img src="'+e(v.cover)+'" alt="数据封面">':'')+'<input type="hidden" name="cover" value="'+e(v.cover||'')+'"><input id="dm-cover" type="file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="上传数据封面"><button type="button" data-dm-clear>移除封面</button><span class="dm-cover-error" role="alert"></span></div>',true)+'</div></section>';}
 function fileTypes(root){let names=[];if(root.closest('#m-create'))names=[...document.querySelectorAll('#upList .nm')].map(n=>n.textContent);else if(root.closest('#mt-outcome-form')){const input=document.getElementById('mt-files');names=input?.files.length?[...input.files].map(f=>f.name):(window.Meeting?.records().find(r=>r.id===Meeting.submitting?.recordId)?.files||[]).map(f=>f.name);}else if(root.closest('#research-outcome-form')&&typeof window.selectedUploadFiles==='function')names=window.selectedUploadFiles().map(f=>f.name);return [...new Set(names.map(n=>{const m=String(n).match(/\.([^.]+)$/);if(!m)return '无扩展名';const ext=m[1].toLowerCase();return ({csv:'CSV',xls:'Excel',xlsx:'Excel',parquet:'Parquet',json:'JSON / JSONL',jsonl:'JSON / JSONL',tif:'GeoTIFF',tiff:'GeoTIFF',geotiff:'GeoTIFF',geojson:'GeoJSON',shp:'Shapefile',shx:'Shapefile',dbf:'Shapefile',jpg:'JPEG / PNG',jpeg:'JPEG / PNG',png:'JPEG / PNG',nc:'NetCDF',netcdf:'NetCDF',h5:'HDF5',hdf5:'HDF5'})[ext]||ext.toUpperCase();}))];}
 function syncTags(root){if(!root)return;const formats=fileTypes(root),annotation=root.querySelector('[name=annotation]')?.value||'',values=[...formats,...(annotation?[annotation]:[])],out=root.querySelector('.dm-file-types'),hidden=root.querySelector('.dm-tag-values');if(!out||!hidden)return;const content=formats.length?formats.map(x=>'<span class="dm-chip">'+e(x)+'</span>').join(''):'<span class="dm-tag-empty">上传成果文件后显示</span>';if(out.innerHTML!==content)out.innerHTML=content;root.querySelector('[name=format]').value=formats.join('、');const markup=values.map(x=>'<input type="hidden" name="tags" value="'+e(x)+'">').join('');if(hidden.innerHTML!==markup)hidden.innerHTML=markup;}
 new MutationObserver(()=>document.querySelectorAll('.dm-card').forEach(syncTags)).observe(document.documentElement,{childList:true,subtree:true});
@@ -1858,12 +1877,12 @@ function renderDetail(id,mode='view',tab){
  const hiddenCover=document.createElement('input');hiddenCover.type='hidden';hiddenCover.name='cover';hiddenCover.value=m.cover||'';cover.after(hiddenCover);
  // Keep the tag layout used by the original detail editor.
  const tagHost=document.createElement('div');tagHost.id='datasetTags';
- tagHost.innerHTML='<div class="dataset-tag-formats"><span class="dataset-tag-label" id="datasetFormatLabel">数据格式</span><div class="dataset-format-chips" aria-labelledby="datasetFormatLabel" aria-live="polite">'+(formats(r.files).map(f=>'<span class="dataset-tag-chip">'+e(f)+'</span>').join('')||'<span class="dataset-tag-empty">上传成果文件后显示</span>')+'</div></div><div class="dataset-tag-annotation"><label class="dataset-tag-label" for="datasetAnnotation">标注情况</label><select class="sel" id="datasetAnnotation" name="annotation">'+['','有标注','无标注','未说明'].map(value=>'<option value="'+value+'" '+(value===m.annotation?'selected':'')+'>'+(value||'请选择')+'</option>').join('')+'</select></div>';
+ tagHost.innerHTML='<div class="dataset-tag-formats"><div class="dataset-format-chips" role="group" aria-label="文件类型" aria-live="polite">'+(formats(r.files).map(f=>'<span class="dataset-tag-chip">'+e(f)+'</span>').join('')||'<span class="dataset-tag-empty">上传成果文件后显示</span>')+'</div></div><div class="dataset-tag-annotation"><label class="dataset-tag-label" for="datasetAnnotation">标注情况</label><select class="sel" id="datasetAnnotation" name="annotation">'+['','有标注','无标注','未说明'].map(value=>'<option value="'+value+'" '+(value===m.annotation?'selected':'')+'>'+(value||'请选择')+'</option>').join('')+'</select></div>';
  const oldTags=root.querySelector('.info-line3 .tagsel');oldTags.closest('.info-line3').classList.add('dataset-info-tags');oldTags.parentElement.classList.add('dataset-tags-value');oldTags.replaceWith(tagHost);
  root.querySelectorAll('.info-line3 .lb').forEach(label=>{
   const value=label.nextElementSibling;
   if(label.textContent.trim()==='数据集ID')value.querySelector('.ro-val').textContent=r.id;
-  if(label.textContent.trim()==='接入来源'){value.innerHTML='<select class="sel" id="detail-source" name="accessSource" aria-label="接入来源">'+Object.entries(SRC).map(([key,name])=>'<option value="'+key+'" '+(key===r.src?'selected':'')+'>'+name+'</option>').join('')+'</select>';}
+  if(label.textContent.trim()==='接入来源')value.querySelector('.ro-val').textContent=SRC[r.src]||'—';
  });
  const crops=root.querySelector('#detail-crop'),cropInput=crops.querySelector('input');
  crops.querySelectorAll('.chip').forEach(n=>n.remove());
@@ -1880,8 +1899,8 @@ function renderDetail(id,mode='view',tab){
  window.scrollTo(0,0);
 }
 function collectDetail(){
- const r=rowOf(currentId),root=$('detailView'),values={...r.metadata,...DatasetUI.collect()};
- for(const key of ['name','provider','summary','year','region','topic','owner','annotation','cover','accessSource'])values[key]=root.querySelector('[name="'+key+'"]')?.value||'';
+ const r=rowOf(currentId),root=$('detailView'),values={...r.metadata,...DatasetUI.collect(),accessSource:r.src};
+ for(const key of ['name','provider','summary','year','region','topic','owner','annotation','cover'])values[key]=root.querySelector('[name="'+key+'"]')?.value||'';
  values.containsGeographicData=root.querySelector('[name=containsGeographicData]:checked')?.value==='true';
  values.coverageCodes=JSON.parse(root.querySelector('[name=coverageCodes]').value||'[]');
  values.coverageAll=root.querySelector('[name=coverageAll]').value==='true';
@@ -1898,7 +1917,7 @@ function saveDetail(){
  const r=rowOf(currentId),values=collectDetail();if(values.datasetContent.previewBusy){toast('预览材料正在保存，请稍候');return false;}
  if(!values.name.trim()){toast('请填写数据名称');$('detail-name').focus();return false;}
  if(values.year&&!/^\d{4}$/.test(values.year)){toast('覆盖年份请填写四位年份');return false;}
- const before=clone(r);Object.assign(r,{updatedAt:new Date().toISOString(),metadata:values,name:values.name,desc:values.summary,org:values.provider,src:values.accessSource||r.src,containsGeographicData:values.containsGeographicData});r.todo=missing(r).length>0;
+ const before=clone(r);Object.assign(r,{updatedAt:new Date().toISOString(),metadata:values,name:values.name,desc:values.summary,org:values.provider,containsGeographicData:values.containsGeographicData});r.todo=missing(r).length>0;
  if(!persist()){Object.assign(r,before);return false;}
  const wasPreview=$('detailView').querySelector('[data-ds-tab=preview]').getAttribute('aria-selected')==='true';
  refreshOrgOptions();renderGrid();renderDetail(r.id,'edit',wasPreview?'preview':'intro');toast('已保存数据集');return true;
@@ -1926,6 +1945,7 @@ function addUpload(){const input=document.createElement('input');input.type='fil
 function createDone(){
  if(uploadsBusy){toast('文件正在读取，请稍候');return;}
  const v={...DatasetMetadata.collect($('createMetadata')),accessSource:$('createSource').value};
+ if(v.accessSource!=='res'&&v.accessSource!=='manual'){toast('请选择科研成果或手动新建');return;}
  for(const [key,label] of DatasetMetadata.schema.filter(([k])=>DatasetMetadata.required.includes(k))){if(!String(v[key]??'').trim()){toast('请填写'+label);return;}}
  if(v.year&&!/^\d{4}$/.test(v.year)){toast('覆盖年份请填写四位年份');return;}
  if(!createFiles.length){toast('请上传数据文件');return;}
